@@ -1,0 +1,85 @@
+.transaction {
+    > :not(:first-child, :nth-child(2)) {
+        margin-bottom: 25px;
+    }
+
+    .transaction__info {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            border-radius: 10px;
+            overflow: hidden;
+
+            td {
+                padding: 12px 20px;
+                font-size: 13px;
+                line-height: 1.4;
+
+                p {
+                    font-size: 13px;
+                    line-height: 1.4;
+                }
+
+                &:last-child {
+                    word-break: break-all;
+                }
+            }
+
+            tr {
+                &:nth-child(2n) {
+                    background-color: #234ee21a;
+                }
+    
+                &:nth-child(2n + 1) {
+                    background-color: #263163;
+                }
+
+                &.transaction__confirmation {
+                    background-color: #0e5311;
+                }
+
+                &.transaction__extra_items td:last-child {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 7px;
+                }
+            }
+        }
+    }
+
+    .transaction__table__wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+
+        > :last-child {
+            background-color: #234ee21a;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        table tbody tr td {
+            width: auto;
+        }
+
+        .table__hash {
+            font-size: 13px;
+        }
+
+        > :last-child {
+            @media screen and (max-width: 800px) {
+                overflow-x: auto;
+
+                table {
+                    width: 800px;
+                }
+            }  
+        }
+    }
+
+    
+}

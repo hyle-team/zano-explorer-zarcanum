@@ -1,0 +1,21 @@
+.blockchain {
+    > :not(:first-child, :nth-child(2)) {
+        margin-bottom: 25px;
+    }
+
+    .info__top__daemon {
+        display: flex;
+        gap: 25px;
+        
+        > p {
+            font-size: 14px;
+            color: #9eaacc;
+        }
+
+        @media screen and (max-width: 991px) {
+            > p:not(:first-child) {
+                display: none;
+            }
+        }
+    }
+}

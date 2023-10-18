@@ -1,0 +1,29 @@
+import React, { Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Block from "./pages/Block/Block";
+
+const Blockchain = React.lazy(() => import("./pages/Blockchain/Blockchain"));
+const AltBlocks = React.lazy(() => import("./pages/AltBlocks/AltBlocks"));
+const Aliases = React.lazy(() => import("./pages/Aliases/Aliases"));
+const API = React.lazy(() => import("./pages/API/API"));
+const Transaction = React.lazy(() => import("./pages/Transaction/Transaction"));
+
+function App() {
+    return (
+        <Router>
+            <Suspense fallback={<></>}>
+                <Routes>
+                    <Route path="/" element={<Blockchain />} />
+                    <Route path="/alt-blocks" element={<AltBlocks />} />
+                    <Route path="/aliases" element={<Aliases />} />
+                    <Route path="/api" element={<API />} />
+                    <Route path="/block/:hash" element={<Block />} />
+                    <Route path="/transaction/:hash" element={<Transaction />} />
+                    <Route path="/alt-blocks/:hash" element={<Block alt />} />
+                </Routes>
+            </Suspense>
+        </Router>
+    );
+}
+
+export default App;

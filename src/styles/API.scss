@@ -1,0 +1,95 @@
+.api {
+    .api__title {
+        height: 77px;
+        display: flex;
+        align-items: center;
+
+        > p {
+            color: #9eaacc;
+        }
+    }
+
+    .api__items {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+        
+        .api__item {
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #234ee21a;
+        
+
+            .api__item__title {
+                padding: 18px 20px;
+                background: linear-gradient(to right,#1b3a8a,#32439f);
+
+                > h3 {
+                    font-size: 21px;
+                }
+            }
+
+            .api__item__units {
+                display: flex;
+                flex-direction: column;
+
+                .api__item__unit {
+                    height: 40px;
+                    padding: 0 20px;
+                    display: flex;
+                    align-items: center;
+
+                    &:nth-child(2n) {
+                        background-color: #263163;
+                    }
+
+                    > :first-child {
+                        flex-basis: 30%;
+                    }
+
+                    > :last-child {
+                        p, a {
+                            font-size: 13px;
+                        }
+
+                        a {
+                            color: #68a1ff;
+                        }
+                    }   
+                    
+                }
+            }
+        }
+
+        .api__item__json {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+
+            .item__json__element {
+                margin-left: 25px;
+
+                &:not(:last-child) {
+                    margin-bottom: 0px;
+                }
+
+                span {
+                    font-family: "Inconsolata";
+                    font-size: 13px;
+                    font-weight: 400;
+                }
+            }
+
+            .item__json__number {
+                color: #009688;
+            }
+
+            .item__json__container {
+                > :first-child {
+                    margin: 0;
+                }
+            }
+        }
+    }
+}

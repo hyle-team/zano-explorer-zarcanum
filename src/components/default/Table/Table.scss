@@ -1,0 +1,113 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    overflow: hidden;
+
+    p, a {
+        font-size: 13px;
+    }
+
+    tr {
+        > * {
+            padding: 12px 20px;
+            white-space: nowrap;
+
+            @media screen and (max-width: 1170px) {
+                padding: 12px 15px;
+            }
+        }
+    }
+
+    td {
+        font-size: 13px;
+
+        &:last-child {
+            width: 100%;
+        }
+    }
+
+    thead {
+        background: linear-gradient(to right,#1b3a8a,#32439f);
+
+        th {
+            font-size: 14px;
+            font-weight: 400;
+            color: #9eaacc;
+            text-align: start;
+            text-transform: uppercase;
+        }
+    }
+
+    tbody {
+        tr {
+            &:nth-child(2n) {
+                background-color: #263163;
+            }
+        }
+    }
+}
+
+.table__pagination {
+    height: 60px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    p {
+        font-size: 16px;
+        color: #9eaacc;
+    }
+
+    input {
+        max-width: 100px;
+        text-align: center;
+
+        &::placeholder {
+            color: #ffffff;
+        }
+    }
+
+    .table__pagination__pages {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        > div {
+            display: flex;
+
+            button {
+                background-color: transparent;
+                height: 29px;
+                width: 29px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                &:first-child > svg {
+                    transform: rotateY(180deg);
+                }
+
+                &.disabled {
+                    opacity: 0.7;
+                }
+            }
+        }
+    }
+
+    .table__pagination__blocks {
+        display: flex;
+        gap: 29px;
+
+        > div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            &:last-child input {
+                max-width: 90px;               
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+.blockchain__latest_blocks {
+    background-color: #234ee21a;
+    border-radius: 10px;
+    overflow: hidden;
+
+    h3 {
+        padding: 18px 20px;
+    }
+
+    @media screen and (max-width: 761px) {
+        overflow-x: auto;
+
+        > :last-child {
+            width: 850px;
+        }
+    }
+}
