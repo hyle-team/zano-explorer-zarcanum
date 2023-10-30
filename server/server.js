@@ -699,10 +699,10 @@ const syncTransactions = async () => {
                                 let aliasName = arr[0]
                                 let aliasAddress = arr[1]
                                 let aliasComment = parseComment(
-                                    item.datails_view
+                                    item.details_view
                                 )
                                 let aliasTrackingKey = parseTrackingKey(
-                                    item.datails_view
+                                    item.details_view
                                 )
                                 let aliasBlock = bl.height
                                 let aliasTransaction = localTr.id
@@ -777,6 +777,7 @@ const syncTransactions = async () => {
                         )
                     }
                 } catch (error) {
+                    console.log(error);
                     log(`SyncTransactions() Inserting aliases ERROR: ${error}`)
                 }
             }
