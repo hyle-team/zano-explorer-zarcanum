@@ -14,8 +14,6 @@ function AltBlocks() {
 
     const [altBlocks, setAltBlocks] = useState<Block[]>([]);
 
-    console.log(altBlocks);
-
     const [itemsOnPage, setItemsOnPage] = useState("10");
     const [page, setPage] = useState("1");
 

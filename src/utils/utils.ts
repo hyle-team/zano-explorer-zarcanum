@@ -1,6 +1,13 @@
+import ChartSeriesElem from "../interfaces/common/ChartSeriesElem";
 import Block from "../interfaces/state/Block";
+import { chartDataFieldMap, chartRequestNames } from "./constants";
+import Fetch from "./methods";
 
 class Utils {
+    static shortenAddress(address: string): string {
+        if (address.length < 10) return address;
+        return address.slice(0, 6) + "..." + address.slice(-4);
+    }
     static formatTimestampUTC(timestamp: number) {
         const date = new Date(timestamp * 1e3);
         const year = date.getUTCFullYear();
@@ -21,8 +28,9 @@ class Utils {
         return formattedNumber;
     }
 
-    static toShiftedNumber(string: string, shift: number = 2, decimalShown: boolean = true) {
-        if (typeof string !== "string") return "";
+    static toShiftedNumber(number: number | string, shift: number = 2, decimalPlaces: number = 2) {
+        if (typeof number !== "string" && typeof number !== "number") return "";
+        const string = typeof number === "string" ? number : number.toString();
         const input = string.replace(/\D/g, "");
         const length = input.length;
 
@@ -32,9 +40,9 @@ class Utils {
 
         const delimitedCharIndex = Math.max(0, length - shift);
         const integerPart = input.slice(0, delimitedCharIndex) || '0';
-        const decimalPart = decimalShown ? input.slice(delimitedCharIndex, length) + "00" : "";
+        const decimalPart = decimalPlaces ? input.slice(delimitedCharIndex, length) + "0".repeat(decimalPlaces) : "";
 
-        return integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (decimalPart ? "." + decimalPart.slice(0, 2) : "");
+        return integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (decimalPart ? "." + decimalPart.slice(0, decimalPlaces) : "");
     }
 
     static transformToBlocks(result: any, reverse: boolean = false, hashField: boolean = false): Block[] {
@@ -68,6 +76,67 @@ class Utils {
         } else {
             const years: number = Math.floor(elapsedSeconds / 31536000);
             return `${years} year${years > 1 ? 's' : ''} ago`;
+        }
+    }
+
+    static async fetchChartInfo(chartId: string): Promise<ChartSeriesElem[][] | undefined> {
+        if (!(chartId && chartRequestNames[chartId])) return;
+        const result = await Fetch.getChartData(chartId);
+        if (!result) return;
+        if (result.success === false) return;
+
+        if (chartId === "difficulty-pow" || chartId === "difficulty-pos") {
+            const dataDetailed = result.detailed;
+
+            if (!dataDetailed || typeof dataDetailed !== "object") return;
+
+            return [ 
+                dataDetailed.map(
+                    (e: any) => ({
+                        x: parseFloat(e?.at || 0) * 1e3,
+                        y: parseInt(e?.d, 10) || 0,
+                        label: "test"
+                    })
+                ) 
+            ];
+        } else {
+            if (!(result instanceof Array)) return;
+
+            if (chartId === "hash-rate") {
+                return [ 
+                    result.map(
+                        (e: any) => ({
+                            x: parseFloat(e?.at || 0) * 1e3,
+                            y: parseFloat(e?.h100) || 0,
+                            label: "test"
+                        })
+                    ),
+                    result.map(
+                        (e: any) => ({
+                            x: parseFloat(e?.at || 0) * 1e3,
+                            y: parseFloat(e?.h400) || 0,
+                            label: "test"
+                        })
+                    ),
+                    result.map(
+                        (e: any) => ({
+                            x: parseFloat(e?.at || 0) * 1e3,
+                            y: parseFloat(e?.d120) || 0,
+                            label: "test"
+                        })
+                    ) 
+                ];
+            } else {
+                return [
+                    result.map(
+                        (e: any) => ({
+                            x: parseFloat(e?.at || 0) * 1e3,
+                            y: e?.[chartDataFieldMap[chartId]] || 0,
+                            label: "test"
+                        })
+                    )
+                ];
+            }
         }
     }
 }

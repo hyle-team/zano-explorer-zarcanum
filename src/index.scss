@@ -52,19 +52,19 @@ button {
 }
 
 
-.custom-scroll::-webkit-scrollbar {
+::-webkit-scrollbar {
     -webkit-appearance: none;
     width: 10px;
     height: 10px;
 }
 
-.custom-scroll::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
     background-color: #32439f;
     border-radius: 10px;
     border: 1px solid #ffffff;
 }
 
-.custom-scroll::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
     border-radius: 10px;
     background-color: #fff;
 }

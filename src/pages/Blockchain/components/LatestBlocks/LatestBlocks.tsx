@@ -29,8 +29,6 @@ function LatestBlocks() {
     const [page, setPage] = useState("1");
     const [goToBlock, setGoToBlock] = useState("");
 
-    console.log(itemsOnPage, page, goToBlock);
-
     function onGoToBlockEnter() {
         if (!goToBlock || !itemsOnPage) return;
         const goToHeight = parseInt(goToBlock || "0", 10);

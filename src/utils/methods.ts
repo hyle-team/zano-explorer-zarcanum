@@ -1,3 +1,5 @@
+import { chartRequestNames } from "./constants";
+
 async function postFetch(path: string, body: Object) {
     return await fetch("/api/user/set-theme", {
         method: "POST",
@@ -9,28 +11,30 @@ async function postFetch(path: string, body: Object) {
 }
 
 class Fetch {
+    static readonly proxyPath = "/api";
+
     static async getInfo() {
-        return await fetch("/proxy/get_info").then(res => res.json());
+        return await fetch(this.proxyPath + "/get_info").then(res => res.json());
     }
 
     static async getBlockDetails(page: number, blocksAmount: number) {
-        return await fetch(`/proxy/get_blocks_details/${page}/${blocksAmount}`).then(res => res.json());
+        return await fetch(this.proxyPath + `/get_blocks_details/${page}/${blocksAmount}`).then(res => res.json());
     }
 
     static async getVisibilityInfo() {
-        return await fetch(`/proxy/get_visibility_info`).then(res => res.json());
+        return await fetch(this.proxyPath + `/get_visibility_info`).then(res => res.json());
     }
 
     static async getAltBlocksInfo(offset: number, amount: number) {
-        return await fetch(`/proxy/get_alt_blocks_details/${offset}/${amount}`).then(res => res.json());
+        return await fetch(this.proxyPath + `/get_alt_blocks_details/${offset}/${amount}`).then(res => res.json());
     }
 
     static async getAliases(offset: number, amount: number) {
-        return await fetch(`/proxy/get_aliases/${offset}/${amount}/all`).then(res => res.json());
+        return await fetch(this.proxyPath + `/get_aliases/${offset}/${amount}/all`).then(res => res.json());
     }
 
     static async getBlockInfo(hash: string, alt: boolean = false) {
-        return await fetch(`/proxy/${alt ? "get_alt_block_details" : "get_main_block_details"}/${hash}`).then(res => res.json());
+        return await fetch(this.proxyPath + `/${alt ? "get_alt_block_details" : "get_main_block_details"}/${hash}`).then(res => res.json());
     }
 
     static async getHashByHeight(height: number): Promise<string | null> {
@@ -46,11 +50,17 @@ class Fetch {
     }
 
     static async getTransaction(hash: string) {
-        return await fetch(`/proxy/get_tx_details/${hash}`).then(res => res.json());
+        return await fetch(this.proxyPath + `/get_tx_details/${hash}`).then(res => res.json());
     }
 
     static async searchById(id: string) {
-        return await fetch(`/proxy/search_by_id/${id}`).then(res => res.json());
+        return await fetch(this.proxyPath + `/search_by_id/${id}`).then(res => res.json());
+    }
+
+    static async getChartData(chartId: string) {
+        const chartRequestName = chartRequestNames[chartId];
+        if (!chartRequestName) return undefined;
+        return await fetch(this.proxyPath + `/get_chart/${chartRequestName}/all`).then(res => res.json());
     }
 }
 

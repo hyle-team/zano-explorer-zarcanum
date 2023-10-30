@@ -95,9 +95,9 @@ function InfoTopPanel(props: InfoTopPanelProps) {
                         setNoMatch(false);
                     }}
                 /> 
-                <Button 
-                    onClick={onButtonClick}
-                >
+                    <Button 
+                        onClick={onButtonClick}
+                    >
                     <SearchImg />
                 </Button>
             </div>

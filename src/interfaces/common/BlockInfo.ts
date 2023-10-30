@@ -19,6 +19,12 @@ interface BlockInfo {
     transactions: string;
     transactionsSize?: string;
     seed?: string;
+    alreadyGeneratedCoins?: string;
+    object_in_json?: string;
+    id?: string;
+    prev_id?: string;
+    major_version?: string;
+    minor_version?: string;
 }
 
 export default BlockInfo;

@@ -30,13 +30,13 @@ function Header(props: HeaderProps) {
                 </a>
                 <a 
                     className={page === "Charts" ? "selected" : undefined} 
-                    href="/"
+                    href="/charts"
                 >
                     Charts
                 </a>
                 <a 
                     className={page === "API" ? "selected" : undefined} 
-                    href="/api"
+                    href="/zano_api"
                 >
                     API
                 </a>

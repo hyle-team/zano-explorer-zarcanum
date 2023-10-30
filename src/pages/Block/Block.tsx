@@ -7,8 +7,9 @@ import Table from "../../components/default/Table/Table";
 import { ReactComponent as ArrowImg } from "../../assets/images/UI/arrow.svg";
 import BlockInfo from "../../interfaces/common/BlockInfo";
 import Utils from "../../utils/utils";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Fetch from "../../utils/methods";
+import Popup from "../../components/default/Popup/Popup";
 
 interface Transaction {
     hash: string;
@@ -21,6 +22,7 @@ function Block(props: { alt?: boolean }) {
     const { alt } = props;
 
     const [burgerOpened, setBurgerOpened] = useState(false);
+    const [jsonPopupOpened, setJsonPopupOpened] = useState(false);
 
     const { hash } = useParams();
 
@@ -29,6 +31,9 @@ function Block(props: { alt?: boolean }) {
 
     const [blockInfo, setBlockInfo] = useState<BlockInfo | null>(null);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+    console.log(blockInfo);
+    
 
     const tableElements = transactions.map(e => [
         !alt 
@@ -73,7 +78,7 @@ function Block(props: { alt?: boolean }) {
             if (result.success === false) return;
 
             setHeight(result.height || null);
-
+            
             setBlockInfo({
                 type: result.type === 1 ? "PoW" : "PoS",
                 timestamp: result.timestamp || undefined,
@@ -93,7 +98,13 @@ function Block(props: { alt?: boolean }) {
                 effectiveFeeMedian: Utils.toShiftedNumber(result.effective_fee_median || "0", 12),
                 currentTxsMedian: undefined,
                 transactions: result.tr_count || "0",
-                transactionsSize: result.total_txs_size || "0"
+                transactionsSize: result.total_txs_size || "0",
+                alreadyGeneratedCoins: result.already_generated_coins || undefined, 
+                object_in_json: result.object_in_json || undefined,
+                id: result.id || undefined,
+                prev_id: result.prev_id || undefined,
+                minor_version: result?.object_in_json?.split('\"minor_version\": ')?.[1]?.split(',')?.[0] || '-',
+                major_version: result?.object_in_json?.split('\"major_version\": ')?.[1]?.split(',')?.[0] || '-',
             }); 
 
             const rawTransactionsDetails = result.transactions_details;
@@ -123,8 +134,32 @@ function Block(props: { alt?: boolean }) {
     }, [hash]);
     
     function BlockInfo() {
+        
+        function JsonPopup() {
+            return (
+                <div className="block__info__json">
+                    {/* <button>x</button> */}
+                    <div className="block__info__json__content">
+                        {blockInfo?.object_in_json || ''}
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <div className="block__info">
+                {jsonPopupOpened && 
+                    <Popup 
+                        Content={JsonPopup}
+                        close={() => setJsonPopupOpened(false)}
+                        settings={{
+
+                        }}
+                        scroll
+                        blur
+                        classList={["block__json_popup"]}
+                    />
+                }
                 <div className="block__info__title">
                     <h2>Zano Block</h2>
                     <div>
@@ -160,6 +195,10 @@ function Block(props: { alt?: boolean }) {
                                 <td>{blockInfo?.timestamp ? Utils.formatTimestampUTC(blockInfo?.timestamp) : "-"}</td>
                             </tr>
                             <tr>
+                                <td>ID</td>
+                                <td><a href="">{Utils.shortenAddress(blockInfo?.id ?? "-")}</a></td>
+                            </tr>
+                            <tr>
                                 <td>Actual Timestamp (UTC):</td>
                                 <td>{blockInfo?.actualTimestamp ? Utils.formatTimestampUTC(blockInfo?.actualTimestamp) : "-"}</td>
                             </tr>
@@ -191,6 +230,10 @@ function Block(props: { alt?: boolean }) {
                                 <td>Transactions fee:</td>
                                 <td>{blockInfo?.transactionsFee ?? "-"}</td>
                             </tr>
+                            <tr>
+                                <td>Major / Minor versions:</td>
+                                <td>{blockInfo?.major_version ?? "-"} / {blockInfo?.minor_version ?? "-"}</td>
+                            </tr>
                         </tbody>
                     </table>
                     <table>
@@ -202,6 +245,10 @@ function Block(props: { alt?: boolean }) {
                             <tr>
                                 <td>Reward:</td>
                                 <td>{blockInfo?.reward || "-"}</td>
+                            </tr>
+                            <tr>
+                                <td>Previous ID:</td>
+                                <td><a href={`/block/${blockInfo?.prev_id}`}>{Utils.shortenAddress(blockInfo?.prev_id ?? "-")}</a></td>
                             </tr>
                             <tr>
                                 <td>Total block size, bytes:</td>
@@ -234,6 +281,20 @@ function Block(props: { alt?: boolean }) {
                             <tr>
                                 <td>Seed</td>
                                 <td>{blockInfo?.seed ?? ""}</td>
+                            </tr>
+                            <tr>
+                                <td>JSON data:</td>
+                                <td>
+                                    <a 
+                                        href="/" 
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setJsonPopupOpened(true);
+                                        }}
+                                    >
+                                        [ &nbsp;view &nbsp;]
+                                    </a>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

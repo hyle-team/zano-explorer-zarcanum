@@ -5,6 +5,7 @@ import APIItemValue from "../../interfaces/common/APIItemValue";
 import { JsonView, darkStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
 import examples from "./examples";
+import { nanoid } from "nanoid";
 
 interface APIEndpointItemProps {
     title: string, 
@@ -13,7 +14,7 @@ interface APIEndpointItemProps {
         link?: string 
     }, 
     example: string,
-    json?: string
+    json?: Object
 }
 
 function API() {
@@ -27,73 +28,68 @@ function API() {
             title: "Request current coin stats", 
             method: { text: "get_info", link: "https://docs.zano.org/reference/#getinfo" }, 
             example: "https://explorer.zano.org/api/get_info/4294967295", 
-            json: JSON.stringify(examples.get_info)
+            json: examples.get_info
         },
         { 
             title: "Request current total coins", 
             method: { text: "get_total_coins"}, 
-            example: "https://explorer.zano.org/api/get_total_coins" 
+            example: "https://explorer.zano.org/api/get_total_coins",
+            json: examples.get_total_coins
         },
         { 
             title: "Request blocks (offset and count)", 
             method: { text: "get_blocks_details", link: "https://docs.zano.org/reference/#get_blocks_details" }, 
-            example: "https://explorer.zano.org/api/get_blocks_details/{:offset}/{:count}" 
+            example: "https://explorer.zano.org/api/get_blocks_details/{:offset}/{:count}",
+            json: examples.get_blocks_details
         },
         { 
             title: "Request a given block by hash", 
             method: { text: "get_main_block_details", link: "https://docs.zano.org/reference/#get_main_block_details" }, 
-            example: "https://explorer.zano.org/api/get_main_block_details/{:hash}" 
+            example: "https://explorer.zano.org/api/get_main_block_details/{:hash}",
+            json: examples.get_main_block_details
         },
         { 
             title: "Request Alt-blocks (offset and count)", 
             method: { text: "get_alt_blocks_details", link: "https://docs.zano.org/reference/#get_alt_blocks_details" }, 
-            example: "https://explorer.zano.org/api/get_alt_blocks_details/{:offset}/{:count}" 
+            example: "https://explorer.zano.org/api/get_alt_blocks_details/{:offset}/{:count}",
+            json: examples.get_alt_blocks_details_offset
         },
         { 
             title: "Request a given Alt-block by hash", 
             method: { text: "get_alt_block_details", link: "https://docs.zano.org/reference/#get_alt_blocks_details" }, 
-            example: "https://explorer.zano.org/api/get_alt_block_details/{:hash}" 
+            example: "https://explorer.zano.org/api/get_alt_block_details/{:hash}",
+            json: examples.get_alt_blocks_details_offset
         },
         { 
             title: "Request transaction from the pool", 
             method: { text: "get_pool_txs_details", link: "https://docs.zano.org/reference/#get_pool_txs_details" }, 
-            example: "https://explorer.zano.org/api/get_pool_txs_details" 
+            example: "https://explorer.zano.org/api/get_pool_txs_details",
+            json: examples.get_pool_txs_details
         },
         {
             title: "Request brief information transactions from the pool",
             method: { text: "get_pool_txs_brief_details", link: "https://docs.zano.org/reference/#get_pool_txs_brief_details" },
-            example: "https://explorer.zano.org/api/get_pool_txs_brief_details"
+            example: "https://explorer.zano.org/api/get_pool_txs_brief_details",
+            json: examples.get_pool_txs_brief_details
         },
         {
             title: "Request IDs for all txs from the pool",
             method: { text: "get_all_pool_tx_list", link: "https://docs.zano.org/reference/#get_all_pool_tx_list" },
-            example: "https://explorer.zano.org/api/get_all_pool_tx_list"
+            example: "https://explorer.zano.org/api/get_all_pool_tx_list",
+            json: examples.get_all_pool_tx_list
         },
         {
             title: "Request a given transaction by hash",
             method: { text: "get_tx_details", link: "https://docs.zano.org/reference/#get_tx_details" },
-            example: "https://explorer.zano.org/api/get_tx_details/{:tx_hash}"
+            example: "https://explorer.zano.org/api/get_tx_details/{:tx_hash}",
+            json: examples.get_tx_details
         },
     ]
 
     const [burgerOpened, setBurgerOpened] = useState(false);
 
-    function APIItem(props: { title: string, values?: APIItemValue[], json?: string }) {
+    function APIItem(props: { title: string, values?: APIItemValue[], json?: Object }) {
         const { title, values, json } = props;
-
-        const [parsedJson, setParsedJson] = useState<Object | any[] | null>(null);
-
-        useEffect(() => {
-            function parseJson() {
-                if (!json) return;
-                try {
-                    const result = JSON.parse(json);
-                    setParsedJson(result);
-                } catch {}
-            }
-       
-            parseJson();
-        }, []);
 
         return (
             <div className="api__item">
@@ -121,7 +117,7 @@ function API() {
                     <div className="api__item__json">
                         <p>JSON Response</p>
                         <JsonView 
-                            data={JSON.parse(json)} 
+                            data={json} 
                             style={
                                 { 
                                     ...darkStyles, 
@@ -163,10 +159,9 @@ function API() {
             </div>
             <div className="api__items">
                 <APIItem title="How to use" values={howToUseValues} />
-                {/* <APIEndpointItem title="Request current coin stats" method={{ text: "get_info" }} /> */}
                 {
                     endpoints.map(e => (
-                        <APIEndpointItem {...e} />
+                        <APIEndpointItem key={nanoid(16)} {...e} />
                     ))
                 }
             </div>
