@@ -31,8 +31,6 @@ function Block(props: { alt?: boolean }) {
 
     const [blockInfo, setBlockInfo] = useState<BlockInfo | null>(null);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
-
-    console.log(blockInfo);
     
 
     const tableElements = transactions.map(e => [
@@ -123,7 +121,7 @@ function Block(props: { alt?: boolean }) {
             setTransactions(
                 transactionsDetails.map(e => ({
                     hash: e?.id || "",
-                    fee: Utils.formatNumber(e?.fee || "0"),
+                    fee: Utils.toShiftedNumber(e?.fee || "0", 12),
                     amount: Utils.toShiftedNumber(e?.amount?.toString() || "0", 12),
                     size: e?.blob_size || "0"
                 }))
@@ -317,7 +315,7 @@ function Block(props: { alt?: boolean }) {
                 back
                 className="block__info__top"
             />
-            <StatsPanel onlyBottom />
+            <StatsPanel />
             <BlockInfo />
             <div className="block__transactions">
                 <h2>Transactions</h2>

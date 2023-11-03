@@ -28,7 +28,9 @@ function Table(props: TableProps) {
         setPage,
         goToBlock,
         setGoToBlock,
-        goToBlockEnter
+        goToBlockEnter,
+        columnsWidth,
+        textWrap
     } = props;
 
     function changePage(increase: number) {
@@ -39,7 +41,7 @@ function Table(props: TableProps) {
 
     return (
         <div className={className}>
-            <table className="table">
+            <table className={"table " + (!textWrap ? "table__text_nowrap" : "")}>
                 <thead>
                     <tr>
                         {
@@ -50,7 +52,16 @@ function Table(props: TableProps) {
                 <tbody>
                     {elements.map(row => 
                         <tr key={nanoid(16)}>
-                            {row.map(e => <td key={nanoid(16)}>{e}</td>)}
+                            {
+                                row.map((e, i) => 
+                                    <td 
+                                        style={columnsWidth ? { width: `${columnsWidth[i]}%` } : undefined} 
+                                        key={nanoid(16)}
+                                    >
+                                        {e}
+                                    </td>
+                                )
+                            }
                         </tr>
                     )}
                     

@@ -62,6 +62,18 @@ class Fetch {
         if (!chartRequestName) return undefined;
         return await fetch(this.proxyPath + `/get_chart/${chartRequestName}/all`).then(res => res.json());
     }
+
+    static async getAssets() {
+        return await fetch(this.proxyPath + "/assets_whitelist_testnet").then(res => res.json());
+    }
+
+    static async getOutInfo(amount: number, index: number) {
+        return await fetch(this.proxyPath + "/get_out_info/" + amount + "/" + index).then(res => res.json());
+    }
+
+    static async getTxByKeyimage(image: string) {
+        return await fetch(this.proxyPath + "/get_tx_by_keyimage/" + image).then(res => res.json());
+    }
 }
 
 export default Fetch;

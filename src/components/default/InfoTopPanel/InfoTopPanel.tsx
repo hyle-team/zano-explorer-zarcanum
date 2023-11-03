@@ -3,7 +3,6 @@ import Input from "../../UI/Input/Input";
 import "./InfoTopPanel.scss";
 import { ReactComponent as SearchImg } from "../../../assets/images/UI/search.svg";
 import { ReactComponent as BackImg } from "../../../assets/images/UI/back.svg";
-
 import { useState } from "react";
 import Fetch from "../../../utils/methods";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +26,6 @@ function InfoTopPanel(props: InfoTopPanelProps) {
     const [noMatch, setNoMatch] = useState(false);
 
     async function onButtonClick() {
-        setInputClosed(!inputClosed);
         if (!inputState) return;
         const input = inputState.replace(/\s/g, '');
 
@@ -40,6 +38,13 @@ function InfoTopPanel(props: InfoTopPanelProps) {
             }
             if (result === "block") {
                 return navigate("/block/" + input);
+            }
+
+            const txByKeyimageRes = await Fetch.getTxByKeyimage(input);
+
+            if (txByKeyimageRes && typeof txByKeyimageRes === "object" && txByKeyimageRes.data) {
+                const { data } = txByKeyimageRes; 
+                return navigate("/transaction/" + data);
             }
 
             if (input.match(/^\d+$/)) {
@@ -59,7 +64,11 @@ function InfoTopPanel(props: InfoTopPanelProps) {
 
     async function onBackClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
         event.preventDefault();
-        navigate(-1);
+        if (document.referrer) {
+            navigate(-1);
+        } else {
+            navigate("/");
+        }
     }
 
     return (
@@ -94,10 +103,11 @@ function InfoTopPanel(props: InfoTopPanelProps) {
                         setInputState(event.currentTarget.value);
                         setNoMatch(false);
                     }}
+                    onEnterPress={inputState ? onButtonClick : undefined}
                 /> 
-                    <Button 
-                        onClick={onButtonClick}
-                    >
+                <Button 
+                    onClick={inputState ? onButtonClick : () => setInputClosed(!inputClosed)}
+                >
                     <SearchImg />
                 </Button>
             </div>

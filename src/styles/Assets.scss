@@ -1,0 +1,14 @@
+.assets__table {
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+@media screen and (max-width: 850px) {
+    .assets__table {
+        overflow-x: auto;
+
+        > :first-child {
+            width: 850px;
+        }
+    }
+}

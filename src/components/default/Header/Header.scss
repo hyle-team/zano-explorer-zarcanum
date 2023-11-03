@@ -1,10 +1,9 @@
 .header {
-
     .header__top {
         height: 80px;
         display: flex;
         align-items: center;
-        gap: 60px;
+        justify-content: space-between;
         border-bottom: 1px solid rgba(255,255,255,.1);
 
         .header__logo {
@@ -25,6 +24,7 @@
 
         nav {
             display: flex;
+            align-items: center;
             gap: 45px;
 
             > a {
@@ -42,6 +42,32 @@
             border-radius: 0;
             background: transparent;
             display: none;
+        }
+        
+        .header__net_switch {
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-wrap: nowrap;
+
+            button {
+                border-radius: 0;
+
+                &.selected {
+                    background: #1b3a8a;
+                }
+            }
+        }
+
+        .header__top__main {
+            display: flex;
+            gap: 60px;
+        }
+
+        .header__top__right {
+            display: flex;
+            gap: 30px;
+            align-items: center;
         }
     }
 
@@ -67,7 +93,7 @@
     }
     
 
-    @media screen and (max-width: 761px) {
+    @media screen and (max-width: 1050px) {
         .header__top {
             justify-content: space-between;
 

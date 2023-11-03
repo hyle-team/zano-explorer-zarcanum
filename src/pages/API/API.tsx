@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Header from "../../components/default/Header/Header";
 import "../../styles/API.scss";
 import APIItemValue from "../../interfaces/common/APIItemValue";
-import { JsonView, darkStyles } from 'react-json-view-lite';
-import 'react-json-view-lite/dist/index.css';
 import examples from "./examples";
 import { nanoid } from "nanoid";
+import JsonViewStyled from "../../components/UI/JsonViewStyled/JsonViewStyled";
 
 interface APIEndpointItemProps {
     title: string, 
@@ -116,16 +115,8 @@ function API() {
                 {json &&
                     <div className="api__item__json">
                         <p>JSON Response</p>
-                        <JsonView 
+                        <JsonViewStyled 
                             data={json} 
-                            style={
-                                { 
-                                    ...darkStyles, 
-                                    container: "item__json__container", 
-                                    basicChildStyle: "item__json__element",
-                                    numberValue: "item__json__number"
-                                }
-                            } 
                             shouldExpandNode={() => false}
                         />
                     </div>

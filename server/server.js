@@ -467,6 +467,24 @@ app.get(
     })
 )
 
+app.get(
+    "/api/get_tx_by_keyimage/:id",
+    exceptionHandler(async (req, res, next) => {
+        const id = req.params.id.toLowerCase();
+        const txs = (await db.query("SELECT * FROM transactions WHERE ins LIKE $1", [ '%' + id + '%' ])).rows;
+        for (const tx of txs) {
+            try {
+                const ins = JSON.parse(tx.ins);
+                if (!(ins instanceof Array)) continue;
+                if (ins.find(e => e.kimage_or_ms_id === id)) {
+                    return res.json({ result: "FOUND", data: tx.id });
+                }
+            } catch {}
+        }
+        return res.json({ result: "NOT FOUND" });
+    })
+)
+
 // Search
 app.get(
     '/api/search_by_id/:id',
@@ -777,7 +795,6 @@ const syncTransactions = async () => {
                         )
                     }
                 } catch (error) {
-                    console.log(error);
                     log(`SyncTransactions() Inserting aliases ERROR: ${error}`)
                 }
             }
@@ -1357,6 +1374,17 @@ app.get(
             }
         })
         res.json(response.data)
+    })
+)
+
+app.get(
+    '/api/assets_whitelist_testnet',
+    exceptionHandler(async (req, res) => {
+        const response = await axios({
+            method: 'get',
+            url: 'https://api.zano.org/assets_whitelist_testnet.json'
+        });
+        res.json(response.data);
     })
 )
 

@@ -8,10 +8,15 @@
         font-size: 13px;
     }
 
+    &.table__text_nowrap {
+        > * {
+            white-space: nowrap;
+        }
+    }
+
     tr {
         > * {
             padding: 12px 20px;
-            white-space: nowrap;
 
             @media screen and (max-width: 1170px) {
                 padding: 12px 15px;

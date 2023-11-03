@@ -1,13 +1,16 @@
 import "./Button.scss";
 
-function Button(props: React.HTMLProps<HTMLButtonElement>) {
-    const { children, className, onClick, style } = props;
+interface ButtonProps extends React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
+    wrapper?: boolean
+}
+
+function Button(props: ButtonProps) {
+    const { children, className, wrapper, ...restProps } = props;
 
     return (
         <button 
-            className={"button " + (className || "")}
-            onClick={onClick}
-            style={style}
+            className={`button ${wrapper ? "button__wrapper" : ""} ${className || ""}`}
+            {...restProps}
         >
             {children}
         </button>

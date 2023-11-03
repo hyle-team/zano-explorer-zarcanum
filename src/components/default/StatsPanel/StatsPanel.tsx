@@ -5,8 +5,8 @@ import Utils from "../../../utils/utils";
 import "./StatsPanel.scss";
 import { useState, useEffect } from "react";
 
-function StatsPanel(props: { onlyBottom?: boolean, visibilityInfo?: VisibilityInfo | null }) {
-    const { onlyBottom, visibilityInfo } = props;
+function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null }) {
+    const { visibilityInfo } = props;
 
     const [info, setInfo] = useState<Info | null>(null);
 
@@ -32,7 +32,7 @@ function StatsPanel(props: { onlyBottom?: boolean, visibilityInfo?: VisibilityIn
     const powDiff = Utils.formatNumber(info?.pow_difficulty || 0, 0);
     const coinsEmitted = Utils.toShiftedNumber(info?.total_coins || "0", 12);
     const transactionsString = Utils.formatNumber(transactions, 0);
-    const hashrate = Utils.toShiftedNumber(info?.current_network_hashrate_350 || 0, 9, 3);
+    const hashrate = Utils.toShiftedNumber(info?.current_network_hashrate_350 || 0, 0, 3);
 
     const stackedCoins = Utils.toShiftedNumber(visibilityInfo?.amount.toString() || "0", 12);
     const percentage = visibilityInfo?.percentage || "0";
@@ -82,7 +82,7 @@ function StatsPanel(props: { onlyBottom?: boolean, visibilityInfo?: VisibilityIn
     return (
         <>
             <div className="blockchain__info__main">
-                {!onlyBottom &&
+                {/* {!onlyBottom &&
                     <div className="info__main__top">
                         <TopItem 
                             title="Staked Coins (est)" 
@@ -94,7 +94,7 @@ function StatsPanel(props: { onlyBottom?: boolean, visibilityInfo?: VisibilityIn
                             amount={devFund}
                         />
                     </div>
-                }
+                } */}
                 <div className="info__main__bottom">
                     <BottomItem title="Height">
                         <p className="item__text__large">{infoHeight}</p>
@@ -125,7 +125,7 @@ function StatsPanel(props: { onlyBottom?: boolean, visibilityInfo?: VisibilityIn
 
             
             <div className="info__main__mobile">
-                {!onlyBottom &&
+                {/* {!onlyBottom &&
                     <div className="info__main__top">
                         <TopItem 
                             title="Staked Coins (est)" 
@@ -137,7 +137,7 @@ function StatsPanel(props: { onlyBottom?: boolean, visibilityInfo?: VisibilityIn
                             amount={devFund}
                         />
                     </div>
-                }
+                } */}
                 <div className="info__main__bottom">
                     <BottomItem title="Height">
                         <p className="item__text__large">{infoHeight}</p>

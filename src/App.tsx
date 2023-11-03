@@ -9,6 +9,7 @@ const API = React.lazy(() => import("./pages/API/API"));
 const Transaction = React.lazy(() => import("./pages/Transaction/Transaction"));
 const Charts = React.lazy(() => import("./pages/Charts/Charts"));
 const ChartsPage = React.lazy(() => import("./pages/ChartPage/ChartPage"));
+const Assets = React.lazy(() => import("./pages/Assets/Assets"));
 
 function App() {
     return (
@@ -24,6 +25,7 @@ function App() {
                     <Route path="/alt-blocks/:hash" element={<Block alt />} />
                     <Route path="/charts" element={<Charts />} />
                     <Route path="/charts/:name" element={<ChartsPage />} />
+                    <Route path="/assets" element={<Assets />} />
                 </Routes>
             </Suspense>
         </Router>

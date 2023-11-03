@@ -40,6 +40,18 @@ function Header(props: HeaderProps) {
                 >
                     API
                 </a>
+                <a 
+                    className={page === "Assets" ? "selected" : undefined} 
+                    href="/assets"
+                >
+                    Assets
+                </a>
+                <a 
+                    className={page === "Governance" ? "selected" : undefined} 
+                    href="/"
+                >
+                    Governance
+                </a>
             </nav>
         )
     }
@@ -47,19 +59,32 @@ function Header(props: HeaderProps) {
     return (
         <header className="header">
             <div className="header__top">
-                <a href="/">
-                    <div className="header__logo">
-                        <LogoImg />
-                        <p>ZANO</p>
-                    </div>
-                </a>
-                <Nav />
-                <Button
-                    onClick={() => setBurgerOpened(!burgerOpened)} 
-                    className="header__burger__button"
-                >
-                    <BurgerImg />
-                </Button>
+                <div className="header__top__main">
+                    <a href="/">
+                        <div className="header__logo">
+                            <LogoImg />
+                            <p>ZANO</p>
+                        </div>
+                    </a>
+                    <Nav />
+                </div>
+
+                <div className="header__top__right">
+                    <a 
+                        href="https://explorer.zano.org/"
+                        target="_blank" 
+                    >
+                        <Button>
+                            <p>Main Net</p>
+                        </Button>
+                    </a>
+                    <Button
+                        onClick={() => setBurgerOpened(!burgerOpened)} 
+                        className="header__burger__button"
+                    >
+                        <BurgerImg />
+                    </Button>
+                </div>
             </div>
             { burgerOpened && <Nav className="header__nav__mobile" /> }
         </header>

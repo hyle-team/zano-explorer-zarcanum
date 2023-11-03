@@ -4,11 +4,14 @@ import Header from "../../components/default/Header/Header";
 import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
 import StatsPanel from "../../components/default/StatsPanel/StatsPanel";
 import Table from "../../components/default/Table/Table";
-import TransactionInfo from "../../interfaces/common/TransactionInfo";
+import TransactionInfo, { Input } from "../../interfaces/common/TransactionInfo";
 import Fetch from "../../utils/methods";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Utils from "../../utils/utils";
 import { nanoid } from "nanoid";
+import Popup from "../../components/default/Popup/Popup";
+import { ReactComponent as CrossImg } from "../../assets/images/UI/cross.svg";
+import Button from "../../components/UI/Button/Button";
 
 interface Block {
     hash: string;
@@ -24,7 +27,12 @@ function Transaction() {
     const [transactionInfo, setTransactionInfo] = useState<TransactionInfo | null>(null);
     const [blockOrigin, setBlockOrigin] = useState<Block | null>(null);
 
+    const [popupState, setPopupState] = useState(false);
+    const [selectedInput, setSelectedInput] = useState<Input | null>(null);
+
     const { hash } = useParams();
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchTransaction() {
@@ -35,12 +43,14 @@ function Transaction() {
             const newTransactionInfo: TransactionInfo = {
                 hash: result.id || "",
                 amount: Utils.toShiftedNumber(result.amount || "0", 12),
-                fee: Utils.toShiftedNumber(result.fee || "0", 0),
+                fee: Utils.toShiftedNumber(result.fee || "0", 12),
                 size: result.block_size || "0",
                 confirmations: "-",
                 publicKey: result.pub_key || "-",
                 mixin: "-",
                 extraItems: [],
+                ins: [],
+                outs: [],
                 attachments: undefined
             }
             setBlockOrigin({
@@ -58,11 +68,117 @@ function Transaction() {
                 }
             } catch {}
 
+            try {
+                const parsedIns = JSON.parse(result.ins);
+                if (parsedIns instanceof Array) {
+                    newTransactionInfo.ins = parsedIns.map(e => {
+                        const mixins = (e?.mixins instanceof Array) ? e?.mixins : [];
+                        const globalIndexes = (e?.global_indexes instanceof Array) ? e?.global_indexes : [];
+                        return {
+                            amount: e?.amount || 0,
+                            keyimage: e?.kimage_or_ms_id || "",
+                            mixins: mixins,
+                            globalIndexes: globalIndexes
+                        }
+                    });
+                }
+            } catch {}
+
+            try {
+                const parsedOuts = JSON.parse(result.outs);
+                if (parsedOuts instanceof Array) {
+                    newTransactionInfo.outs = parsedOuts.map(e => {
+                        return {
+                            amount: e?.amount || 0,
+                            publicKey: e?.pub_keys?.[0] || "",
+                            globalIndex: e?.global_index || 0
+                        }
+                    })
+                }
+            } catch {}
+
             setTransactionInfo(newTransactionInfo);
         }
 
         fetchTransaction();
-    }, []);
+    }, [hash]);
+
+    function showIndexesClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, input: Input) {
+        event.preventDefault();
+        setSelectedInput(input);
+        setPopupState(true);
+    }
+
+    async function onIndexClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, amount: number, index: number) {
+        event.preventDefault();
+        const result = await Fetch.getOutInfo(amount, index);
+        if (result.tx_id && typeof result.tx_id === "string") {
+            navigate("/transaction/" + result.tx_id);
+            setPopupState(false);
+        } 
+    }
+
+    const insRows = transactionInfo ? (
+        transactionInfo.ins.map(e => [
+            Utils.toShiftedNumber(e.amount, 12),
+            e.keyimage,
+            e.globalIndexes.length,
+            e.globalIndexes.length > 1 ?
+            (
+                <a href="/" onClick={event => showIndexesClick(event, e)}>Show all...</a>
+            )
+            : 
+            (
+                <a 
+                    href="/" 
+                    onClick={event => onIndexClick(event, e.amount, e.globalIndexes[0])}
+                >
+                    {e.globalIndexes[0] ?? ""}
+                </a>
+            )
+        ])
+    ) : [];
+
+    const outsRows = transactionInfo ? (
+        transactionInfo.outs.map(e => [
+            Utils.toShiftedNumber(e.amount, 12),
+            e.publicKey,
+            e.globalIndex
+        ])
+    ) : [];
+
+    function GlobalIndexesPopup({ close }: { close: () => void; }) {
+        const popupIndexes = selectedInput?.globalIndexes || [];
+        const amount = selectedInput?.amount || 0;
+
+        return (
+            <div className="transaction__indexes__popup">
+                <h3>
+                    Global Index mixins({popupIndexes.length}) for amount {Utils.toShiftedNumber(selectedInput?.amount || "0", 0)}
+                </h3>
+                <div>
+                    {popupIndexes.map(e => 
+                        (
+                            <a 
+                                href="/" 
+                                key={e}
+                                onClick={event => onIndexClick(event, amount, e)}
+                            >
+                                {e}
+                            </a>
+                        )
+                    )}
+                </div>
+                <Button 
+                    wrapper 
+                    className="popup__cross"
+                    onClick={close}
+                >
+                    <CrossImg />
+                </Button>
+            </div>
+        )
+    }
 
     return (
         <div className="transaction">
@@ -77,7 +193,7 @@ function Transaction() {
                 back
                 className="block__info__top"
             />
-            <StatsPanel onlyBottom />
+            <StatsPanel />
             <div className="transaction__info">
                 <h2>Transaction</h2>
                 <table>
@@ -144,33 +260,36 @@ function Transaction() {
                         blockOrigin?.height || "",
                         blockOrigin?.timestamp ? Utils.formatTimestampUTC(parseInt(blockOrigin.timestamp, 10)) : "" 
                     ]]}
+                    columnsWidth={[ 65, 15, 20 ]}
                 />
             </div>
             <div className="transaction__table__wrapper">
-                <h3>Inputs ( 2 )</h3>
+                <h3>{`Inputs ( ${insRows.length} )`}</h3>
                 <Table 
-                    className="custom-scroll"
-                    headers={[ "AMOUNT", "IMAGE / MULTISIG ID", "MIXIN COUNT", "GLOBAL INDEX" ]}
-                    elements={[[ 
-                        "1.00",
-                        "a32ef806cc193cbe07e1cf7cff27e3a9609bae44e57e5999f46b69ffd9366a57",
-                        "1",
-                        <a className="table__hash" href="/block/1234">13496</a>,
-                    ]]}
+                    className="transaction__table__inputs custom-scroll"
+                    headers={[ "AMOUNT", "IMAGE / MULTISIG ID", "DECOY COUNT", "GLOBAL INDEX" ]}
+                    elements={insRows}
+                    columnsWidth={[ 15, 50, 15, 20 ]}
                 />
             </div>
             <div className="transaction__table__wrapper">
-                <h3>Outputs ( 2 )</h3>
+                <h3>{`Outputs ( ${outsRows.length} )`}</h3>
                 <Table 
                     className="custom-scroll"
                     headers={[ "AMOUNT", "KEY", "GLOBAL INDEX / MULTISIG ID" ]}
-                    elements={[[ 
-                        "1.00",
-                        "048a327cb79739b33f6859b3a3082b6beafd380f1570b62e4598959442cd8641 [SPENT]",
-                        "14124"
-                    ]]}
+                    elements={outsRows}
+                    columnsWidth={[ 15, 65, 20 ]}
+                    textWrap
                 />
             </div>
+            {popupState &&
+                <Popup 
+                    Content={GlobalIndexesPopup}
+                    settings={{}}
+                    close={() => setPopupState(false)}
+                    blur
+                />
+            }
         </div>
     )
 }

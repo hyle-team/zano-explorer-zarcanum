@@ -13,6 +13,8 @@ interface TableProps {
     goToBlock?: string;
     setGoToBlock?: Dispatch<SetStateAction<string>>;
     goToBlockEnter?: () => void;
+    columnsWidth?: number[];
+    textWrap?: boolean;
 }
 
 export default TableProps;

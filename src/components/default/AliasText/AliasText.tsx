@@ -1,14 +1,17 @@
 import "./AliasText.scss";
 
-interface AliasTextProps {
-    children: React.ReactNode,
-    href: string
+interface AliasTextProps extends React.HTMLProps<HTMLAnchorElement> {
+    children: React.ReactNode
 }
 
 function AliasText(props: AliasTextProps) {
+    const { children, ...restProps } = props;
+
     return (
         <span className="alias__text">
-            <a href={props.href}>{props.children}</a>
+            <a {...restProps}>
+                {children}
+            </a>
         </span>
     )
 }
