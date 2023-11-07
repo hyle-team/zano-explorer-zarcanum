@@ -88,9 +88,11 @@ function Transaction() {
                 const parsedOuts = JSON.parse(result.outs);
                 if (parsedOuts instanceof Array) {
                     newTransactionInfo.outs = parsedOuts.map(e => {
+                        const { pub_keys } = e;
+                        const pubKeys = (pub_keys instanceof Array) ? pub_keys : [];
                         return {
-                            amount: e?.amount || 0,
-                            publicKey: e?.pub_keys?.[0] || "",
+                            amount: pubKeys[4] || "",
+                            publicKeys: pubKeys.slice(0, 4),
                             globalIndex: e?.global_index || 0
                         }
                     })
@@ -141,8 +143,10 @@ function Transaction() {
 
     const outsRows = transactionInfo ? (
         transactionInfo.outs.map(e => [
-            Utils.toShiftedNumber(e.amount, 12),
-            e.publicKey,
+            e.amount,
+            <div className="transaction__outs__keys">
+                {e.publicKeys.map(e => <p>{e}</p>)}
+            </div>,
             e.globalIndex
         ])
     ) : [];

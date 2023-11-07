@@ -3,6 +3,12 @@
         margin-bottom: 25px;
     }
 
+    .transaction__outs__keys {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
     .transaction__info {
         display: flex;
         flex-direction: column;

@@ -6,8 +6,8 @@ interface Input {
 }
 
 interface Output {
-    amount: number;
-    publicKey: string;
+    amount: string;
+    publicKeys: string[];
     globalIndex: string;
 }
 
