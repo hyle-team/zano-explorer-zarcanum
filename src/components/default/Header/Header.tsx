@@ -3,6 +3,7 @@ import { ReactComponent as LogoImg } from "../../../assets/images/UI/logo.svg";
 import { ReactComponent as BurgerImg } from "../../../assets/images/UI/burger.svg";
 import HeaderProps from "./Header.props";
 import Button from "../../UI/Button/Button";
+import NET_MODE from "../../../config/config";
 
 function Header(props: HeaderProps) {
     const { page, burgerOpened, setBurgerOpened } = props;
@@ -46,12 +47,14 @@ function Header(props: HeaderProps) {
                 >
                     Assets
                 </a>
-                <a 
-                    className={page === "Governance" ? "selected" : undefined} 
-                    href="/"
-                >
-                    Governance
-                </a>
+                {NET_MODE === "TEST" &&
+                    <a 
+                        className={page === "Governance" ? "selected" : undefined} 
+                        href="/"
+                    >
+                        Governance
+                    </a>
+                }
             </nav>
         )
     }
@@ -75,7 +78,7 @@ function Header(props: HeaderProps) {
                         target="_blank" 
                     >
                         <Button>
-                            <p>Main Net</p>
+                            <p>Switch to {NET_MODE === "TEST" ? "Main Net" : "Test Net" }</p>
                         </Button>
                     </a>
                     <Button

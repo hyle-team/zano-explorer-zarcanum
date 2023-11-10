@@ -83,7 +83,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null }) {
     return (
         <>
             <div className="blockchain__info__main">
-                {/* {!onlyBottom &&
+                {NET_MODE === "MAIN" &&
                     <div className="info__main__top">
                         <TopItem 
                             title="Staked Coins (est)" 
@@ -95,7 +95,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null }) {
                             amount={devFund}
                         />
                     </div>
-                } */}
+                }
                 <div className="info__main__bottom">
                     <BottomItem title="Height">
                         <p className="item__text__large">{infoHeight}</p>
@@ -126,7 +126,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null }) {
 
             
             <div className="info__main__mobile">
-                {/* {!onlyBottom &&
+                {NET_MODE === "MAIN" &&
                     <div className="info__main__top">
                         <TopItem 
                             title="Staked Coins (est)" 
@@ -138,7 +138,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null }) {
                             amount={devFund}
                         />
                     </div>
-                } */}
+                }
                 <div className="info__main__bottom">
                     <BottomItem title="Height">
                         <p className="item__text__large">{infoHeight}</p>

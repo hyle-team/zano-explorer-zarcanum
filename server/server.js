@@ -717,10 +717,10 @@ const syncTransactions = async () => {
                                 let aliasName = arr[0]
                                 let aliasAddress = arr[1]
                                 let aliasComment = parseComment(
-                                    item.details_view
+                                    item.datails_view || item.details_view
                                 )
                                 let aliasTrackingKey = parseTrackingKey(
-                                    item.details_view
+                                    item.datails_view || item.details_view
                                 )
                                 let aliasBlock = bl.height
                                 let aliasTransaction = localTr.id
