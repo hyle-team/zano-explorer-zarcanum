@@ -74,7 +74,7 @@ function Header(props: HeaderProps) {
 
                 <div className="header__top__right">
                     <a 
-                        href="https://explorer.zano.org/"
+                        href={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/" }
                         target="_blank" 
                     >
                         <Button>
