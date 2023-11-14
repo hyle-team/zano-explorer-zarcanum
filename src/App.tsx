@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Block from "./pages/Block/Block";
+import NET_MODE from "./config/config";
 
 const Blockchain = React.lazy(() => import("./pages/Blockchain/Blockchain"));
 const AltBlocks = React.lazy(() => import("./pages/AltBlocks/AltBlocks"));
@@ -25,7 +26,10 @@ function App() {
                     <Route path="/alt-blocks/:hash" element={<Block alt />} />
                     <Route path="/charts" element={<Charts />} />
                     <Route path="/charts/:name" element={<ChartsPage />} />
-                    <Route path="/assets" element={<Assets />} />
+                    {NET_MODE === "TEST" &&
+                        <Route path="/assets" element={<Assets />} />
+                    }
+                    <Route path="/*" element={<Navigate to="/" />} />
                 </Routes>
             </Suspense>
         </Router>

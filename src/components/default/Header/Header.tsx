@@ -41,19 +41,22 @@ function Header(props: HeaderProps) {
                 >
                     API
                 </a>
-                <a 
-                    className={page === "Assets" ? "selected" : undefined} 
-                    href="/assets"
-                >
-                    Assets
-                </a>
                 {NET_MODE === "TEST" &&
-                    <a 
-                        className={page === "Governance" ? "selected" : undefined} 
-                        href="/"
-                    >
-                        Governance
-                    </a>
+                    <>
+                        <a 
+                            className={page === "Assets" ? "selected" : undefined} 
+                            href="/assets"
+                        >
+                            Assets
+                        </a>
+                        
+                        <a 
+                            className={page === "Governance" ? "selected" : undefined} 
+                            href="/"
+                        >
+                            Governance
+                        </a>
+                    </>
                 }
             </nav>
         )
@@ -76,6 +79,7 @@ function Header(props: HeaderProps) {
                     <a 
                         href={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/" }
                         target="_blank" 
+                        rel="noreferrer"
                     >
                         <Button>
                             <p>Switch to {NET_MODE === "TEST" ? "Main Net" : "Test Net" }</p>
