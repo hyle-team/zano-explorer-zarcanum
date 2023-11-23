@@ -15,6 +15,7 @@ interface TableProps {
     goToBlockEnter?: () => void;
     columnsWidth?: number[];
     textWrap?: boolean;
+    pagesTotal?: number;
 }
 
 export default TableProps;

@@ -13,7 +13,7 @@
         "user": "postgres",
         "host": "127.0.0.1",
         "port": 5432,
-        "database": "zano",
-        "password": "root"
+        "database": "zano-explorer",
+        "password": "12345677"
     }
 }

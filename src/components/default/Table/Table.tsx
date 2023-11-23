@@ -11,7 +11,7 @@ function Table(props: TableProps) {
         if (newValue !== "" && !newValue.match(/^\d+$/)) return event.preventDefault();
         if (max) {
             const number = parseInt(newValue, 10) || 0;
-            if (number > max) return;
+            if (number > max) return setState(max.toString());
         }
         setState(newValue);
     }
@@ -30,7 +30,8 @@ function Table(props: TableProps) {
         setGoToBlock,
         goToBlockEnter,
         columnsWidth,
-        textWrap
+        textWrap,
+        pagesTotal
     } = props;
 
     function changePage(increase: number) {
@@ -90,6 +91,7 @@ function Table(props: TableProps) {
                             onInput={(e) => onNumberInput(e, setPage)}
                         />
                     </div>
+                    {pagesTotal && <p>Pages total: {pagesTotal}</p>}
                     <div className="table__pagination__blocks">
                         <div>
                             <p>Items on page: </p>

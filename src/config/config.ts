@@ -1,3 +1,3 @@
-const NET_MODE: "TEST" | "MAIN" = "MAIN";
+const NET_MODE: "TEST" | "MAIN" = "TEST";
 
 export default NET_MODE;

@@ -22,6 +22,7 @@ function API() {
         { key: "URL Request Format", value: { text: "https://explorer.zano.org/api/{method}/{param1}/{param2}" } },
     ];
 
+    // method.link is currently not in use
     const endpoints: APIEndpointItemProps[] = [
         { 
             title: "Request current coin stats", 
@@ -103,10 +104,7 @@ function API() {
                                     <p>{e.key}</p>
                                 </div>
                                 <div>
-                                    {!e.value.link ?
-                                        <p>{e.value.text}</p> :
-                                        <a href={e.value.link} target="_blank">{e.value.text}</a>
-                                    }
+                                    <p>{e.value.text}</p> 
                                 </div>
                             </div>
                         ))

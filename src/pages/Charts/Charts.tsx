@@ -12,31 +12,57 @@ import Preloader from "../../components/UI/Preloader/Preloader";
 function Charts() {
     const [burgerOpened, setBurgerOpened] = useState(false);
 
+    const [chartsSeries, setChartsSeries] = useState<{ [key: string]: ChartSeriesElem[][] | undefined }>(
+        {
+            "avg-block-size": undefined,
+            "avg-trans-per-block": undefined,
+            "hash-rate": undefined,
+            "difficulty-pow": undefined,
+            "difficulty-pos": undefined,
+            "confirm-trans-per-day": undefined
+        }
+    );
+
+    const [loaded, setLoaded] = useState(false);
+
+    useEffect(() => {
+        async function fetchCharts() {
+            setLoaded(false);
+
+            const titles = [
+                "avg-block-size",
+                "avg-trans-per-block",
+                "hash-rate",
+                "difficulty-pow",
+                "difficulty-pos",
+                "confirm-trans-per-day"
+            ];
+
+            const chartPeriod = 7 * 24 * 60 * 60 * 1e3;
+            const now = Date.now();
+    
+            await Promise.all(titles.map(async title => {
+                const result = await Utils.fetchChartInfo(title);
+                if (!result) return;
+                setChartsSeries(prev => ({ 
+                    ...prev, 
+                    [title]: result.map(
+                        series => series.filter(e => e.x > now - chartPeriod)
+                    ) 
+                }))
+            }));
+                
+            setLoaded(true);
+        }
+
+        fetchCharts();
+    }, []);
+
     function Chart(props: { title: string, requestTitle: string }) {
         const {
             title,
             requestTitle
         } = props;
-
-        const [chartSeries, setChartSeries] = useState<ChartSeriesElem[][]>([]);
-
-        useEffect(() => {
-            async function fetchChart() {
-                const dayMs = 24 * 60 * 60 * 1e3;
-                const now = Date.now();
-                const chartId = requestTitle;
-                if (!chartId) return;
-                const result = await Utils.fetchChartInfo(chartId);
-                if (!result) return;
-                setChartSeries(
-                    result.map(
-                        series => series.filter(e => e.x > now - dayMs)
-                    )
-                );
-            }
-
-            fetchChart();
-        }, []);
 
         return (
             <a href={"/charts/" + requestTitle} className="charts__chart__wrapper">
@@ -50,10 +76,11 @@ function Charts() {
                         title: {
                             text: undefined
                         },
-                        series: chartSeries.map(e => ({
+                        series: chartsSeries[requestTitle]?.map(e => ({
                             type: "line",
                             data: e,
                             turboThreshold: 0,
+                            animation: false
                         })),
                         chart: {
                             ...chartOptions.chart,
@@ -106,32 +133,37 @@ function Charts() {
                 burgerOpened={burgerOpened} 
                 title="Charts" 
             />
-            <div className="charts__container">
-                <Chart 
-                    title="Average Block Size"
-                    requestTitle="avg-block-size"
-                />
-                <Chart 
-                    title="Average Number Of Transactions Per Block"
-                    requestTitle="avg-trans-per-block"
-                />
-                <Chart 
-                    title="Hash Rate" 
-                    requestTitle="hash-rate"
-                />
-                <Chart 
-                    title="PoW Difficulty" 
-                    requestTitle="difficulty-pow"
-                />
-                <Chart 
-                    title="PoS Difficulty" 
-                    requestTitle="difficulty-pos"
-                />
-                <Chart 
-                    title="Confirmed Transaction Per Day"
-                    requestTitle="confirm-trans-per-day" 
-                />
-            </div>
+            {loaded ?
+                <div className="charts__container">
+                    <Chart 
+                        title="Average Block Size"
+                        requestTitle="avg-block-size"
+                    />
+                    <Chart 
+                        title="Average Number Of Transactions Per Block"
+                        requestTitle="avg-trans-per-block"
+                    />
+                    <Chart 
+                        title="Hash Rate" 
+                        requestTitle="hash-rate"
+                    />
+                    <Chart 
+                        title="PoW Difficulty" 
+                        requestTitle="difficulty-pow"
+                    />
+                    <Chart 
+                        title="PoS Difficulty" 
+                        requestTitle="difficulty-pos"
+                    />
+                    <Chart 
+                        title="Confirmed Transaction Per Day"
+                        requestTitle="confirm-trans-per-day" 
+                    />
+                </div> : 
+                <div className="charts__preloader">
+                    <Preloader />
+                </div>
+            }
         </div>
     )
 }

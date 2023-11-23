@@ -26,20 +26,28 @@ function LatestBlocks() {
     const [blocks, setBlocks] = useState<Block[]>([]);
 
     const [itemsOnPage, setItemsOnPage] = useState("10");
+    const [pagesAmount, setPagesAmount] = useState(0);
     const [page, setPage] = useState("1");
     const [goToBlock, setGoToBlock] = useState("");
 
-    function onGoToBlockEnter() {
-        if (!goToBlock || !itemsOnPage) return;
-        const goToHeight = parseInt(goToBlock || "0", 10);
-        const itemsParsed = parseInt(itemsOnPage || "0", 10);
+    useEffect(() => {
         if (!info) return;
         const { height } = info;
-        if (goToHeight > height - 1) return;
-        const offset = height - goToHeight;
-        const newPage = Math.ceil(offset / itemsParsed);
-        setPage(newPage.toString());
-    }
+        const itemsParsed = parseInt(itemsOnPage || "0", 10);
+
+        function onGoToBlockEnter() {
+            if (!goToBlock || !itemsOnPage) return;
+            const goToHeight = parseInt(goToBlock || "0", 10);
+            if (goToHeight > height - 1) return;
+            const offset = height - goToHeight;
+            const newPage = Math.ceil(offset / itemsParsed);
+            setPage(newPage.toString());
+        }
+
+        setPagesAmount(Math.ceil((height - 1) / itemsParsed));
+
+        onGoToBlockEnter();
+    }, [goToBlock, info, itemsOnPage]);
     
 
     useEffect(() => {
@@ -93,7 +101,8 @@ function LatestBlocks() {
                 setPage={setPage}
                 goToBlock={goToBlock}
                 setGoToBlock={setGoToBlock}
-                goToBlockEnter={onGoToBlockEnter}
+                pagesTotal={pagesAmount}
+                // goToBlockEnter={onGoToBlockEnter}
             />
         </div>
     )
