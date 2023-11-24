@@ -37,7 +37,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null }) {
 
     const stackedCoins = Utils.toShiftedNumber(visibilityInfo?.amount.toString() || "0", 12);
     const percentage = visibilityInfo?.percentage || "0";
-    const devFund = Utils.toShiftedNumber(visibilityInfo?.unlocked_balance.toString() || "0", 12);
+    const devFund = Utils.toShiftedNumber(visibilityInfo?.balance.toString() || "0", 12);
 
     function TopItem(props: { title: string, amount: string, percent?: string }) {
         const { title, amount, percent } = props;
