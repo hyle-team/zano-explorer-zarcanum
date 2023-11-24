@@ -315,7 +315,7 @@ function Block(props: { alt?: boolean }) {
                 back
                 className="block__info__top"
             />
-            <StatsPanel />
+            <StatsPanel noStats={true}/>
             <BlockInfo />
             <div className="block__transactions">
                 <h2>Transactions</h2>

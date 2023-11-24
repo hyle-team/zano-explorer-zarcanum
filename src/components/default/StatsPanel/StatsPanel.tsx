@@ -6,7 +6,7 @@ import Utils from "../../../utils/utils";
 import "./StatsPanel.scss";
 import { useState, useEffect } from "react";
 
-function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null }) {
+function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: boolean }) {
     const { visibilityInfo } = props;
 
     const [info, setInfo] = useState<Info | null>(null);
@@ -83,7 +83,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null }) {
     return (
         <>
             <div className="blockchain__info__main">
-                {NET_MODE === "MAIN" &&
+                {NET_MODE === "MAIN" && !visibilityInfo?.noStats &&
                     <div className="info__main__top">
                         <TopItem 
                             title="Staked Coins (est)" 

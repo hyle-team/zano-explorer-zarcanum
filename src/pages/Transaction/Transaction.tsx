@@ -197,7 +197,7 @@ function Transaction() {
                 back
                 className="block__info__top"
             />
-            <StatsPanel />
+            <StatsPanel noStats={true}/>
             <div className="transaction__info">
                 <h2>Transaction</h2>
                 <table>
