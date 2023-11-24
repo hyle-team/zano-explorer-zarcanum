@@ -83,7 +83,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
     return (
         <>
             <div className="blockchain__info__main">
-                {NET_MODE === "MAIN" && !visibilityInfo?.noStats &&
+                {NET_MODE === "MAIN" && !props.noStats &&
                     <div className="info__main__top">
                         <TopItem 
                             title="Staked Coins (est)" 
