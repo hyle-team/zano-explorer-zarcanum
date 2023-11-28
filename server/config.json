@@ -1,5 +1,5 @@
 {
-    "api": "http://127.0.0.1:12111",
+    "api": "http://127.0.0.1:11211",
     "frontEnd_api": "*",
     "server_port": "4595",
     "auditable_wallet": {
