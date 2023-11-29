@@ -158,7 +158,7 @@ function Transaction() {
         return (
             <div className="transaction__indexes__popup">
                 <h3>
-                    Global Index mixins({popupIndexes.length}) for amount {Utils.toShiftedNumber(amount, 12)}
+                    Input ring set ({popupIndexes.length})
                 </h3>
                 <div>
                     {popupIndexes.map(e => 
