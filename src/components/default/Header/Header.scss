@@ -27,13 +27,18 @@
             align-items: center;
             gap: 45px;
 
-            > a {
+            > a, p {
                 font-size: 16px;
                 color: #ffffff;
 
                 &.selected {
                     font-weight: 600;
                 }
+            }
+
+            > p {
+                opacity: 0.7;
+                pointer-events: none;
             }
         }
 
@@ -78,7 +83,7 @@
         flex-direction: column;
         gap: 10px;
 
-        > a {
+        > a, p {
             height: 35px;
             padding: 0 15px;
             display: flex;
@@ -89,6 +94,11 @@
             &.selected {
                 background: linear-gradient(to right,#1b3a8a,#32439f);
             }
+        }
+
+        p {
+            opacity: 0.7;
+            pointer-events: none;
         }
     }
     
