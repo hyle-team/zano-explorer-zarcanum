@@ -30,12 +30,9 @@ function Header(props: HeaderProps) {
                     Aliases
                 </a>
                 {NET_MODE === "TEST" &&
-                    <a 
-                        className={page === "Assets" ? "selected" : undefined} 
-                        href="/assets"
-                    >
+                    <p>
                         Assets
-                    </a>
+                    </p>
                 }
                 <a 
                     className={page === "Charts" ? "selected" : undefined} 
@@ -49,13 +46,10 @@ function Header(props: HeaderProps) {
                 >
                     API
                 </a>
-                {NET_MODE === "TEST" &&
-                    <a 
-                        className={page === "Governance" ? "selected" : undefined} 
-                        href="/"
-                    >
+                {NET_MODE === "MAIN" &&
+                    <p>
                         Governance
-                    </a>
+                    </p>
                 }
             </nav>
         )
