@@ -1380,13 +1380,128 @@ app.get(
 app.get(
     '/api/assets_whitelist_testnet',
     exceptionHandler(async (req, res) => {
+        const assetsRows = (await db.query("SELECT * FROM assets ORDER BY id ASC")).rows;
+        res.json({ assets: assetsRows });
+    })
+);
+
+(async () => {
+    while (true) {
         const response = await axios({
             method: 'get',
             url: 'https://api.zano.org/assets_whitelist_testnet.json'
         });
-        res.json(response.data);
-    })
-)
+        const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd").then(res => res.json());
+        const assets = [
+            ...response.data.assets,
+            {
+                asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
+                logo: "",
+                price_url: "",
+                ticker: "ZANO",
+                full_name: "Zano (Native)",
+                total_max_supply: "0",
+                current_supply: "0",
+                decimal_point: 0,
+                meta_info: "",
+                price: zanoInfo?.zano?.usd || 0
+            }
+        ];
+        const assetsRows = (await db.query("SELECT * FROM assets")).rows;
+        for (const assetRow of assetsRows) {
+            const foundAsset = assets.find(e => e.asset_id === assetRow.asset_id);
+            if (!foundAsset) {
+                await db.query("DELETE FROM assets WHERE asset_id=$1", [ assetRow.asset_id ]);
+            } else {
+                const {
+                    asset_id,
+                    logo,
+                    price_url,
+                    ticker,
+                    full_name,
+                    total_max_supply,
+                    current_supply,
+                    decimal_point,
+                    meta_info,
+                    price = 0
+                } = foundAsset;
+
+                await db.query(
+                    `UPDATE assets SET 
+                        logo=$1, 
+                        price_url=$2, 
+                        ticker=$3, 
+                        full_name=$4, 
+                        total_max_supply=$5, 
+                        current_supply=$6, 
+                        decimal_point=$7, 
+                        meta_info=$8,
+                        price=$9 WHERE asset_id=$10
+                    `,
+                    [ 
+                        logo, 
+                        price_url,
+                        ticker,
+                        full_name,
+                        total_max_supply.toString(),
+                        current_supply.toString(),
+                        decimal_point,
+                        meta_info,
+                        price,
+                        asset_id
+                    ]
+                )
+            }
+        }
+        for (const asset of assets) {
+            const foundAsset = assetsRows.find(e => e.asset_id === asset.asset_id);
+            if (!foundAsset) {
+                const {
+                    asset_id,
+                    logo,
+                    price_url,
+                    ticker,
+                    full_name,
+                    total_max_supply,
+                    current_supply,
+                    decimal_point,
+                    meta_info,
+                    price = 0
+                } = asset;
+
+                await db.query(
+                    `
+                        INSERT INTO assets(
+                            asset_id, 
+                            logo, 
+                            price_url, 
+                            ticker, 
+                            full_name, 
+                            total_max_supply, 
+                            current_supply, 
+                            decimal_point, 
+                            meta_info,
+                            price
+                        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                    `,
+                    [
+                        asset_id,
+                        logo,
+                        price_url,
+                        ticker,
+                        full_name,
+                        total_max_supply.toString(),
+                        current_supply.toString(),
+                        decimal_point,
+                        meta_info,
+                        price
+                    ]
+                )
+            }
+        }
+        await new Promise(res => setTimeout(res, 60 * 1e3));
+    }
+})();
 
 
 app.get("/*", function (req, res) {
