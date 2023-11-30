@@ -33,11 +33,12 @@ function Assets() {
         setPopupState(true);
     }
 
-    const tableHeaders = [ "NAME", "TICKER", "ASSET ID" ];
+    const tableHeaders = [ "NAME", "TICKER", "PRICE (USD)", "ASSET ID" ];
 
     const tableElements = assets.map(e => [
         e?.full_name || "",
         e?.ticker || "",
+        e?.price || "",
         <AliasText href="/" onClick={(event) => onAssetClick(event, e)}>
             {e?.asset_id || ""}
         </AliasText>
