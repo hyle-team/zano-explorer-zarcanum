@@ -6,17 +6,10 @@ import { ReactComponent as BackImg } from "../../../assets/images/UI/back.svg";
 import { useState } from "react";
 import Fetch from "../../../utils/methods";
 import { useNavigate } from "react-router-dom";
-
-interface InfoTopPanelProps {
-    burgerOpened: boolean;
-    title: string;
-    content?: React.ReactNode;
-    back?: boolean;
-    className?: string;
-}
+import InfoTopPanelProps from "./InfoTopPanel.props";
 
 function InfoTopPanel(props: InfoTopPanelProps) {
-    const { burgerOpened, title, content, back, className } = props;
+    const { burgerOpened, title, content, back, className, inputParams } = props;
 
     const navigate = useNavigate();
 
@@ -96,15 +89,25 @@ function InfoTopPanel(props: InfoTopPanelProps) {
             <h4>{title}</h4>
             <div className="info__top__input">
                 {noMatch && <p>No matching records found!</p> }
-                <Input 
-                    placeholder="block height / block hash / transaction hash" 
-                    value={inputState}
-                    onInput={(event) => {
-                        setInputState(event.currentTarget.value);
-                        setNoMatch(false);
-                    }}
-                    onEnterPress={inputState ? onButtonClick : undefined}
-                /> 
+                {!inputParams ?
+                    <Input 
+                        placeholder="block height / block hash / transaction hash" 
+                        value={inputState}
+                        onInput={event => {
+                            setInputState(event.currentTarget.value);
+                            setNoMatch(false);
+                        }}
+                        onEnterPress={inputState ? onButtonClick : undefined}
+                    /> :
+                    <Input
+                        placeholder={inputParams.placeholder}
+                        value={inputParams.state}
+                        onInput={event => {
+                            inputParams.setState(event.currentTarget.value);
+                        }}
+                    />
+                }
+                
                 <Button 
                     onClick={inputState ? onButtonClick : () => setInputClosed(!inputClosed)}
                 >

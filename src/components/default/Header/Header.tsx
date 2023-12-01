@@ -29,7 +29,13 @@ function Header(props: HeaderProps) {
                 >
                     Aliases
                 </a>
-                {NET_MODE === "TEST" &&
+                {NET_MODE === "TEST" ?
+                    <a 
+                        className={page === "Assets" ? "selected" : undefined} 
+                        href="/assets"
+                    >
+                        Assets
+                    </a> :
                     <p>
                         Assets
                     </p>

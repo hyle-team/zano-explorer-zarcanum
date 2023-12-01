@@ -1,5 +1,5 @@
 import "../../styles/Aliases.scss";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "../../components/default/Header/Header";
 import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
 import Table from "../../components/default/Table/Table";
@@ -14,28 +14,30 @@ function Aliases() {
     const [itemsOnPage, setItemsOnPage] = useState("10");
     const [page, setPage] = useState("1");
 
+    const [searchState, setSearchState] = useState("");
+
+    const fetchAliases = useCallback(async () => {
+        const currentPage = parseInt(page, 10) || 0;
+        const itemsAmount = parseInt(itemsOnPage, 10) || 0;
+        const result = await Fetch.getAliases((currentPage - 1) * itemsAmount, itemsAmount, searchState || undefined);
+
+        if (result.sucess === false) return;
+        if (!(result instanceof Array)) return;
+        setAliases(
+            result.map((e: any) => ({
+                alias: e.alias || "",
+                address: e.address || ""
+            }))
+        );
+    }, [itemsOnPage, page, searchState]);
+
     useEffect(() => {
-        async function fetchAliases() {
-            const currentPage = parseInt(page, 10) || 0;
-            const itemsAmount = parseInt(itemsOnPage, 10) || 0;
-            const result = await Fetch.getAliases((currentPage - 1) * itemsAmount, itemsAmount);
-
-            if (result.sucess === false) return;
-            if (!(result instanceof Array)) return;
-            setAliases(
-                result.map((e: any) => ({
-                    alias: e.alias || "",
-                    address: e.address || ""
-                }))
-            );
-        }
-
         fetchAliases();
 
         const id = setInterval(fetchAliases, 20 * 1e3);
 
         return () => clearInterval(id);
-    }, [itemsOnPage, page]);
+    }, [fetchAliases]);
 
     const tableHeaders = [ "NAME", "ADDRESS" ];
 
@@ -54,6 +56,11 @@ function Aliases() {
             <InfoTopPanel 
                 burgerOpened={burgerOpened} 
                 title="Aliases" 
+                inputParams={{ 
+                    placeholder: "name / address / comment",
+                    state: searchState,
+                    setState: setSearchState
+                }}
             />
             <div className="aliases__table custom-scroll">
                 <Table 
