@@ -1394,7 +1394,6 @@ app.get(
         });
         const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd").then(res => res.json());
         const assets = [
-            ...response.data.assets,
             {
                 asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
                 logo: "",
@@ -1406,7 +1405,8 @@ app.get(
                 decimal_point: 0,
                 meta_info: "",
                 price: zanoInfo?.zano?.usd || 0
-            }
+            },
+            ...response.data.assets
         ];
         const assetsRows = (await db.query("SELECT * FROM assets")).rows;
         for (const assetRow of assetsRows) {
