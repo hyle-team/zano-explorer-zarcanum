@@ -1381,8 +1381,13 @@ app.get(
 app.get(
     '/api/assets_whitelist_testnet',
     exceptionHandler(async (req, res) => {
-        const assetsRows = (await db.query("SELECT * FROM assets ORDER BY id DESC")).rows;
-        res.json({ assets: assetsRows });
+        const assetsRows = (await db.query("SELECT * FROM assets ORDER BY id ASC")).rows;
+        const zanoRow = assetsRows.find(e => e.ticker === "ZANO");
+        if (zanoRow) {
+            return res.json({ assets: [ zanoRow, ...assetsRows.filter(e => e.id !== zanoRow.id) ] });
+        } else {
+            res.json({ assets: assetsRows });
+        }
     })
 );
 
