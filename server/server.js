@@ -321,15 +321,22 @@ app.get(
     exceptionHandler(async (req, res, next) => {
         let tx_hash = req.params.tx_hash.toLowerCase()
         if (tx_hash) {
+            
             const query = {
                 text: 'SELECT transactions.*, blocks.id as block_hash, blocks.timestamp as block_timestamp FROM transactions LEFT JOIN blocks ON transactions.keeper_block = blocks.height WHERE transactions.id = $1;',
                 values: [tx_hash]
             }
             let result = await db.query(query)
-            if (result && result.rowCount > 0) res.json(result.rows[0])
-            else {
+            if (result && result.rowCount > 0) {
+                const response = result.rows[0];
+                response.last_block = lastBlock.height
+                res.json(response);
+            } else {
                 let response = await get_tx_details(tx_hash)
                 let data = response.data
+
+                data.last_block = lastBlock.height
+
                 if (data.result !== undefined) {
                     res.json(data.result.tx_info)
                 } else {
@@ -633,7 +640,7 @@ const syncPool = async () => {
                             statusSyncPool = false
                         }
                     } else {
-                        statusSyncPool = false
+                        statusSyncPool = false 
                     }
                 } catch (error) {
                     log(`Select id from pool ERROR: ${error}`)
@@ -1124,11 +1131,14 @@ const getVisibilityInfo = async () => {
     return JSON.stringify(result)
 }
 
-const emitSocketInfo = async () => {
+const emitSocketInfo = async (socket) => {
     if (enabled_during_sync && lastBlock) {
         blockInfo.lastBlock = lastBlock.height
-        io.emit('get_info', JSON.stringify(blockInfo))
-        io.emit('get_visibility_info', await getVisibilityInfo())        
+        
+        const emitter = socket || io;
+
+        emitter.emit('get_info', JSON.stringify(blockInfo));
+        emitter.emit('get_visibility_info', getVisibilityInfo());  
     }
 }
 
@@ -1144,7 +1154,7 @@ const getInfoTimer = async () => {
                 let result = await db.query(
                     'SELECT COUNT(*)::integer AS transactions FROM pool'
                 )
-                let countTrPoolDB = 0
+                let countTrPoolDB = 0;
                 if (result && result.rowCount > 0)
                     countTrPoolDB = result.rows[0].transactions
                 if (countTrPoolDB !== countTrPoolServer) {
@@ -1511,7 +1521,12 @@ app.get("/*", function (req, res) {
 });
 
 io.on('connection', async (socket) => {
-    await emitSocketInfo()
+    socket.on('get-socket-info', () => {
+        emitSocketInfo(socket);
+    })
+    socket.on('get-socket-pool', async () => {
+        io.emit('get_transaction_pool_info', JSON.stringify(await getTxPoolDetails(0)))
+    });
 })
 
 server.listen(server_port, () => {

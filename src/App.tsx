@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Block from "./pages/Block/Block";
-import NET_MODE from "./config/config";
+import { NET_MODE } from "./config/config";
 
 const Blockchain = React.lazy(() => import("./pages/Blockchain/Blockchain"));
 const AltBlocks = React.lazy(() => import("./pages/AltBlocks/AltBlocks"));

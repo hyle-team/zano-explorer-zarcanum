@@ -1,30 +1,34 @@
-import NET_MODE from "../../../config/config";
+import { NET_MODE } from "../../../config/config";
 import Info from "../../../interfaces/state/Info";
 import VisibilityInfo from "../../../interfaces/state/VisibilityInfo";
 import Fetch from "../../../utils/methods";
 import Utils from "../../../utils/utils";
 import "./StatsPanel.scss";
 import { useState, useEffect } from "react";
+import { socket } from "../../../utils/socket";
 
 function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: boolean }) {
     const { visibilityInfo } = props;
 
     const [info, setInfo] = useState<Info | null>(null);
-
     useEffect(() => {
-        async function fetchInfo() {
-            const result = await Fetch.getInfo();
-            if (result.success === false) return;
-            if (!result.height) return;
-            setInfo(result);
-        }
+        socket.on("get_info", (data) => {
+            try {
+                data = JSON.parse(data);
+                if (!data?.height) return;
+                setInfo(data);
+            } catch (error) {
+                console.log(error);
+            }
+        });
 
-        fetchInfo();
+        socket.emit("get-socket-info");
 
-        const id = setInterval(fetchInfo, 20 * 1e3);
-
-        return () => clearInterval(id);
+        return () => {
+            socket.off("get_info");
+        };
     }, []);
+
 
     const transactions = info ? info.height + info.tx_count : 0;
 

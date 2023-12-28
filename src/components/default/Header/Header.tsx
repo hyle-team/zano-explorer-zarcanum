@@ -3,7 +3,7 @@ import { ReactComponent as LogoImg } from "../../../assets/images/UI/logo.svg";
 import { ReactComponent as BurgerImg } from "../../../assets/images/UI/burger.svg";
 import HeaderProps from "./Header.props";
 import Button from "../../UI/Button/Button";
-import NET_MODE from "../../../config/config";
+import { NET_MODE } from "../../../config/config";
 
 function Header(props: HeaderProps) {
     const { page, burgerOpened, setBurgerOpened } = props;
