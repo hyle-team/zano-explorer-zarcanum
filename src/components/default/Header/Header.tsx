@@ -1,5 +1,5 @@
 import "./Header.scss";
-import { ReactComponent as LogoImg } from "../../../assets/images/UI/logo.svg";
+import { ReactComponent as LogoImg } from "../../../assets/images/UI/logo-testnet.svg";
 import { ReactComponent as BurgerImg } from "../../../assets/images/UI/burger.svg";
 import HeaderProps from "./Header.props";
 import Button from "../../UI/Button/Button";
@@ -68,7 +68,6 @@ function Header(props: HeaderProps) {
                     <a href="/">
                         <div className="header__logo">
                             <LogoImg />
-                            <p>ZANO</p>
                         </div>
                     </a>
                     <Nav />
