@@ -44,7 +44,7 @@ function Transaction() {
                 hash: result.id || "",
                 amount: Utils.toShiftedNumber(result.amount || "0", 12),
                 fee: Utils.toShiftedNumber(result.fee || "0", 12),
-                size: result.block_size || "0",
+                size: result.blob_size || "0",
                 confirmations: parseInt(result.last_block, 10) - parseInt(result.keeper_block, 10),
                 publicKey: result.pub_key || "-",
                 mixin: "-",
