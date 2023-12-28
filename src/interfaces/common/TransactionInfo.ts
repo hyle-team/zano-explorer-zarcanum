@@ -16,7 +16,7 @@ interface TransactionInfo {
     amount: string;
     fee: string;
     size: string;
-    confirmations: string;
+    confirmations: number;
     publicKey: string;
     mixin?: string;
     extraItems: string[];

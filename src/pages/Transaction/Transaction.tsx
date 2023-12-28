@@ -45,7 +45,7 @@ function Transaction() {
                 amount: Utils.toShiftedNumber(result.amount || "0", 12),
                 fee: Utils.toShiftedNumber(result.fee || "0", 12),
                 size: result.block_size || "0",
-                confirmations: "-",
+                confirmations: parseInt(result.last_block, 10) - parseInt(result.keeper_block, 10),
                 publicKey: result.pub_key || "-",
                 mixin: "-",
                 extraItems: [],

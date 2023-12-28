@@ -6,6 +6,7 @@ import Fetch from "../../../../utils/methods";
 import Utils from "../../../../utils/utils";
 import "./LatestBlocks.scss";
 import { useState, useEffect } from "react";
+import { socket } from "../../../../utils/socket";
 
 function LatestBlocks() {
 
