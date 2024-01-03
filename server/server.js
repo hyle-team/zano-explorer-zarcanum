@@ -1094,7 +1094,8 @@ const getVisibilityInfo = async () => {
         amount: 0,
         percentage: 0,
         balance: 0,
-        unlocked_balance: 0
+        unlocked_balance: 0,
+        apy: 0
     }
     try {
         if (enable_Visibility_Info) {
@@ -1124,9 +1125,13 @@ const getVisibilityInfo = async () => {
             result.amount = totalCoinsInvolvedInStaking.toNumber()
             let totalSupply = new BigNumber(res3.data.result.total_coins)
             result.percentage = totalCoinsInvolvedInStaking.dividedBy(totalSupply).multipliedBy(100).toFixed(2);
-
-            console.log(parseInt(totalStakedCoins7Days, 10));
-            console.log(parseInt(stakedCoinsLast7Days, 10));
+            
+            result.apy = stakedCoinsLast7Days
+                .dividedBy(totalCoinsInvolvedInStaking)
+                .multipliedBy(100)
+                .multipliedBy(365)
+                .dividedBy(7)
+                .toNumber();
         }
     } catch (error) {
         log(`getVisibilityInfo() ERROR ${error}`)
