@@ -1106,8 +1106,6 @@ const getVisibilityInfo = async () => {
             ])
             result.balance = res1.data.result.balance
             result.unlocked_balance = res1.data.result.unlocked_balance
-            
-            console.log(result);
 
 
             let totalStakedCoins7Days = new BigNumber(720 * 7 * 1000000000000)
@@ -1128,12 +1126,9 @@ const getVisibilityInfo = async () => {
             result.amount = totalCoinsInvolvedInStaking.toNumber()
             let totalSupply = new BigNumber(res3.data.result.total_coins)
             result.percentage = totalCoinsInvolvedInStaking.dividedBy(totalSupply).multipliedBy(100).toFixed(2);
-            
-            console.log(new BigNumber(result.unlocked_balance || result.balance));
-            console.log(stakedCoinsLast7Days);
 
-            result.apy = new BigNumber(result.unlocked_balance || result.balance)
-                .dividedBy(stakedCoinsLast7Days)
+            result.apy = stakedCoinsLast7Days
+                .dividedBy(new BigNumber(result.unlocked_balance || result.balance))
                 .multipliedBy(100)
                 .multipliedBy(365)
                 .dividedBy(7)

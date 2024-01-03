@@ -41,18 +41,19 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
 
     const stackedCoins = Utils.toShiftedNumber(visibilityInfo?.amount.toString() || "0", 12);
     const percentage = visibilityInfo?.percentage || "0";
+    const APY = parseFloat((visibilityInfo?.apy || 0).toFixed(4));
     const devFund = Utils.toShiftedNumber(visibilityInfo?.balance.toString() || "0", 12);
 
-    function TopItem(props: { title: string, amount: string, percent?: string }) {
-        const { title, amount, percent } = props;
+    function TopItem(props: { title: string, amount: string, percent?: string, customCurrency?: boolean }) {
+        const { title, amount, percent, customCurrency } = props;
 
         return (
             <div className="main__top__item">
                 <div>
-                    <p>{title}</p>
+                    <p className="main__top__item__header">{title}</p>
                 </div>
                 <div className="item__value">
-                    <p>{amount + " ZANO"}</p>
+                    <p>{amount + (!customCurrency ? " ZANO" : "")}</p>
                     {percent &&
                         <div>
                             <div>
@@ -60,7 +61,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                                     {percent + "%"}
                                 </p>
                             </div>
-                            <p>from total supply</p>
+                            <p className="item__precent__label">from total supply</p>
                         </div>
                     }
                 </div>
@@ -84,22 +85,31 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
         )
     }
 
+    function InfoTop() {
+        return (
+            <div className="info__main__top">
+            <TopItem 
+                title="Staked Coins (est)" 
+                amount={stackedCoins}
+                percent={percentage}
+            />
+            <TopItem 
+                title="Dev Fund" 
+                amount={devFund}
+            />
+            <TopItem 
+                title="Real Time APY" 
+                amount={`${APY}%`}
+                customCurrency={true}
+            />
+        </div>
+        );
+    }
+
     return (
         <>
             <div className="blockchain__info__main">
-                {NET_MODE === "MAIN" && !props.noStats &&
-                    <div className="info__main__top">
-                        <TopItem 
-                            title="Staked Coins (est)" 
-                            amount={stackedCoins}
-                            percent={percentage}
-                        />
-                        <TopItem 
-                            title="Dev Fund" 
-                            amount={devFund}
-                        />
-                    </div>
-                }
+                {NET_MODE === "MAIN" && !props.noStats && <InfoTop/>}
                 <div className="info__main__bottom">
                     <BottomItem title="Height">
                         <p className="item__text__large">{infoHeight}</p>
@@ -130,19 +140,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
 
             
             <div className="info__main__mobile">
-                {NET_MODE === "MAIN" &&
-                    <div className="info__main__top">
-                        <TopItem 
-                            title="Staked Coins (est)" 
-                            amount={stackedCoins}
-                            percent={percentage}
-                        />
-                        <TopItem 
-                            title="Dev Fund" 
-                            amount={devFund}
-                        />
-                    </div>
-                }
+                {NET_MODE === "MAIN" && <InfoTop/>}
                 <div className="info__main__bottom">
                     <BottomItem title="Height">
                         <p className="item__text__large">{infoHeight}</p>

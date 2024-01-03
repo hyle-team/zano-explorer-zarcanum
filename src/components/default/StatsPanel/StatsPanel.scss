@@ -52,7 +52,16 @@
         height: 70px;
         display: flex;
         gap: 24px;
-        
+
+        .main__top__item__header {
+            text-align: center;
+            padding: 0 20px;
+            line-height: 20px;
+            color: #9EAACC;
+        }
+        .item__precent__label {
+            color: #9EAACC;
+        }
         > .main__top__item {
             flex: 1;
             background-color: #2b3768;
