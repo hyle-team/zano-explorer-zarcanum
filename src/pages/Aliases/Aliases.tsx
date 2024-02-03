@@ -11,7 +11,7 @@ function Aliases() {
 
     const [aliases, setAliases] = useState<Alias[]>([]);
 
-    const [itemsOnPage, setItemsOnPage] = useState("10");
+    const [itemsOnPage, setItemsOnPage] = useState("20");
     const [page, setPage] = useState("1");
 
     const [searchState, setSearchState] = useState("");
