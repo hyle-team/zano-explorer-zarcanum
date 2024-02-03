@@ -5,6 +5,7 @@ import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
 import Table from "../../components/default/Table/Table";
 import Alias from "../../interfaces/state/Alias";
 import Fetch from "../../utils/methods";
+import crownImg from "../../assets/images/UI/crown.svg";
 
 function Aliases() {
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -41,8 +42,21 @@ function Aliases() {
 
     const tableHeaders = [ "NAME", "ADDRESS" ];
 
+    function ShortAlias({ alias }: { alias: string }) {
+        return (
+            <div>
+                <div className="short_alias">
+                    {alias}
+                    <div className="short_alias__crown">
+                        <img src={crownImg} alt="" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     const tableElements = aliases.map(e => [
-        e.alias,
+        e.alias.length > 5 ? e.alias : <ShortAlias alias={e.alias} />,
         e.address
     ]);
 
