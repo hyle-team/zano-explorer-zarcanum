@@ -91,7 +91,7 @@ function Transaction() {
                         const { pub_keys } = e;
                         const pubKeys = (pub_keys instanceof Array) ? pub_keys : [];
                         return {
-                            amount: pubKeys[4] || "",
+                            amount: (e?.amount / 1e12) || "-",
                             publicKeys: pubKeys.slice(0, 4),
                             globalIndex: e?.global_index || 0
                         }
