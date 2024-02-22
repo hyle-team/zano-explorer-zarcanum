@@ -6,7 +6,7 @@ interface Input {
 }
 
 interface Output {
-    amount: string;
+    amount: number | string;
     publicKeys: string[];
     globalIndex: string;
 }
