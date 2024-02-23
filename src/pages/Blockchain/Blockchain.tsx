@@ -12,6 +12,7 @@ function Blockchain() {
     const [burgerOpened, setBurgerOpened] = useState(false);
 
     const [visibliltyInfo, setVisibilityInfo] = useState<VisibilityInfo | null>(null);
+    const [isOnline, setIsOnline] = useState(true);
 
     useEffect(() => {
         async function fetchVisibilityInfo() {
@@ -20,7 +21,23 @@ function Blockchain() {
             setVisibilityInfo(result);
         }
 
+        async function checkOnline() {
+            try {
+                const result = await Fetch.getInfo();
+                if (result.status === "OK") {
+                    setIsOnline(true);
+                } else {
+                    setIsOnline(false);
+                }
+            } catch (error) {
+                console.log(error);
+                setIsOnline(false);
+            }
+        }
+
         fetchVisibilityInfo();
+        const interval = setInterval(checkOnline, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     return (
@@ -35,7 +52,7 @@ function Blockchain() {
                 title="Blockchain" 
                 content={
                     <div className="info__top__daemon">
-                        <p>Daemon state: Online</p>
+                        <p>Daemon state: {isOnline ? 'Online' : 'Offline'}</p>
                         <p>Default network fee: 0,01</p>
                         <p>Minimum network fee: 0,01</p>
                     </div>
