@@ -1433,7 +1433,7 @@ app.get('/api/zano_price', exceptionHandler(async (req, res) => {
             method: 'get',
             url: 'https://api.zano.org/assets_whitelist_testnet.json'
         });
-        const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd").then(res => res.json());
+        const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
        
         if (zanoInfo?.zano?.usd !== undefined) {
             priceDate = zanoInfo;
