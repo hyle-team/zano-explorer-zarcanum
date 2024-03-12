@@ -1410,6 +1410,23 @@ app.get(
     })
 );
 
+let priceDate = {};
+
+app.get('/api/zano_price', exceptionHandler(async (req, res) => {
+    if (priceDate?.zano?.usd !== undefined) {
+        res.json({
+            success: true,
+            data: priceDate
+        });
+        
+    } else {
+        res.json({
+            success: false,
+            data: {}
+        });
+    }
+}));
+
 (async () => {
     while (true) {
         const response = await axios({
@@ -1417,6 +1434,10 @@ app.get(
             url: 'https://api.zano.org/assets_whitelist_testnet.json'
         });
         const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd").then(res => res.json());
+       
+        if (zanoInfo?.zano?.usd !== undefined) {
+            priceDate = zanoInfo;
+        }
         const assets = [
             ...response.data.assets,
             {
