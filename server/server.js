@@ -1406,7 +1406,7 @@ app.get(
         try {
             const response = await axios({
                 method: 'get',
-                url: 'https://api.zano.org/assets_whitelist_testnet.json'
+                url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
             });
             const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
            
