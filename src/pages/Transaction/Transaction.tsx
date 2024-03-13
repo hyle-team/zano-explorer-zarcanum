@@ -34,23 +34,6 @@ function Transaction() {
 
     const navigate = useNavigate();
 
-
-    function convertENotationToNumber(num: number | string): string {
-        const str = num.toString()
-        const match = str.match(/^(\d+)(\.(\d+))?[eE]([-\+]?\d+)$/)
-        if (!match) return str;
-        const [, integer,, tail, exponentStr ] = match
-        const exponent = Number(exponentStr)
-        const realInteger = integer + (tail || '')
-        if(exponent > 0) {
-            const realExponent = Math.abs(exponent + integer.length)
-            return realInteger.padEnd(realExponent, '0')
-        } else {
-            const realExponent = Math.abs(exponent - (tail?.length || 0))
-            return '0.'+ realInteger.padStart(realExponent, '0')
-        }
-    }
-
     useEffect(() => {
         async function fetchTransaction() {
             if (!hash) return;
@@ -91,8 +74,15 @@ function Transaction() {
                     newTransactionInfo.ins = parsedIns.map(e => {
                         const mixins = (e?.mixins instanceof Array) ? e?.mixins : [];
                         const globalIndexes = (e?.global_indexes instanceof Array) ? e?.global_indexes : [];
+
+                        const existingAmount = ((e?.amount || 0) / 1e12);
+                        if (existingAmount) {
+                            e.convertedAmount = Utils.convertENotationToString(existingAmount?.toExponential());
+                        }
+
+
                         return {
-                            amount: e?.amount || 0,
+                            amount: e.convertedAmount,
                             keyimage: e?.kimage_or_ms_id || "",
                             mixins: mixins,
                             globalIndexes: globalIndexes
@@ -110,7 +100,7 @@ function Transaction() {
 
                         const existingAmount = (e?.amount / 1e12);
                         if (existingAmount) {
-                            e.convertedAmount = convertENotationToNumber(existingAmount?.toExponential());
+                            e.convertedAmount = Utils.convertENotationToString(existingAmount?.toExponential());
                         }
 
                         return {
@@ -145,7 +135,7 @@ function Transaction() {
 
     const insRows = transactionInfo ? (
         transactionInfo.ins.map(e => [
-            Utils.toShiftedNumber(e.amount, 12),
+            e.amount,
             e.keyimage,
             e.globalIndexes.length,
             e.globalIndexes.length > 1 ?
