@@ -34,6 +34,23 @@ function Transaction() {
 
     const navigate = useNavigate();
 
+
+    function convertENotationToNumber(num: number | string): string {
+        const str = num.toString()
+        const match = str.match(/^(\d+)(\.(\d+))?[eE]([-\+]?\d+)$/)
+        if (!match) return str;
+        const [, integer,, tail, exponentStr ] = match
+        const exponent = Number(exponentStr)
+        const realInteger = integer + (tail || '')
+        if(exponent > 0) {
+            const realExponent = Math.abs(exponent + integer.length)
+            return realInteger.padEnd(realExponent, '0')
+        } else {
+            const realExponent = Math.abs(exponent - (tail?.length || 0))
+            return '0.'+ realInteger.padStart(realExponent, '0')
+        }
+    }
+
     useEffect(() => {
         async function fetchTransaction() {
             if (!hash) return;
@@ -90,8 +107,14 @@ function Transaction() {
                     newTransactionInfo.outs = parsedOuts.map(e => {
                         const { pub_keys } = e;
                         const pubKeys = (pub_keys instanceof Array) ? pub_keys : [];
+
+                        const existingAmount = (e?.amount / 1e12);
+                        if (existingAmount) {
+                            e.convertedAmount = convertENotationToNumber(existingAmount?.toExponential());
+                        }
+
                         return {
-                            amount: (e?.amount / 1e12) || "-",
+                            amount: e.convertedAmount || "-",
                             publicKeys: pubKeys.slice(0, 4),
                             globalIndex: e?.global_index || 0
                         }
