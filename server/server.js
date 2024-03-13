@@ -1412,7 +1412,7 @@ app.get(
 
 let priceDate = {};
 
-app.get('/api/zano_price', exceptionHandler(async (req, res) => {
+app.get('/api/price', exceptionHandler(async (req, res) => {
     if (priceDate?.zano?.usd !== undefined) {
         res.json({
             success: true,
