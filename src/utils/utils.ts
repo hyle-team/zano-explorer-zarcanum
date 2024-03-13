@@ -45,6 +45,22 @@ class Utils {
         return integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ") + (decimalPart ? "." + decimalPart.slice(0, decimalPlaces) : "");
     }
 
+    static convertENotationToString(num: number | string): string {
+        const str = num.toString()
+        const match = str.match(/^(\d+)(\.(\d+))?[eE]([-\+]?\d+)$/)
+        if (!match) return str;
+        const [, integer,, tail, exponentStr ] = match
+        const exponent = Number(exponentStr)
+        const realInteger = integer + (tail || '')
+        if(exponent > 0) {
+            const realExponent = Math.abs(exponent + integer.length)
+            return realInteger.padEnd(realExponent, '0')
+        } else {
+            const realExponent = Math.abs(exponent - (tail?.length || 0))
+            return '0.'+ realInteger.padStart(realExponent, '0')
+        }
+    }
+
     static transformToBlocks(result: any, reverse: boolean = false, hashField: boolean = false): Block[] {
         if (result.sucess === false) return [];
         if (!(result instanceof Array)) return [];
