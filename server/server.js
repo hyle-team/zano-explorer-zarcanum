@@ -1452,6 +1452,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
            
             try {
                 const ethInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
+                console.log('ETH INFO: ', ethInfo);
                 if (ethInfo?.ethereum?.usd !== undefined) {
                     priceData.ethereum = ethInfo;
                 }
@@ -1459,6 +1460,8 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                 console.log('ETH PARSING ERROR');
                 console.log('Error: ', error);
             }
+
+            console.log('ZANO INFO: ', zanoInfo);
 
             if (zanoInfo?.zano?.usd !== undefined) {
                 priceData.zano = zanoInfo;
