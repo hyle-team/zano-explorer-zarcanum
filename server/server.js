@@ -1413,7 +1413,7 @@ app.get(
 let priceData = {};
 
 app.get('/api/price', exceptionHandler(async (req, res) => {
-    if (priceData?.zano?.usd !== undefined) {
+    if (priceData?.zano?.zano?.usd !== undefined) {
         
         const responseData = {
             success: true,
