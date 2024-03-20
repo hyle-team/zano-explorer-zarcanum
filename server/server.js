@@ -1452,6 +1452,8 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
             });
             const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
 
+            await new Promise(res => setTimeout(res, 5 * 1e3));
+
             try {
                 const ethInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
                 console.log('ETH INFO: ', ethInfo);
