@@ -1410,13 +1410,27 @@ app.get(
     })
 );
 
-let priceDate = {};
+let priceData = {};
 
 app.get('/api/price', exceptionHandler(async (req, res) => {
-    if (priceDate?.zano?.usd !== undefined) {
-        res.json({
+    if (priceData?.zano?.usd !== undefined) {
+        
+        const responseData = {
             success: true,
-            data: priceDate
+            data: priceData.zano
+        };
+
+        switch (req.query.asset) {
+            case "ethereum":
+                responseData.data = priceData.ethereum;
+                break;
+            default:
+                break;
+        }
+
+        return res.json({
+            success: true,
+            data: responseData
         });
         
     } else {
@@ -1436,8 +1450,18 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
             });
             const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
            
+            try {
+                const ethInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
+                if (ethInfo?.ethereum?.usd !== undefined) {
+                    priceData.ethereum = ethInfo;
+                }
+            } catch (error) {
+                console.log('ETH PARSING ERROR');
+                console.log('Error: ', error);
+            }
+
             if (zanoInfo?.zano?.usd !== undefined) {
-                priceDate = zanoInfo;
+                priceData.zano = zanoInfo;
             }
             const assets = [
                 ...response.data.assets,
