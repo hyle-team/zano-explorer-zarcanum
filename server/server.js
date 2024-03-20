@@ -1436,10 +1436,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
             break;
     }
 
-    return res.json({
-        success: true,
-        data: responseData
-    });
+    return res.json(responseData);
 
 }));
 
