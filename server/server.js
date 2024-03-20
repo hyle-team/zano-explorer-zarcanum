@@ -5,7 +5,7 @@ const http = require('http')
 const app = express()
 const server = http.createServer(app)
 const { Server } = require('socket.io')
-const io = new Server(server, {transports: ['websocket', 'polling']})
+const io = new Server(server, { transports: ['websocket', 'polling'] })
 const { Pool } = require('pg')
 const axios = require('axios')
 const BigNumber = require('bignumber.js')
@@ -74,20 +74,20 @@ const log = (msg) => {
     let now = new Date()
     console.log(
         now.getFullYear() +
-            '-' +
-            now.getMonth() +
-            '-' +
-            now.getDate() +
-            ' ' +
-            now.getHours() +
-            ':' +
-            now.getMinutes() +
-            ':' +
-            now.getSeconds() +
-            '.' +
-            now.getMilliseconds() +
-            ' ' +
-            msg
+        '-' +
+        now.getMonth() +
+        '-' +
+        now.getDate() +
+        ' ' +
+        now.getHours() +
+        ':' +
+        now.getMinutes() +
+        ':' +
+        now.getSeconds() +
+        '.' +
+        now.getMilliseconds() +
+        ' ' +
+        msg
     )
 }
 
@@ -321,7 +321,7 @@ app.get(
     exceptionHandler(async (req, res, next) => {
         let tx_hash = req.params.tx_hash.toLowerCase()
         if (tx_hash) {
-            
+
             const query = {
                 text: 'SELECT transactions.*, blocks.id as block_hash, blocks.timestamp as block_timestamp FROM transactions LEFT JOIN blocks ON transactions.keeper_block = blocks.height WHERE transactions.id = $1;',
                 values: [tx_hash]
@@ -479,7 +479,7 @@ app.get(
     "/api/get_tx_by_keyimage/:id",
     exceptionHandler(async (req, res, next) => {
         const id = req.params.id.toLowerCase();
-        const txs = (await db.query("SELECT * FROM transactions WHERE ins LIKE $1", [ '%' + id + '%' ])).rows;
+        const txs = (await db.query("SELECT * FROM transactions WHERE ins LIKE $1", ['%' + id + '%'])).rows;
         for (const tx of txs) {
             try {
                 const ins = JSON.parse(tx.ins);
@@ -487,7 +487,7 @@ app.get(
                 if (ins.find(e => e.kimage_or_ms_id === id)) {
                     return res.json({ result: "FOUND", data: tx.id });
                 }
-            } catch {}
+            } catch { }
         }
         return res.json({ result: "NOT FOUND" });
     })
@@ -617,10 +617,10 @@ const syncPool = async () => {
                                 for (let tx of response.data.result.txs) {
                                     txInserts.push(
                                         `(${tx.blob_size},` +
-                                            `${tx.fee},` +
-                                            `'${tx.id}',` +
-                                            `${tx.timestamp}` +
-                                            ` )`
+                                        `${tx.fee},` +
+                                        `'${tx.id}',` +
+                                        `${tx.timestamp}` +
+                                        ` )`
                                     )
                                 }
                                 if (txInserts.length > 0) {
@@ -640,7 +640,7 @@ const syncPool = async () => {
                             statusSyncPool = false
                         }
                     } else {
-                        statusSyncPool = false 
+                        statusSyncPool = false
                     }
                 } catch (error) {
                     log(`Select id from pool ERROR: ${error}`)
@@ -778,28 +778,28 @@ const syncTransactions = async () => {
 
                         transactionInserts.push(
                             `('${tx_info.keeper_block}',` +
-                                `'${tx_info.id}',` +
-                                `'${tx_info.amount.toString()}',` +
-                                `${tx_info.blob_size},` +
-                                `'${decodeString(
-                                    JSON.stringify(tx_info.extra)
-                                )}',` +
-                                `${tx_info.fee},` +
-                                `'${decodeString(
-                                    JSON.stringify(tx_info.ins)
-                                )}',` +
-                                `'${decodeString(
-                                    JSON.stringify(tx_info.outs)
-                                )}',` +
-                                `'${tx_info.pub_key}',` +
-                                `${tx_info.timestamp},` +
-                                `'${decodeString(
-                                    JSON.stringify(
-                                        !!tx_info.attachments
-                                            ? tx_info.attachments
-                                            : {}
-                                    )
-                                )}')`
+                            `'${tx_info.id}',` +
+                            `'${tx_info.amount.toString()}',` +
+                            `${tx_info.blob_size},` +
+                            `'${decodeString(
+                                JSON.stringify(tx_info.extra)
+                            )}',` +
+                            `${tx_info.fee},` +
+                            `'${decodeString(
+                                JSON.stringify(tx_info.ins)
+                            )}',` +
+                            `'${decodeString(
+                                JSON.stringify(tx_info.outs)
+                            )}',` +
+                            `'${tx_info.pub_key}',` +
+                            `${tx_info.timestamp},` +
+                            `'${decodeString(
+                                JSON.stringify(
+                                    !!tx_info.attachments
+                                        ? tx_info.attachments
+                                        : {}
+                                )
+                            )}')`
                         )
                     }
                 } catch (error) {
@@ -809,15 +809,15 @@ const syncTransactions = async () => {
 
             chartInserts.push(
                 `(${bl.height},` +
-                    `${bl.actual_timestamp},` +
-                    `${bl.block_cumulative_size},` +
-                    `${bl.cumulative_diff_precise},` +
-                    `${bl.difficulty},` +
-                    `${bl.tr_count ? bl.tr_count : 0},` +
-                    `${bl.type},` +
-                    `0,` +
-                    `0,` +
-                    `0)`
+                `${bl.actual_timestamp},` +
+                `${bl.block_cumulative_size},` +
+                `${bl.cumulative_diff_precise},` +
+                `${bl.difficulty},` +
+                `${bl.tr_count ? bl.tr_count : 0},` +
+                `${bl.type},` +
+                `0,` +
+                `0,` +
+                `0)`
             )
             // }
 
@@ -835,9 +835,9 @@ const syncTransactions = async () => {
 
                     outInfoInserts.push(
                         `(${localOut.amount},` +
-                            `${localOut.i}, ` +
-                            `'${response.data.result.tx_id}', ` +
-                            `${bl.height})`
+                        `${localOut.i}, ` +
+                        `'${response.data.result.tx_id}', ` +
+                        `${bl.height})`
                     )
                 }
                 await db.query('begin')
@@ -859,34 +859,34 @@ const syncTransactions = async () => {
             }
 
             //build block inserts
-        
+
             {
                 blockInserts.push(
                     `(${bl.height},` +
-                        `${bl.actual_timestamp},` +
-                        `${bl.base_reward},` +
-                        `'${bl.blob}',` +
-                        `${bl.block_cumulative_size},` +
-                        `${bl.block_tself_size},` +
-                        `${bl.cumulative_diff_adjusted},` +
-                        `${bl.cumulative_diff_precise},` +
-                        `${bl.difficulty},` +
-                        `${bl.effective_fee_median},` +
-                        `'${bl.id}',` +
-                        `${bl.is_orphan},` +
-                        `${bl.penalty},` +
-                        `'${bl.prev_id}',` +
-                        `${bl.summary_reward},` +
-                        `${bl.this_block_fee_median},` +
-                        `${bl.timestamp},` +
-                        `${bl.total_fee},` +
-                        `${bl.total_txs_size},` +
-                        `${bl.tr_count ? bl.tr_count : 0},` +
-                        `${bl.type},` +
-                        "'" + decodeString(bl.miner_text_info) + "'," +
-                        `${bl.already_generated_coins},` +
-                        "'" + decodeString(bl.object_in_json) + "'," + 
-                        `'${bl.pow_seed}')`
+                    `${bl.actual_timestamp},` +
+                    `${bl.base_reward},` +
+                    `'${bl.blob}',` +
+                    `${bl.block_cumulative_size},` +
+                    `${bl.block_tself_size},` +
+                    `${bl.cumulative_diff_adjusted},` +
+                    `${bl.cumulative_diff_precise},` +
+                    `${bl.difficulty},` +
+                    `${bl.effective_fee_median},` +
+                    `'${bl.id}',` +
+                    `${bl.is_orphan},` +
+                    `${bl.penalty},` +
+                    `'${bl.prev_id}',` +
+                    `${bl.summary_reward},` +
+                    `${bl.this_block_fee_median},` +
+                    `${bl.timestamp},` +
+                    `${bl.total_fee},` +
+                    `${bl.total_txs_size},` +
+                    `${bl.tr_count ? bl.tr_count : 0},` +
+                    `${bl.type},` +
+                    "'" + decodeString(bl.miner_text_info) + "'," +
+                    `${bl.already_generated_coins},` +
+                    "'" + decodeString(bl.object_in_json) + "'," +
+                    `'${bl.pow_seed}')`
                 );
             }
         }
@@ -1078,7 +1078,7 @@ const syncAltBlocks = async () => {
 const getTxPoolDetails = async (count) => {
     if (count === 0) {
         let result = await db.query('SELECT blob_size, fee, id, timestamp FROM pool ORDER BY timestamp DESC;')
-        return result && result.rowCount > 0 ? result.rows : []  
+        return result && result.rowCount > 0 ? result.rows : []
     }
 
     const query = {
@@ -1112,17 +1112,17 @@ const getVisibilityInfo = async () => {
             let stakedCoinsLast7Days = new BigNumber(0)
             if ('mined_entries' in res2.data.result) {
                 for (const item of res2.data.result.mined_entries) {
-			stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a)
+                    stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a)
                 }
             }
 
             let totalCoinsInvolvedInStaking =
-            stakedCoinsLast7Days.isEqualTo(0)
-            ? new BigNumber(0)
-            : new BigNumber(result.balance)
-            .multipliedBy(
-                totalStakedCoins7Days.dividedBy(stakedCoinsLast7Days)
-                )
+                stakedCoinsLast7Days.isEqualTo(0)
+                    ? new BigNumber(0)
+                    : new BigNumber(result.balance)
+                        .multipliedBy(
+                            totalStakedCoins7Days.dividedBy(stakedCoinsLast7Days)
+                        )
             result.amount = totalCoinsInvolvedInStaking.toNumber()
             let totalSupply = new BigNumber(res3.data.result.total_coins)
             result.percentage = totalCoinsInvolvedInStaking.dividedBy(totalSupply).multipliedBy(100).toFixed(2);
@@ -1143,11 +1143,11 @@ const getVisibilityInfo = async () => {
 const emitSocketInfo = async (socket) => {
     if (enabled_during_sync && lastBlock) {
         blockInfo.lastBlock = lastBlock.height
-        
+
         const emitter = socket || io;
 
         emitter.emit('get_info', JSON.stringify(blockInfo));
-        emitter.emit('get_visibility_info', getVisibilityInfo());  
+        emitter.emit('get_visibility_info', getVisibilityInfo());
     }
 }
 
@@ -1403,7 +1403,7 @@ app.get(
         const assetsRows = (await db.query("SELECT * FROM assets ORDER BY id ASC")).rows;
         const zanoRow = assetsRows.find(e => e.ticker === "ZANO");
         if (zanoRow) {
-            return res.json({ assets: [ zanoRow, ...assetsRows.filter(e => e.id !== zanoRow.id) ] });
+            return res.json({ assets: [zanoRow, ...assetsRows.filter(e => e.id !== zanoRow.id)] });
         } else {
             res.json({ assets: assetsRows });
         }
@@ -1413,32 +1413,34 @@ app.get(
 let priceData = {};
 
 app.get('/api/price', exceptionHandler(async (req, res) => {
-    if (priceData?.zano?.zano?.usd !== undefined) {
-        
-        const responseData = {
-            success: true,
-            data: priceData.zano
-        };
 
-        switch (req.query.asset) {
-            case "ethereum":
+    const responseData = {
+        success: true,
+        data: priceData.zano
+    };
+
+    switch (req.query.asset) {
+        case "ethereum":
+            if (priceData?.ethereum?.ethereum?.usd === undefined) {
+                responseData.data = {};
+                responseData.success = false;
+            } else {
                 responseData.data = priceData.ethereum;
-                break;
-            default:
-                break;
-        }
-
-        return res.json({
-            success: true,
-            data: responseData
-        });
-        
-    } else {
-        res.json({
-            success: false,
-            data: {}
-        });
+            }
+            break;
+        default:
+            if (priceData?.zano?.zano?.usd === undefined) {
+                responseData.data = {};
+                responseData.success = false;
+            }
+            break;
     }
+
+    return res.json({
+        success: true,
+        data: responseData
+    });
+
 }));
 
 (async () => {
@@ -1449,7 +1451,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                 url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
             });
             const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
-           
+
             try {
                 const ethInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
                 console.log('ETH INFO: ', ethInfo);
@@ -1485,7 +1487,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
             for (const assetRow of assetsRows) {
                 const foundAsset = assets.find(e => e.asset_id === assetRow.asset_id);
                 if (!foundAsset) {
-                    await db.query("DELETE FROM assets WHERE asset_id=$1", [ assetRow.asset_id ]);
+                    await db.query("DELETE FROM assets WHERE asset_id=$1", [assetRow.asset_id]);
                 } else {
                     const {
                         asset_id,
@@ -1499,7 +1501,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                         meta_info,
                         price = 0
                     } = foundAsset;
-    
+
                     await db.query(
                         `UPDATE assets SET 
                             logo=$1, 
@@ -1512,8 +1514,8 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                             meta_info=$8,
                             price=$9 WHERE asset_id=$10
                         `,
-                        [ 
-                            logo, 
+                        [
+                            logo,
                             price_url,
                             ticker,
                             full_name,
@@ -1542,7 +1544,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                         meta_info,
                         price = 0
                     } = asset;
-    
+
                     await db.query(
                         `
                             INSERT INTO assets(
