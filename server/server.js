@@ -332,10 +332,22 @@ app.get(
                 response.last_block = lastBlock.height
                 res.json(response);
             } else {
-                let response = await get_tx_details(tx_hash)
-                let data = response.data
+                let response = await get_tx_details(tx_hash);
 
-                data.last_block = lastBlock.height
+                let data = response.data;
+
+                if (data?.result?.tx_info)  {
+                    data.result.tx_info.last_block = lastBlock.height
+
+                    if (data?.result?.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
+                        data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);
+                    }
+
+                    if (data?.result?.tx_info.outs && typeof data.result.tx_info.outs === 'object') {
+                        data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
+                    }
+
+                }
 
                 if (data.result !== undefined) {
                     res.json(data.result.tx_info)
