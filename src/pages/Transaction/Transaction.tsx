@@ -104,7 +104,7 @@ function Transaction() {
                         }
 
                         return {
-                            amount: e.convertedAmount || "-",
+                            amount: e.convertedAmount || "0",
                             publicKeys: pubKeys.slice(0, 4),
                             globalIndex: e?.global_index || 0
                         }
