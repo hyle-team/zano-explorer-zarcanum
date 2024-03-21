@@ -87,7 +87,7 @@ function Block(props: { alt?: boolean }) {
                 cummulativeDiffPresize: Utils.formatNumber(result.cumulative_diff_precise || "", 0),
                 orphan: result.is_orphan || false,
                 baseReward: Utils.toShiftedNumber(result.base_reward || "0", 12),
-                transactionsFee: Utils.formatNumber(result.total_fee || "0", 12),
+                transactionsFee: Utils.toShiftedNumber(result.total_fee || "0", 12),
                 rewardPenalty: "",
                 reward: Utils.toShiftedNumber(result.summary_reward || "0", 12),
                 totalBlockSize: result.block_tself_size || undefined,
