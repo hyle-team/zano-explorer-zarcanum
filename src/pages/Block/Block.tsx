@@ -92,7 +92,7 @@ function Block(props: { alt?: boolean }) {
                 reward: Utils.toShiftedNumber(result.summary_reward || "0", 12),
                 totalBlockSize: result.block_tself_size || undefined,
                 effectiveTxsMedian: undefined,
-                blockFeeMedian: result.this_block_fee_median || undefined,
+                blockFeeMedian: Utils.toShiftedNumber(result.this_block_fee_median || "0"),
                 effectiveFeeMedian: Utils.toShiftedNumber(result.effective_fee_median || "0", 12),
                 currentTxsMedian: undefined,
                 transactions: result.tr_count || "0",
