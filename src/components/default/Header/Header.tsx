@@ -11,25 +11,25 @@ function Header(props: HeaderProps) {
     function Nav({ className }: { className?: string }) {
         return (
             <nav className={className}>
-                <a 
-                    className={page === "Blockchain" ? "selected" : undefined} 
+                <a
+                    className={page === "Blockchain" ? "selected" : undefined}
                     href="/"
                 >
                     Blockchain
                 </a>
-                <a 
-                    className={page === "Alt-blocks" ? "selected" : undefined} 
+                <a
+                    className={page === "Alt-blocks" ? "selected" : undefined}
                     href="/alt-blocks"
                 >
                     Alt-blocks
                 </a>
-                <a 
-                    className={page === "Aliases" ? "selected" : undefined} 
+                <a
+                    className={page === "Aliases" ? "selected" : undefined}
                     href="/aliases"
                 >
                     Aliases
                 </a>
-                {NET_MODE === "TEST" ?
+                {/* {NET_MODE === "TEST" ?
                     <a 
                         className={page === "Assets" ? "selected" : undefined} 
                         href="/assets"
@@ -39,15 +39,21 @@ function Header(props: HeaderProps) {
                     <p>
                         Assets
                     </p>
-                }
-                <a 
-                    className={page === "Charts" ? "selected" : undefined} 
+                } */}
+                <a
+                    className={page === "Assets" ? "selected" : undefined}
+                    href="/assets"
+                >
+                    Assets
+                </a>
+                <a
+                    className={page === "Charts" ? "selected" : undefined}
                     href="/charts"
                 >
                     Charts
                 </a>
-                <a 
-                    className={page === "API" ? "selected" : undefined} 
+                <a
+                    className={page === "API" ? "selected" : undefined}
                     href="/zano_api"
                 >
                     API
@@ -75,24 +81,24 @@ function Header(props: HeaderProps) {
                 </div>
 
                 <div className="header__top__right">
-                    <a 
-                        href={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/" }
-                        target="_blank" 
+                    <a
+                        href={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
+                        target="_blank"
                         rel="noreferrer"
                     >
                         <Button>
-                            <p>Switch to {NET_MODE === "TEST" ? "Main Net" : "Test Net" }</p>
+                            <p>Switch to {NET_MODE === "TEST" ? "Main Net" : "Test Net"}</p>
                         </Button>
                     </a>
                     <Button
-                        onClick={() => setBurgerOpened(!burgerOpened)} 
+                        onClick={() => setBurgerOpened(!burgerOpened)}
                         className="header__burger__button"
                     >
                         <BurgerImg />
                     </Button>
                 </div>
             </div>
-            { burgerOpened && <Nav className="header__nav__mobile" /> }
+            {burgerOpened && <Nav className="header__nav__mobile" />}
         </header>
     )
 }

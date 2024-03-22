@@ -26,9 +26,10 @@ function App() {
                     <Route path="/alt-blocks/:hash" element={<Block alt />} />
                     <Route path="/charts" element={<Charts />} />
                     <Route path="/charts/:name" element={<ChartsPage />} />
-                    {NET_MODE === "TEST" &&
+                    {/* {NET_MODE === "TEST" &&
                         <Route path="/assets" element={<Assets />} />
-                    }
+                    } */}
+                    <Route path="/assets" element={<Assets />} />
                     <Route path="/*" element={<Navigate to="/" />} />
                 </Routes>
             </Suspense>
