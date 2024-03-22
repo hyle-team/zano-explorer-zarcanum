@@ -78,7 +78,7 @@ function TransactionPool() {
         element.blob_size + " bytes",
         parseInt(element.fee, 10)/10**12,
         <AliasText href={`/transaction/${element.id}`}>{element.id}</AliasText>
-    ])).splice(0, 10);
+    ]));
 
     return (
         <div className="transaction_pool custom-scroll">
