@@ -337,7 +337,7 @@ app.get(
                 let data = response.data;
 
                 if (data?.result?.tx_info)  {
-                    data.result.tx_info.last_block = lastBlock.height
+                    // data.result.tx_info.last_block = lastBlock.height
 
                     if (data?.result?.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
                         data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);

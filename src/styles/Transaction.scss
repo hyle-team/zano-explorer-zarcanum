@@ -47,6 +47,9 @@
                 &.transaction__confirmation {
                     background-color: #0e5311;
                 }
+                &.transaction__unconfirmed {
+                    background-color: #9b2d28;
+                }
 
                 &.transaction__extra_items td:last-child {
                     display: flex;

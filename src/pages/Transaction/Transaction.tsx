@@ -231,9 +231,9 @@ function Transaction() {
                             <td>Size</td>
                             <td>{(transactionInfo?.size || "0") + " bytes"}</td>
                         </tr>
-                        <tr className="transaction__confirmation">    
+                        <tr className={"transaction__confirmation" + (!transactionInfo?.confirmations ? ' transaction__unconfirmed' : '')}>    
                             <td>Confirmations</td>
-                            <td>{transactionInfo?.confirmations || "0"}</td>
+                            <td>{transactionInfo?.confirmations || "Unconfirmed"}</td>
                         </tr>
                         <tr>
                             <td>One-time public key</td>
