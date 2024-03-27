@@ -1116,6 +1116,9 @@ const getVisibilityInfo = async () => {
                 get_mining_history(),
                 get_info()
             ])
+
+            console.log(res3.data.result);
+
             result.balance = res1.data.result.balance
             result.unlocked_balance = res1.data.result.unlocked_balance
 
