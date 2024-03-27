@@ -30,7 +30,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
     }, []);
 
 
-    const transactions = info ? info.height + info.tx_count : 0;
+    const transactions = info ? info.height + info.tx_count : undefined;
 
     const infoHeight = Utils.formatNumber(info?.height, 0) || "...";
     const posDiff = Utils.toShiftedNumber(info?.pos_difficulty, 0, 0) || "...";
