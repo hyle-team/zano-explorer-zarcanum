@@ -1152,7 +1152,9 @@ const getVisibilityInfo = async () => {
             // let totalSupply = new BigNumber(res3.data.result.total_coins)
             // result.percentage = totalCoinsInvolvedInStaking.dividedBy(totalSupply).multipliedBy(100).toFixed(2);
 
-            result.apy = 720*365/(new BigNumber(result.amount).divideBy(12).toNumber())*100
+            const stakedNumber = new BigNumber(result.amount).divideBy(new BigNumber(12)).toNumber()
+
+            result.apy = 720*365/stakedNumber*100
         }
     } catch (error) {
         log(`getVisibilityInfo() ERROR ${error}`)
