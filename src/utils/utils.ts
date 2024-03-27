@@ -19,7 +19,8 @@ class Utils {
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     }
 
-    static formatNumber(number: number | string, decimalPlaces: number = 2): string {
+    static formatNumber(number: number | string | undefined, decimalPlaces: number = 2): string {
+        if (number === undefined) return "";
         const parsedNumber = typeof number === "number" ? number : parseFloat(number) || 0;
         const roundedNumber = parsedNumber.toFixed(decimalPlaces);
         const [integerPart, decimalPart] = roundedNumber.split(".");
@@ -28,7 +29,7 @@ class Utils {
         return formattedNumber;
     }
 
-    static toShiftedNumber(number: number | string, shift: number = 2, decimalPlaces: number = 2) {
+    static toShiftedNumber(number: number | string | undefined, shift: number = 2, decimalPlaces: number = 2) {
         if (typeof number !== "string" && typeof number !== "number") return "";
         const string = typeof number === "string" ? number : number.toString();
         const input = string.replace(/\D/g, "");

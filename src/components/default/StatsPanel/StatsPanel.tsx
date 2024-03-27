@@ -32,17 +32,17 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
 
     const transactions = info ? info.height + info.tx_count : 0;
 
-    const infoHeight = Utils.formatNumber(info?.height || 0, 0);
-    const posDiff = Utils.toShiftedNumber(info?.pos_difficulty || "0", 0, 0);
-    const powDiff = Utils.formatNumber(info?.pow_difficulty || 0, 0);
-    const coinsEmitted = Utils.toShiftedNumber(info?.total_coins || "0", 12);
-    const transactionsString = Utils.formatNumber(transactions, 0);
-    const hashrate = Utils.toShiftedNumber(info?.current_network_hashrate_350 || 0, NET_MODE === "TEST" ? 0 : 9, 3);
+    const infoHeight = Utils.formatNumber(info?.height, 0) || "...";
+    const posDiff = Utils.toShiftedNumber(info?.pos_difficulty, 0, 0) || "...";
+    const powDiff = Utils.formatNumber(info?.pow_difficulty, 0) || "...";
+    const coinsEmitted = Utils.toShiftedNumber(info?.total_coins, 12) || "...";
+    const transactionsString = Utils.formatNumber(transactions, 0) || "...";
+    const hashrate = Utils.toShiftedNumber(info?.current_network_hashrate_350, NET_MODE === "TEST" ? 0 : 9, 3) || "...";
 
-    const stackedCoins = Utils.toShiftedNumber(visibilityInfo?.amount.toString() || "0", 12);
-    const percentage = visibilityInfo?.percentage || "0";
-    const APY = parseFloat((visibilityInfo?.apy || 0).toFixed(4));
-    const devFund = Utils.toShiftedNumber(visibilityInfo?.balance.toString() || "0", 12);
+    const stackedCoins = Utils.toShiftedNumber(visibilityInfo?.amount.toString(), 12) || "...";
+    const percentage = visibilityInfo?.percentage || "...";
+    const APY = visibilityInfo?.apy ? parseFloat((visibilityInfo?.apy || 0).toFixed(4)) : "...";
+    const devFund = Utils.toShiftedNumber(visibilityInfo?.balance.toString(), 12) || "...";
 
     function TopItem(props: { title: string, amount: string, percent?: string, customCurrency?: boolean }) {
         const { title, amount, percent, customCurrency } = props;
