@@ -1120,38 +1120,41 @@ const getVisibilityInfo = async () => {
             const pos_diff_to_total_ratio = new BigNumber(res3.data.result.pos_difficulty)
             .dividedBy(new BigNumber(res3.data.result.total_coins));
 
-            const difficulty = (0.55 * pos_diff_to_total_ratio)/176.3630  
+            const stakedPercentage = (0.55 * pos_diff_to_total_ratio)/176.3630; 
 
-            console.log(difficulty);
+            result.percentage = stakedPercentage.toFixed(2);
 
+            const stakedCoins = new BigNumber(res3.data.result.total_coins)
+            .dividedBy(100)
+            .multipliedBy(new BigNumber(result.percentage));
+
+            result.amount = stakedCoins.toNumber();
             result.balance = res1.data.result.balance
             result.unlocked_balance = res1.data.result.unlocked_balance
 
 
-            let totalStakedCoins7Days = new BigNumber(720 * 7 * 1000000000000)
-            let stakedCoinsLast7Days = new BigNumber(0)
-            if ('mined_entries' in res2.data.result) {
-                for (const item of res2.data.result.mined_entries) {
-                    stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a)
-                }
-            }
+            // let totalStakedCoins7Days = new BigNumber(720 * 7 * 1000000000000)
+            // let stakedCoinsLast7Days = new BigNumber(0)
+            // if ('mined_entries' in res2.data.result) {
+            //     for (const item of res2.data.result.mined_entries) {
+            //         stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a)
+            //     }
+            // }
 
-            let totalCoinsInvolvedInStaking =
-                stakedCoinsLast7Days.isEqualTo(0)
-                    ? new BigNumber(0)
-                    : new BigNumber(result.balance)
-                        .multipliedBy(
-                            totalStakedCoins7Days.dividedBy(stakedCoinsLast7Days)
-                        )
-            result.amount = totalCoinsInvolvedInStaking.toNumber()
-            let totalSupply = new BigNumber(res3.data.result.total_coins)
-            result.percentage = totalCoinsInvolvedInStaking.dividedBy(totalSupply).multipliedBy(100).toFixed(2);
+            // let totalCoinsInvolvedInStaking =
+            //     stakedCoinsLast7Days.isEqualTo(0)
+            //         ? new BigNumber(0)
+            //         : new BigNumber(result.balance)
+            //             .multipliedBy(
+            //                 totalStakedCoins7Days.dividedBy(stakedCoinsLast7Days)
+            //             )
+            // result.amount = totalCoinsInvolvedInStaking.toNumber()
+            // let totalSupply = new BigNumber(res3.data.result.total_coins)
+            // result.percentage = totalCoinsInvolvedInStaking.dividedBy(totalSupply).multipliedBy(100).toFixed(2);
 
-            result.apy = stakedCoinsLast7Days
-                .dividedBy(new BigNumber(result.unlocked_balance || result.balance))
+            result.apy = new BigNumber(720*365)
+                .dividedBy(stakedCoins)
                 .multipliedBy(100)
-                .multipliedBy(365)
-                .dividedBy(7)
                 .toNumber();
         }
     } catch (error) {
