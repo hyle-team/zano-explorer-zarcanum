@@ -1117,7 +1117,12 @@ const getVisibilityInfo = async () => {
                 get_info()
             ])
 
-            console.log(res3);
+            const pos_diff_to_total_ratio = new BigNumber(res3.data.result.pos_difficulty)
+            .dividedBy(new BigNumber(res3.data.result.total_coins));
+
+            const difficulty = (0.55 * pos_diff_to_total_ratio)/176.3630  
+
+            console.log(difficulty);
 
             result.balance = res1.data.result.balance
             result.unlocked_balance = res1.data.result.unlocked_balance
