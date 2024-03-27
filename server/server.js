@@ -1117,7 +1117,7 @@ const getVisibilityInfo = async () => {
                 get_info()
             ])
 
-            console.log(res3.data.result);
+            console.log(res3);
 
             result.balance = res1.data.result.balance
             result.unlocked_balance = res1.data.result.unlocked_balance
