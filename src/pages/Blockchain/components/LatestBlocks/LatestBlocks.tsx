@@ -20,6 +20,8 @@ function LatestBlocks() {
             setInfo(result);
         }
 
+        fetchInfo();
+
         const interval = setInterval(fetchInfo, 20 * 1e3);
 
         return () => clearInterval(interval);
