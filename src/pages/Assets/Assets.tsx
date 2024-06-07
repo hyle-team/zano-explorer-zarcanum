@@ -56,7 +56,7 @@ function Assets() {
     useEffect(() => {
         async function fetchAssets() {
             let zanoPrice: number | undefined;
-            
+
             try {
                 zanoPrice = await getZanoPrice();
             } catch {}
@@ -73,12 +73,14 @@ function Assets() {
             const resultAssets = result;
             if (!resultAssets || !(resultAssets instanceof Array)) return;
 
-            resultAssets.unshift({
-                full_name: "Zano (Native)",
-                ticker: "ZANO",
-                asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
-                price: zanoPrice
-            });
+            if (pageInt === 1) {
+                resultAssets.unshift({
+                    full_name: "Zano (Native)",
+                    ticker: "ZANO",
+                    asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
+                    price: zanoPrice
+                });
+            }
 
             setAssets(resultAssets);
         }
