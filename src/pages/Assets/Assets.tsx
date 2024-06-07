@@ -16,16 +16,28 @@ function Assets() {
 
     const [popupState, setPopupState] = useState(false);
 
+    const [itemsOnPage, setItemsOnPage] = useState("10");
+    const [page, setPage] = useState("1");
+
+    useEffect(() => {
+
+    }, [itemsOnPage, page]);
+
     useEffect(() => {
         async function fetchAssets() {
-            const result = await Fetch.getAssets();
+            const itemsOnPageInt = parseInt(itemsOnPage, 10) || 0;
+            const pageInt = parseInt(page, 10) || 0;
+
+            const offset = (pageInt - 1) * itemsOnPageInt;
+
+            const result = await Fetch.getAssets(offset, itemsOnPageInt);
             const resultAssets = result?.assets;
             if (!resultAssets || !(resultAssets instanceof Array)) return;
             setAssets(resultAssets);
         }
         
         fetchAssets();
-    }, []);
+    }, [itemsOnPage, page]);
 
     function onAssetClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, asset: Object) {
         event.preventDefault();
@@ -60,6 +72,12 @@ function Assets() {
                     headers={tableHeaders}
                     elements={tableElements}
                     columnsWidth={[ 15, 10, 65, 10 ]}
+                    pagination
+                    hidePaginationBlock
+                    itemsOnPage={itemsOnPage}
+                    setItemsOnPage={setItemsOnPage}
+                    page={page}
+                    setPage={setPage}
                 />
             </div>
             <JSONPopup 
