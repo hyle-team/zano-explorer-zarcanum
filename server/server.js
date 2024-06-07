@@ -1326,6 +1326,25 @@ app.get(
     })
 )
 
+const getWhitelistedAssets = async (offset, count) => {  
+    const fullList = await fetch('https://api.zano.org/assets_whitelist.json')
+    .then(res => res.json())
+    .then(data => data.assets);
+
+    return fullList.slice(offset, offset + count);
+}
+
+app.get(
+    '/api/get_whitelisted_assets/:offset/:count',
+    exceptionHandler(async (req, res) => {
+        const offset = parseInt(req.params.offset, 10);
+        const count = parseInt(req.params.count, 10);
+
+        res.send(await getWhitelistedAssets(offset, count));
+
+    })
+)
+
 app.get(
     '/api/get_alt_blocks_details/:offset/:count',
     exceptionHandler(async (req, res) => {
