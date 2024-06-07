@@ -1351,14 +1351,16 @@ app.get(
         const offset = parseInt(req.params.offset, 10);
         const count = parseInt(req.params.count, 10);
 
+        console.log(offset, count);
+
         const response = await axios({
             method: 'get',
             url: api,
             data: {
                 method: 'get_assets_list',
                 params: {
+                    count: count,
                     offset: offset,
-                    count: count
                 }
             }
         })
