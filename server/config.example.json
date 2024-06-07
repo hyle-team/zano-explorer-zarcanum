@@ -1,0 +1,20 @@
+{
+    "api": "http://127.0.0.1:<port>", // zanod port
+    "frontEnd_api": "*",
+    "server_port": "4596", // app port (in dev mode must be same as in /src/config/config.ts)
+    "auditable_wallet": {
+        "api": "http://127.0.0.1:<port>" // port of auditable wallet
+    },
+    "assets_whitelist_url": "https://api.zano.org/assets_whitelist.json",
+    "websocket": {
+        "enabled_during_sync": true
+    },
+    "enableVisibilityInfo": true,
+    "database": { // pg database data (change credentials)
+        "user": "postgres",
+        "host": "127.0.0.1",
+        "port": 5432,
+        "database": "explorer",
+        "password": "password"
+    }
+}
