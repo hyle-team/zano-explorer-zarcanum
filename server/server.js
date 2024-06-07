@@ -1334,10 +1334,6 @@ const getWhitelistedAssets = async (offset, count) => {
     return fullList.slice(offset, offset + count);
 }
 
-const getAllAssets = async (offset, count) => {
-
-}
-
 app.get(
     '/api/get_whitelisted_assets/:offset/:count',
     exceptionHandler(async (req, res) => {
