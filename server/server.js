@@ -1363,7 +1363,7 @@ app.get(
             }
         })
 
-        res.json(response.data)
+        res.json(response?.data?.result?.assets || []);
     })
 )
 
