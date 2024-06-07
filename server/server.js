@@ -1312,6 +1312,10 @@ const getWhitelistedAssets = async (offset, count) => {
     return fullList.slice(offset, offset + count);
 }
 
+const getAllAssets = async (offset, count) => {
+
+}
+
 app.get(
     '/api/get_whitelisted_assets/:offset/:count',
     exceptionHandler(async (req, res) => {
@@ -1322,6 +1326,29 @@ app.get(
 
     })
 )
+
+app.get(
+    '/api/get_assets/:offset/:count',
+    exceptionHandler(async (req, res) => {
+        const offset = parseInt(req.params.offset, 10);
+        const count = parseInt(req.params.count, 10);
+
+        const response = await axios({
+            method: 'get',
+            url: api,
+            data: {
+                method: 'get_assets_list',
+                params: {
+                    offset: offset,
+                    count: count
+                }
+            }
+        })
+
+        res.json(response.data)
+    })
+)
+
 
 app.get(
     '/api/get_alt_blocks_details/:offset/:count',
