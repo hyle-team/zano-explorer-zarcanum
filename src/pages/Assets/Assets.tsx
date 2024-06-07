@@ -37,7 +37,7 @@ function Assets() {
                 ? await Fetch.getWhitelistedAssets(offset, itemsOnPageInt)  
                 : await Fetch.getAssets(offset, itemsOnPageInt)
 
-            const resultAssets = result?.assets;
+            const resultAssets = result;
             if (!resultAssets || !(resultAssets instanceof Array)) return;
             setAssets(resultAssets);
         }
