@@ -26,8 +26,6 @@ function Assets() {
 
     const [isWhitelist, setIsWhitelist] = useState(true);
 
-    const [zanoPrice, setZanoPrice] = useState<number>();
-
     async function getZanoPrice(): Promise<number | undefined> {
         const result = await Fetch.getPrice();
         const price = result?.data?.zano?.usd;
@@ -39,7 +37,10 @@ function Assets() {
             const zanoPrice = await getZanoPrice();
             setAssets(prev => {
                 const newAssets = [...prev];
-                newAssets.find(e => e.asset_id === ZANO_ID).price = zanoPrice;
+                const zanoAsset = newAssets.find(e => e.asset_id === ZANO_ID);
+                if (zanoAsset) {
+                    zanoAsset.price = zanoPrice;
+                }
                 return newAssets;
             });
         }
