@@ -6,6 +6,7 @@ import Table from "../../components/default/Table/Table";
 import Fetch from "../../utils/methods";
 import AliasText from "../../components/default/AliasText/AliasText";
 import JSONPopup from "../../components/default/JSONPopup/JSONPopup";
+import Switch from "../../components/UI/Switch/Switch";
 
 function Assets() {
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -16,16 +17,33 @@ function Assets() {
 
     const [popupState, setPopupState] = useState(false);
 
+    const [itemsOnPage, setItemsOnPage] = useState("10");
+    const [page, setPage] = useState("1");
+
+    const [isWhitelist, setIsWhitelist] = useState(true);
+
+    useEffect(() => {
+        setPage("1");
+    }, [isWhitelist]);
+
     useEffect(() => {
         async function fetchAssets() {
-            const result = await Fetch.getAssets();
+            const itemsOnPageInt = parseInt(itemsOnPage, 10) || 0;
+            const pageInt = parseInt(page, 10) || 0;
+
+            const offset = (pageInt - 1) * itemsOnPageInt;
+
+            const result = isWhitelist 
+                ? await Fetch.getWhitelistedAssets(offset, itemsOnPageInt)  
+                : await Fetch.getAssets(offset, itemsOnPageInt)
+
             const resultAssets = result?.assets;
             if (!resultAssets || !(resultAssets instanceof Array)) return;
             setAssets(resultAssets);
         }
         
         fetchAssets();
-    }, []);
+    }, [itemsOnPage, page, isWhitelist]);
 
     function onAssetClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, asset: Object) {
         event.preventDefault();
@@ -54,12 +72,26 @@ function Assets() {
             <InfoTopPanel 
                 burgerOpened={burgerOpened} 
                 title="Assets"
+                content={
+                    <Switch
+                        firstTitle="Whitelisted"
+                        secondTitle="All Assets"
+                        isFirstSelected={isWhitelist}
+                        setIsFirstSelected={setIsWhitelist}
+                    />
+                }
             />
             <div className="assets__table">
                 <Table 
                     headers={tableHeaders}
                     elements={tableElements}
                     columnsWidth={[ 15, 10, 65, 10 ]}
+                    pagination
+                    hidePaginationBlock
+                    itemsOnPage={itemsOnPage}
+                    setItemsOnPage={setItemsOnPage}
+                    page={page}
+                    setPage={setPage}
                 />
             </div>
             <JSONPopup 
