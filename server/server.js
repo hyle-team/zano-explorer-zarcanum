@@ -1305,7 +1305,7 @@ app.get(
 )
 
 const getWhitelistedAssets = async (offset, count) => {  
-    const fullList = await fetch('https://api.zano.org/assets_whitelist.json')
+    const fullList = await fetch('https://api.zano.org/assets_whitelist_testnet.json')
     .then(res => res.json())
     .then(data => data.assets);
 
