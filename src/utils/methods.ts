@@ -78,6 +78,10 @@ class Fetch {
     static async getTxByKeyimage(image: string) {
         return await fetch(this.proxyPath + "/get_tx_by_keyimage/" + image).then(res => res.json());
     }
+
+    static async getPrice() {
+        return await fetch(this.proxyPath + "/price").then(res => res.json());
+    }
 }
 
 export default Fetch;

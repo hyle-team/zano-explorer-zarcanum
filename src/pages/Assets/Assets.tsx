@@ -9,6 +9,10 @@ import JSONPopup from "../../components/default/JSONPopup/JSONPopup";
 import Switch from "../../components/UI/Switch/Switch";
 
 function Assets() {
+
+    const ZANO_ID = 
+        "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a";
+
     const [burgerOpened, setBurgerOpened] = useState(false);
 
     const [assets, setAssets] = useState<any[]>([]);
@@ -22,12 +26,41 @@ function Assets() {
 
     const [isWhitelist, setIsWhitelist] = useState(true);
 
+    const [zanoPrice, setZanoPrice] = useState<number>();
+
+    async function getZanoPrice(): Promise<number | undefined> {
+        const result = await Fetch.getPrice();
+        const price = result?.data?.zano?.usd;
+        return price;
+    }
+
+    useEffect(() => {
+        async function fetchZanoPrice() {
+            const zanoPrice = await getZanoPrice();
+            setAssets(prev => {
+                const newAssets = [...prev];
+                newAssets.find(e => e.asset_id === ZANO_ID).price = zanoPrice;
+                return newAssets;
+            });
+        }
+
+        setInterval(() => {
+            fetchZanoPrice();
+        }, 10e3);
+    }, []);
+
     useEffect(() => {
         setPage("1");
     }, [isWhitelist]);
 
     useEffect(() => {
         async function fetchAssets() {
+            let zanoPrice: number | undefined;
+
+            try {
+                zanoPrice = await getZanoPrice();
+            } catch {}
+
             const itemsOnPageInt = parseInt(itemsOnPage, 10) || 0;
             const pageInt = parseInt(page, 10) || 0;
 
@@ -37,8 +70,18 @@ function Assets() {
                 ? await Fetch.getWhitelistedAssets(offset, itemsOnPageInt)  
                 : await Fetch.getAssets(offset, itemsOnPageInt)
 
-            const resultAssets = result?.assets;
+            const resultAssets = result;
             if (!resultAssets || !(resultAssets instanceof Array)) return;
+
+            if (pageInt === 1) {
+                resultAssets.unshift({
+                    full_name: "Zano (Native)",
+                    ticker: "ZANO",
+                    asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
+                    price: zanoPrice
+                });
+            }
+
             setAssets(resultAssets);
         }
         
