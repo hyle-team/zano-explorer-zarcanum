@@ -11,6 +11,7 @@ interface InfoTopPanelProps {
         state: string;
         setState: Dispatch<SetStateAction<string>>;
     }
+    contentNotHiding?: boolean;
 }
 
 export default InfoTopPanelProps;

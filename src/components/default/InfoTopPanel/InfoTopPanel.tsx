@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import InfoTopPanelProps from "./InfoTopPanel.props";
 
 function InfoTopPanel(props: InfoTopPanelProps) {
-    const { burgerOpened, title, content, back, className, inputParams } = props;
+    const { burgerOpened, title, content, back, className, inputParams, contentNotHiding } = props;
 
     const navigate = useNavigate();
 
@@ -72,12 +72,8 @@ function InfoTopPanel(props: InfoTopPanelProps) {
                 + (burgerOpened ? "info__top__hidden" : "")
             }
         >
-            {!back ?
-                <div className="info__top__content">
-                    {
-                        content || <></>
-                    }
-                </div> :
+
+            {back &&
                 <a href="/" onClick={onBackClick}>
                     <div className="info__back">
                         <BackImg />
@@ -85,8 +81,19 @@ function InfoTopPanel(props: InfoTopPanelProps) {
                     </div>
                 </a>
             }
+            <div className={"info__top__title"}>
+                <h4 className={contentNotHiding ? "hiding_element" : undefined}>{title}</h4>
+                {!back &&
+                    <div className={"info__top__content " + (!contentNotHiding ? "hiding_element" : undefined)}>
+                        {
+                            content || <></>
+                        }
+                    </div>    
+                }
+            </div>
             
-            <h4>{title}</h4>
+            
+            
             <div className="info__top__input">
                 {noMatch && <p>No matching records found!</p> }
                 {!inputParams ?

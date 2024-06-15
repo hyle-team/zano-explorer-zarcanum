@@ -59,7 +59,7 @@
     }
 
     @media screen and (max-width: 761px) {
-        .info__top__content {
+        .hiding_element {
             display: none;
         }
         
@@ -75,7 +75,7 @@
     @media screen and (max-width: 575px) {
         justify-content: flex-end;
 
-        h4 {
+        .info__top__title {
             display: none;
         }
 
@@ -102,7 +102,7 @@
             }
     
             
-            h4 {
+            .info__top__title {
                 display: block;
             }
         }

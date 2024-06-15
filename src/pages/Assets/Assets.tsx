@@ -116,6 +116,7 @@ function Assets() {
             <InfoTopPanel 
                 burgerOpened={burgerOpened} 
                 title="Assets"
+                contentNotHiding
                 content={
                     <Switch
                         firstTitle="Whitelisted"
