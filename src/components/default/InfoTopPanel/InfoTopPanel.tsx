@@ -9,11 +9,11 @@ import { useNavigate } from "react-router-dom";
 import InfoTopPanelProps from "./InfoTopPanel.props";
 
 function InfoTopPanel(props: InfoTopPanelProps) {
-    const { burgerOpened, title, content, back, className, inputParams, contentNotHiding } = props;
+    const { burgerOpened, title, content, back, className, inputParams, contentNotHiding, inputDefaultClosed } = props;
 
     const navigate = useNavigate();
 
-    const [inputClosed, setInputClosed] = useState(false);
+    const [inputClosed, setInputClosed] = useState(inputDefaultClosed || false);
     const [inputState, setInputState] = useState("");
 
     const [noMatch, setNoMatch] = useState(false);

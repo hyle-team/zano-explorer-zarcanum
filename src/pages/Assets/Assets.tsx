@@ -117,6 +117,7 @@ function Assets() {
                 burgerOpened={burgerOpened} 
                 title="Assets"
                 contentNotHiding
+                inputDefaultClosed
                 content={
                     <Switch
                         firstTitle="Whitelisted"
