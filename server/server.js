@@ -1393,14 +1393,14 @@ app.get(
             ]
         )).rows[0].count;
 
-        console.log(firstSearchRowCount);
 
         if (firstSearchRowCount > 0) {
             const rows = (
                 await db.query(
                     `SELECT * FROM assets WHERE 
                     LOWER(ticker) LIKE CONCAT('%', LOWER($3::text), '%') OR 
-                    LOWER(full_name) LIKE CONCAT('%', LOWER($3::text), '%') 
+                    LOWER(full_name) LIKE CONCAT('%', LOWER($3::text), '%')
+                    ORDER BY id ASC 
                     LIMIT $1 OFFSET $2`, 
                     [
                         count, 
@@ -1410,9 +1410,6 @@ app.get(
                 )
             ).rows;
 
-            console.log(rows);
-
-    
             return res.send(rows); 
         } else {
             const rows = (
@@ -1616,18 +1613,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                 priceData.zano = zanoInfo;
             }
 
-            const assets = [{
-                asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
-                logo: "",
-                price_url: "",
-                ticker: "ZANO",
-                full_name: "Zano (Native)",
-                total_max_supply: "0",
-                current_supply: "0",
-                decimal_point: 0,
-                meta_info: "",
-                price: zanoInfo?.zano?.usd || 0
-            }];
+            const assets = [];
 
             let iterator = 0;
             const amountPerIteration = 100;
