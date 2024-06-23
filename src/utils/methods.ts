@@ -63,12 +63,12 @@ class Fetch {
         return await fetch(this.proxyPath + `/get_chart/${chartRequestName}/all`).then(res => res.json());
     }
 
-    static async getWhitelistedAssets(offset: number, count: number) {
-        return await fetch(this.proxyPath + `/get_whitelisted_assets/${offset}/${count}`).then(res => res.json());
+    static async getWhitelistedAssets(offset: number, count: number, searchText: string) {
+        return await fetch(this.proxyPath + `/get_whitelisted_assets/${offset}/${count}?search=${searchText}`).then(res => res.json());
     }
 
-    static async getAssets(offset: number, count: number) {
-        return await fetch(this.proxyPath + `/get_assets/${offset}/${count}`).then(res => res.json());
+    static async getAssets(offset: number, count: number, searchText: string) {
+        return await fetch(this.proxyPath + `/get_assets/${offset}/${count}?search=${searchText}`).then(res => res.json());
     }
 
     static async getOutInfo(amount: number, index: number) {

@@ -1326,12 +1326,43 @@ app.get(
     })
 )
 
-const getWhitelistedAssets = async (offset, count) => {  
+const getWhitelistedAssets = async (offset, count, searchText) => {  
     const response = await axios({
         method: 'get',
         url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
     });
-    return response.data.assets.slice(offset, offset + count);
+
+    const allAssets = response.data.assets;
+    allAssets.unshift({
+        asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
+        logo: "",
+        price_url: "",
+        ticker: "ZANO",
+        full_name: "Zano (Native)",
+        total_max_supply: "0",
+        current_supply: "0",
+        decimal_point: 0,
+        meta_info: "",
+        price: 0
+    });
+    const searchTextLower = searchText?.toLowerCase();
+
+    const filteredAssets =  allAssets
+        .filter(asset => {
+            return searchText 
+                ? (
+                    asset.ticker?.toLowerCase()?.includes(searchTextLower) || 
+                    asset.full_name?.toLowerCase()?.includes(searchTextLower)
+                ) 
+                : true
+        });
+
+    if (filteredAssets.length > 0) {
+        return filteredAssets.slice(offset, offset + count);
+    } else {
+        return allAssets.filter(e => e.asset_id === searchText).slice(offset, offset + count);
+    }
+        
 }
 
 app.get(
@@ -1339,8 +1370,9 @@ app.get(
     exceptionHandler(async (req, res) => {
         const offset = parseInt(req.params.offset, 10);
         const count = parseInt(req.params.count, 10);
+        const searchText = req.query.search || '';
 
-        res.send(await getWhitelistedAssets(offset, count));
+        res.send(await getWhitelistedAssets(offset, count, searchText));
 
     })
 )
@@ -1350,10 +1382,52 @@ app.get(
     exceptionHandler(async (req, res) => {
         const offset = parseInt(req.params.offset, 10);
         const count = parseInt(req.params.count, 10);
+        const searchText = req.query.search || '';
 
-        const rows = (await db.query("SELECT * FROM assets LIMIT $1 OFFSET $2", [count, offset])).rows;
+        const firstSearchRowCount = (await db.query(
+            `SELECT COUNT(*) FROM assets WHERE 
+            LOWER(ticker) LIKE CONCAT('%', LOWER($1::text), '%') OR 
+            LOWER(full_name) LIKE CONCAT('%', LOWER($1::text), '%')`, 
+            [
+                searchText
+            ]
+        )).rows[0].count;
 
-        res.send(rows);
+        console.log(firstSearchRowCount);
+
+        if (firstSearchRowCount > 0) {
+            const rows = (
+                await db.query(
+                    `SELECT * FROM assets WHERE 
+                    LOWER(ticker) LIKE CONCAT('%', LOWER($3::text), '%') OR 
+                    LOWER(full_name) LIKE CONCAT('%', LOWER($3::text), '%') 
+                    LIMIT $1 OFFSET $2`, 
+                    [
+                        count, 
+                        offset,
+                        searchText
+                    ]
+                )
+            ).rows;
+
+            console.log(rows);
+
+    
+            return res.send(rows); 
+        } else {
+            const rows = (
+                await db.query(
+                    "SELECT * FROM assets WHERE asset_id=$3 LIMIT $1 OFFSET $2", 
+                    [
+                        count, 
+                        offset,
+                        searchText
+                    ]
+                )
+            ).rows;
+
+            return res.send(rows); 
+        }
     })
 )
 
@@ -1521,21 +1595,6 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                 }
             }
 
-            const assets = [];
-
-            let iterator = 0;
-            const amountPerIteration = 100;
-
-            while (true) {
-                const newAssets = await fetchAssets(iterator + 1, iterator + amountPerIteration);
-                if (!newAssets.length) break;
-                assets.push(...newAssets);
-                iterator += amountPerIteration;
-            }
-
-            
-            console.log('Got assets list');
-
             const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
 
             await new Promise(res => setTimeout(res, 5 * 1e3));
@@ -1556,6 +1615,32 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
             if (zanoInfo?.zano?.usd !== undefined) {
                 priceData.zano = zanoInfo;
             }
+
+            const assets = [{
+                asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
+                logo: "",
+                price_url: "",
+                ticker: "ZANO",
+                full_name: "Zano (Native)",
+                total_max_supply: "0",
+                current_supply: "0",
+                decimal_point: 0,
+                meta_info: "",
+                price: zanoInfo?.zano?.usd || 0
+            }];
+
+            let iterator = 0;
+            const amountPerIteration = 100;
+
+            while (true) {
+                const newAssets = await fetchAssets(iterator + 1, iterator + amountPerIteration);
+                if (!newAssets.length) break;
+                assets.push(...newAssets);
+                iterator += amountPerIteration;
+            }
+
+            
+            console.log('Got assets list');
 
             const assetsRows = (await db.query("SELECT * FROM assets")).rows;
             for (const assetRow of assetsRows) {

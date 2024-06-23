@@ -11,6 +11,7 @@ const Transaction = React.lazy(() => import("./pages/Transaction/Transaction"));
 const Charts = React.lazy(() => import("./pages/Charts/Charts"));
 const ChartsPage = React.lazy(() => import("./pages/ChartPage/ChartPage"));
 const Assets = React.lazy(() => import("./pages/Assets/Assets"));
+const Asset = React.lazy(() => import("./pages/Asset/Asset"));
 
 function App() {
     return (
@@ -31,6 +32,7 @@ function App() {
                     } */}
                     <Route path="/assets" element={<Assets />} />
                     <Route path="/*" element={<Navigate to="/" />} />
+                    <Route path="/assets/:id" element={<Asset />} />
                 </Routes>
             </Suspense>
         </Router>
