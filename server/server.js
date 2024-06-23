@@ -1327,11 +1327,11 @@ app.get(
 )
 
 const getWhitelistedAssets = async (offset, count) => {  
-    const fullList = await fetch('https://api.zano.org/assets_whitelist.json')
-    .then(res => res.json())
-    .then(data => data.assets);
-
-    return fullList.slice(offset, offset + count);
+    const response = await axios({
+        method: 'get',
+        url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
+    });
+    return response.data.assets.slice(offset, offset + count);
 }
 
 app.get(
@@ -1351,31 +1351,9 @@ app.get(
         const offset = parseInt(req.params.offset, 10);
         const count = parseInt(req.params.count, 10);
 
-        console.log({
-            method: 'get',
-            url: api,
-            data: {
-                method: 'get_assets_list',
-                params: {
-                    count: count,
-                    offset: offset,
-                }
-            }
-        });
+        const rows = (await db.query("SELECT * FROM assets LIMIT $1 OFFSET $2", [count, offset])).rows;
 
-        const response = await axios({
-            method: 'get',
-            url: api,
-            data: {
-                method: 'get_assets_list',
-                params: {
-                    count: count,
-                    offset: offset,
-                }
-            }
-        })
-
-        res.json(response?.data?.result?.assets || []);
+        res.send(rows);
     })
 )
 
@@ -1476,18 +1454,18 @@ app.get(
     })
 )
 
-app.get(
-    '/api/assets_whitelist_testnet',
-    exceptionHandler(async (req, res) => {
-        const assetsRows = (await db.query("SELECT * FROM assets ORDER BY id ASC")).rows;
-        const zanoRow = assetsRows.find(e => e.ticker === "ZANO");
-        if (zanoRow) {
-            return res.json({ assets: [zanoRow, ...assetsRows.filter(e => e.id !== zanoRow.id)] });
-        } else {
-            res.json({ assets: assetsRows });
-        }
-    })
-);
+// app.get(
+//     '/api/assets_whitelist_testnet',
+//     exceptionHandler(async (req, res) => {
+//         const assetsRows = (await db.query("SELECT * FROM assets ORDER BY id ASC")).rows;
+//         const zanoRow = assetsRows.find(e => e.ticker === "ZANO");
+//         if (zanoRow) {
+//             return res.json({ assets: [zanoRow, ...assetsRows.filter(e => e.id !== zanoRow.id)] });
+//         } else {
+//             res.json({ assets: assetsRows });
+//         }
+//     })
+// );
 
 let priceData = {};
 
@@ -1522,10 +1500,42 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
 (async () => {
     while (true) {
         try {
-            const response = await axios({
-                method: 'get',
-                url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
-            });
+
+            async function fetchAssets(offset, count) {
+                try {
+                    const response = await axios({
+                        method: 'get',
+                        url: api,
+                        data: {
+                            method: 'get_assets_list',
+                            params: {
+                                count: count,
+                                offset: offset,
+                            }
+                        }
+                    });
+    
+                    return response?.data?.result?.assets || [];
+                } catch {
+                    return [];
+                }
+            }
+
+            const assets = [];
+
+            let iterator = 0;
+            const amountPerIteration = 100;
+
+            while (true) {
+                const newAssets = await fetchAssets(iterator + 1, iterator + amountPerIteration);
+                if (!newAssets.length) break;
+                assets.push(...newAssets);
+                iterator += amountPerIteration;
+            }
+
+            
+            console.log('Got assets list');
+
             const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
 
             await new Promise(res => setTimeout(res, 5 * 1e3));
@@ -1546,21 +1556,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
             if (zanoInfo?.zano?.usd !== undefined) {
                 priceData.zano = zanoInfo;
             }
-            const assets = [
-                ...response.data.assets,
-                {
-                    asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
-                    logo: "",
-                    price_url: "",
-                    ticker: "ZANO",
-                    full_name: "Zano (Native)",
-                    total_max_supply: "0",
-                    current_supply: "0",
-                    decimal_point: 0,
-                    meta_info: "",
-                    price: zanoInfo?.zano?.usd || 0
-                }
-            ];
+
             const assetsRows = (await db.query("SELECT * FROM assets")).rows;
             for (const assetRow of assetsRows) {
                 const foundAsset = assets.find(e => e.asset_id === assetRow.asset_id);
@@ -1577,7 +1573,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                         current_supply,
                         decimal_point,
                         meta_info,
-                        price = 0
+                        price
                     } = foundAsset;
 
                     await db.query(
@@ -1593,14 +1589,14 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                             price=$9 WHERE asset_id=$10
                         `,
                         [
-                            logo,
-                            price_url,
-                            ticker,
-                            full_name,
-                            total_max_supply.toString(),
-                            current_supply.toString(),
-                            decimal_point,
-                            meta_info,
+                            logo || "",
+                            price_url || "",
+                            ticker || "",
+                            full_name || "",
+                            total_max_supply?.toString() || "0",
+                            current_supply?.toString() || "0",
+                            decimal_point || 0,
+                            meta_info || "",
                             price,
                             asset_id
                         ]
@@ -1609,7 +1605,7 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
             }
             for (const asset of assets) {
                 const foundAsset = assetsRows.find(e => e.asset_id === asset.asset_id);
-                if (!foundAsset) {
+                if (!foundAsset && asset.asset_id) {
                     const {
                         asset_id,
                         logo,
@@ -1640,14 +1636,14 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
                         `,
                         [
                             asset_id,
-                            logo,
-                            price_url,
+                            logo || "",
+                            price_url || "",
                             ticker,
                             full_name,
-                            total_max_supply.toString(),
-                            current_supply.toString(),
+                            total_max_supply?.toString(),
+                            current_supply?.toString(),
                             decimal_point,
-                            meta_info,
+                            meta_info || "",
                             price
                         ]
                     )
