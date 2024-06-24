@@ -3,6 +3,17 @@
     border-radius: 10px;
 }
 
+.asset_popup__bottom {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    > button {
+        background: #2e599f;
+    }
+}
+
 @media screen and (max-width: 850px) {
     .assets__table {
         overflow-x: auto;

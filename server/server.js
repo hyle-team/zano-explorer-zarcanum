@@ -1332,6 +1332,10 @@ const getWhitelistedAssets = async (offset, count, searchText) => {
         url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
     });
 
+    if (!response.data.assets) {
+        throw new Error('Assets whitelist response not correct');
+    }
+
     const allAssets = response.data.assets;
     allAssets.unshift({
         asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
@@ -1566,6 +1570,47 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
 
     return res.json(responseData);
 
+}));
+
+app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) => {
+    const { asset_id } = req.params;
+    const dbAsset = (await db.query("SELECT * FROM assets WHERE asset_id = $1", [asset_id])).rows[0];
+    if (!dbAsset) {
+
+
+        const response = await axios({
+            method: 'get',
+            url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
+        });
+        
+        if (!response.data.assets) {
+            throw new Error('Assets whitelist response not correct');
+        }
+
+        const allAssets = response.data.assets;
+        allAssets.unshift({
+            asset_id: "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a",
+            logo: "",
+            price_url: "",
+            ticker: "ZANO",
+            full_name: "Zano (Native)",
+            total_max_supply: "0",
+            current_supply: "0",
+            decimal_point: 0,
+            meta_info: "",
+            price: 0
+        });
+
+        const whitelistedAsset = allAssets.find(e => e.asset_id === asset_id);
+
+        if (whitelistedAsset) {
+            return res.json({ success: true, asset: whitelistedAsset });
+        } else {
+            return res.json({ success: false, data: "Asset not found" });
+        }
+    } else {
+        return res.json({ success: true, asset: dbAsset });
+    }
 }));
 
 (async () => {

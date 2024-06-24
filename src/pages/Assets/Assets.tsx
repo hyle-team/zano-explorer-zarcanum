@@ -1,5 +1,5 @@
 import "../../styles/Assets.scss";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import Header from "../../components/default/Header/Header";
 import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
 import Table from "../../components/default/Table/Table";
@@ -8,8 +8,24 @@ import AliasText from "../../components/default/AliasText/AliasText";
 import JSONPopup from "../../components/default/JSONPopup/JSONPopup";
 import Switch from "../../components/UI/Switch/Switch";
 import { nanoid } from "nanoid";
+import Button from "../../components/UI/Button/Button";
+import { useSearchParams } from "react-router-dom";
+
+const AssetPopupBottom = memo(({ assetId }: { assetId: string }) => {
+
+    const assetLink = `${window.location.origin}/assets?asset_id=${encodeURIComponent(assetId)}`;
+
+    return (
+        <div className="asset_popup__bottom">
+            <Button onClick={() => navigator.clipboard.writeText(assetLink)}>Copy asset link</Button>
+        </div>
+        
+    )
+})
 
 function Assets() {
+
+    const [searchParams] = useSearchParams();
 
     const ZANO_ID = 
         "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a";
@@ -18,7 +34,7 @@ function Assets() {
 
     const [assets, setAssets] = useState<any[]>([]);
 
-    const [assetJson, setAssetJson] = useState<Object>({});
+    const [assetJson, setAssetJson] = useState<Record<string, any>>({});
 
     const [popupState, setPopupState] = useState(false);
 
@@ -36,6 +52,24 @@ function Assets() {
         const price = result?.data?.zano?.usd;
         return price;
     }
+
+    useEffect(() => {
+        async function fetchParamAsset() {
+            const assetId = decodeURIComponent(searchParams.get("asset_id") || '');
+
+            if (assetId) {
+                const response = await Fetch.getAssetDetails(assetId);
+
+                if (response.success && response.asset) {
+                    setPopupState(true);
+                    setAssetJson(response.asset);
+                }
+            }
+        }
+
+        fetchParamAsset();
+        
+    }, [searchParams]);
 
     useEffect(() => {
         async function fetchZanoPrice() {
@@ -141,11 +175,14 @@ function Assets() {
                     setPage={setPage}
                 />
             </div>
-            <JSONPopup 
-                popupState={popupState}
-                setPopupState={setPopupState}
-                json={assetJson}
-            />
+            {
+                JSONPopup({
+                    popupState: popupState,
+                    setPopupState: setPopupState,
+                    json: assetJson,
+                    bottomContent: <AssetPopupBottom assetId={assetJson?.asset_id || ""} />
+                })
+            }
         </div>
     )
 }

@@ -32,7 +32,7 @@ function App() {
                     } */}
                     <Route path="/assets" element={<Assets />} />
                     <Route path="/*" element={<Navigate to="/" />} />
-                    <Route path="/assets/:id" element={<Asset />} />
+                    {/* <Route path="/assets/:id" element={<Asset />} /> */}
                 </Routes>
             </Suspense>
         </Router>
