@@ -5,6 +5,7 @@ interface JSONPopupProps {
     setPopupState: Dispatch<SetStateAction<boolean>>;
     json: Object;
     bottomContent?: React.ReactElement;
+    onClose?: () => void;
 }
 
 export default JSONPopupProps;

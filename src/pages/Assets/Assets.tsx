@@ -193,7 +193,8 @@ function Assets() {
                     popupState: popupState,
                     setPopupState: setPopupState,
                     json: assetJson,
-                    bottomContent: <AssetPopupBottom assetId={assetJson?.asset_id || ""} />
+                    bottomContent: <AssetPopupBottom assetId={assetJson?.asset_id || ""} />,
+                    onClose: () => searchParams.delete("asset_id")
                 })
             }
         </div>

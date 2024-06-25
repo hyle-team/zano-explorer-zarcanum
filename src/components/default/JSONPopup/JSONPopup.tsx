@@ -14,6 +14,13 @@ const JSONPopup = (props: JSONPopupProps) => {
         bottomContent
     } = props;
 
+    function onClose() {
+        setPopupState(false);
+        if (props.onClose) {
+            props.onClose();
+        }
+    }
+
     function PopupContent({ close }: { close: () => void }) {
         return (
             <div className="json_popup__content">
@@ -39,7 +46,7 @@ const JSONPopup = (props: JSONPopupProps) => {
             <Popup 
                 Content={PopupContent}
                 settings={{}}
-                close={() => setPopupState(false)}
+                close={onClose}
                 blur
             /> : 
             <></>
