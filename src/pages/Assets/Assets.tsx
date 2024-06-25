@@ -13,11 +13,24 @@ import { useSearchParams } from "react-router-dom";
 
 const AssetPopupBottom = memo(({ assetId }: { assetId: string }) => {
 
+    const [clicked, setClicked] = useState(false);
+
     const assetLink = `${window.location.origin}/assets?asset_id=${encodeURIComponent(assetId)}`;
+
+    function copy() {
+        if (clicked) return;
+
+        navigator.clipboard.writeText(assetLink);
+        setClicked(true);
+
+        setTimeout(() => {
+            setClicked(false);
+        }, 2e3);
+    }
 
     return (
         <div className="asset_popup__bottom">
-            <Button onClick={() => navigator.clipboard.writeText(assetLink)}>Copy asset link</Button>
+            <Button onClick={copy}>{clicked ? 'Copied' : 'Copy asset link'}</Button>
         </div>
         
     )
