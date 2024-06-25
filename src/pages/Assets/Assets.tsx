@@ -38,7 +38,7 @@ const AssetPopupBottom = memo(({ assetId }: { assetId: string }) => {
 
 function Assets() {
 
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const ZANO_ID = 
         "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a";
@@ -194,7 +194,10 @@ function Assets() {
                     setPopupState: setPopupState,
                     json: assetJson,
                     bottomContent: <AssetPopupBottom assetId={assetJson?.asset_id || ""} />,
-                    onClose: () => searchParams.delete("asset_id")
+                    onClose: () => {
+                        searchParams.delete("asset_id")
+                        setSearchParams(searchParams);
+                    }
                 })
             }
         </div>
