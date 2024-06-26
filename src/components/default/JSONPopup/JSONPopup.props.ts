@@ -6,6 +6,7 @@ interface JSONPopupProps {
     json: Object;
     bottomContent?: React.ReactElement;
     onClose?: () => void;
+    hideJson?: boolean;
 }
 
 export default JSONPopupProps;

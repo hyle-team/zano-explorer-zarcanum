@@ -11,13 +11,16 @@ import { nanoid } from "nanoid";
 import Button from "../../components/UI/Button/Button";
 import { useSearchParams } from "react-router-dom";
 
-const AssetPopupBottom = memo(({ assetId }: { assetId: string }) => {
+const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
 
     const [clicked, setClicked] = useState(false);
 
-    const assetLink = `${window.location.origin}/assets?asset_id=${encodeURIComponent(assetId)}`;
+    const assetLink = assetId !== undefined 
+        ? `${window.location.origin}/assets?asset_id=${encodeURIComponent(assetId)}` 
+        : undefined;
 
     function copy() {
+        if (!assetLink) return;
         if (clicked) return;
 
         navigator.clipboard.writeText(assetLink);
@@ -29,10 +32,17 @@ const AssetPopupBottom = memo(({ assetId }: { assetId: string }) => {
     }
 
     return (
-        <div className="asset_popup__bottom">
-            <Button onClick={copy}>{clicked ? 'Copied' : 'Copy asset link'}</Button>
-        </div>
-        
+        assetLink ? (
+            <div className="asset_popup__bottom">
+                <Button onClick={copy}>{clicked ? 'Copied' : 'Copy asset link'}</Button>
+            </div>
+        ) : (
+            <div className="asset_popup__not_found">
+                <h3>
+                    Asset not found or does not exist. For newly created assets, please allow one minute to appear in the explorer
+                </h3>
+            </div>
+        )
     )
 })
 
@@ -50,6 +60,7 @@ function Assets() {
     const [assetJson, setAssetJson] = useState<Record<string, any>>({});
 
     const [popupState, setPopupState] = useState(false);
+    const [notFountPopupState, setNotFountPopupState] = useState(false);
 
     const [itemsOnPage, setItemsOnPage] = useState("10");
     const [page, setPage] = useState("1");
@@ -57,6 +68,7 @@ function Assets() {
     const [isWhitelist, setIsWhitelist] = useState(true);
 
     const [inputState, setInputState] = useState("");
+    const [initFetched, setInitFetched] = useState(false);
     
     const fetchIdRef = useRef<string>(nanoid());
 
@@ -72,17 +84,24 @@ function Assets() {
 
             if (assetId) {
                 const response = await Fetch.getAssetDetails(assetId);
+                setInitFetched(true);
 
                 if (response.success && response.asset) {
                     setPopupState(true);
                     setAssetJson(response.asset);
+                } else {
+                    setNotFountPopupState(true);
                 }
+            } else {
+                setInitFetched(true);
             }
         }
 
-        fetchParamAsset();
+        if (!initFetched) {
+            fetchParamAsset();
+        }
         
-    }, [searchParams]);
+    }, [searchParams, initFetched]);
 
     useEffect(() => {
         async function fetchZanoPrice() {
@@ -190,13 +209,23 @@ function Assets() {
             </div>
             {
                 JSONPopup({
-                    popupState: popupState,
+                    popupState: popupState || notFountPopupState,
                     setPopupState: setPopupState,
                     json: assetJson,
-                    bottomContent: <AssetPopupBottom assetId={assetJson?.asset_id || ""} />,
+                    hideJson: notFountPopupState,
+                    bottomContent: (
+                        <AssetPopupBottom
+                            assetId={
+                                !notFountPopupState ? (assetJson?.asset_id || "") : undefined
+                            }
+                        />
+                    ),
                     onClose: () => {
-                        searchParams.delete("asset_id")
-                        setSearchParams(searchParams);
+                        if (searchParams.get("asset_id")) {
+                            searchParams.delete("asset_id");
+                            setSearchParams(searchParams);
+                        }
+                        setNotFountPopupState(false);
                     }
                 })
             }
