@@ -1388,6 +1388,20 @@ app.get(
         const count = parseInt(req.params.count, 10);
         const searchText = req.query.search || '';
 
+        if (!searchText) {
+            const rows = (
+                await db.query(
+                    "SELECT * FROM assets ORDER BY id ASC LIMIT $1 OFFSET $2", 
+                    [
+                        count, 
+                        offset
+                    ]
+                )
+            ).rows;
+
+            return res.send(rows);
+        }
+
         const firstSearchRowCount = (await db.query(
             `SELECT COUNT(*) FROM assets WHERE 
             LOWER(ticker) LIKE CONCAT('%', LOWER($1::text), '%') OR 
