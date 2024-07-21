@@ -1,6 +1,15 @@
 .assets__table {
     overflow: hidden;
     border-radius: 10px;
+
+    .assets__table_asset-id {
+        display: flex;
+        gap: 10px;
+
+        > span {
+            flex: 1;
+        }
+    }
 }
 
 .asset_popup__bottom {

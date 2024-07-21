@@ -10,6 +10,7 @@ import Switch from "../../components/UI/Switch/Switch";
 import { nanoid } from "nanoid";
 import Button from "../../components/UI/Button/Button";
 import { useSearchParams } from "react-router-dom";
+import CopyButton from "../../components/CopyButton/CopyButton";
 
 const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
 
@@ -162,9 +163,13 @@ function Assets() {
     const tableElements = assets.map(e => [
         e?.full_name || "",
         e?.ticker || "",
-        <AliasText href="/" onClick={(event) => onAssetClick(event, e)}>
-            {e?.asset_id || ""}
-        </AliasText>,
+        <div className="assets__table_asset-id">
+            <CopyButton text={e?.asset_id || ""} />
+            <AliasText href="/" onClick={(event) => onAssetClick(event, e)}>
+                {e?.asset_id || ""}
+            </AliasText>
+            
+        </div>,
         e?.price ? `${e?.price}$` : "No data"
     ]);
 
