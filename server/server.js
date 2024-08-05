@@ -1565,6 +1565,11 @@ app.get('/api/price', exceptionHandler(async (req, res) => {
     if (req.query.asset_id) {
 
         if (req.query.asset_id === ZANO_ASSET_ID) {
+
+            if (!priceData?.zano?.zano?.usd) {
+                res.send({ success: false, data: "Price not found" });
+            }
+
             return res.send({
                 success: true,
                 data: {
