@@ -50,6 +50,8 @@ let pools_array = []
 
 let serverTimeout = 30
 
+const ZANO_ASSET_ID = 'd6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a';
+
 io.engine.on('initial_headers', (headers, req) => {
     headers['Access-Control-Allow-Origin'] = frontEnd_api
 })
@@ -1559,6 +1561,29 @@ app.get(
 let priceData = {};
 
 app.get('/api/price', exceptionHandler(async (req, res) => {
+
+    if (req.query.asset_id) {
+
+        if (req.query.asset_id === ZANO_ASSET_ID) {
+            return res.send({
+                success: true,
+                data: {
+                    name: "Zano",
+                    usd: priceData?.zano?.zano?.usd,
+                    usd_24h_change: priceData?.zano?.zano?.usd_24h_change
+                }
+            })
+        }
+
+        const assetData = (await db.query("SELECT * FROM assets WHERE asset_id = $1", [req.query.asset_id]))?.rows?.[0];
+     
+        if (!assetData) {
+            return res.json({ success: false, data: "Asset not found" });
+        } 
+
+        
+
+    }
 
     const responseData = {
         success: true,
