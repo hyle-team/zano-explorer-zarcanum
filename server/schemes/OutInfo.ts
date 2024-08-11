@@ -1,0 +1,30 @@
+import { Model, DataTypes } from "sequelize";
+import sequelize from "../database/sequelize";
+
+class OutInfo extends Model {
+    declare readonly id: number;
+    declare amount: number;
+    declare i: BigInt;
+    declare tx_id: string;
+    declare block: BigInt;
+    
+    declare readonly createdAt: Date;
+    declare readonly updatedAt: Date;
+}
+
+OutInfo.init(
+    {
+        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        amount: { type: DataTypes.INTEGER, allowNull: true },
+        i: { type: DataTypes.BIGINT, allowNull: true },
+        tx_id: { type: DataTypes.STRING, allowNull: true },
+        block: { type: DataTypes.BIGINT, allowNull: true }
+    },
+    {
+        sequelize,
+        modelName: "out_info",
+        timestamps: true
+    }
+);
+
+export default OutInfo;
