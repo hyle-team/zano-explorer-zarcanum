@@ -1661,23 +1661,6 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
 
     while (true) {
 
-        await db.query(
-            `
-            WITH CTE AS (
-                SELECT 
-                    asset_id,
-                    ROW_NUMBER() OVER (PARTITION BY asset_id ORDER BY asset_id) AS rn
-                FROM assets
-            )
-            DELETE FROM assets
-            WHERE asset_id IN (
-                SELECT asset_id 
-                FROM CTE 
-                WHERE rn > 1
-            );
-            `
-        ).catch(e => console.log('Error deleting duplicates: ', e));    
-
         try {
 
             async function fetchAssets(offset, count) {
@@ -1721,7 +1704,7 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
                 priceData.zano = zanoInfo;
             }
 
-            const assets = [];
+            let tempAssets = [];
 
             let iterator = 0;
             const amountPerIteration = 100;
@@ -1729,10 +1712,17 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
             while (true) {
                 const newAssets = await fetchAssets(iterator + 1, iterator + amountPerIteration);
                 if (!newAssets.length) break;
-                assets.push(...newAssets);
+                tempAssets.push(...newAssets);
                 iterator += amountPerIteration;
             }
 
+            const assets = [];
+
+            for (const tempAsset of tempAssets) {
+                if (assets.every(e => e.asset_id !== tempAsset.asset_id)) {
+                    assets.push(tempAsset);
+                }
+            }
             
             console.log('Got assets list');
 
