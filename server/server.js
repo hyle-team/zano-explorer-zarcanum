@@ -1676,7 +1676,7 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
                 WHERE rn > 1
             );
             `
-        );    
+        ).catch(e => console.log('Error deleting duplicates: ', e));    
 
         try {
 
@@ -1814,7 +1814,6 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
                                 meta_info,
                                 price
                             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                            ON CONFLICT (asset_id) DO NOTHING
                         `,
                         [
                             asset_id,
