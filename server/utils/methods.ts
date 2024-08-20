@@ -6,6 +6,8 @@ import { get_info, get_mining_history, getbalance } from "./zanod";
 import BigNumber from "bignumber.js";
 import Transaction from "../schemes/Transaction";
 import Pool from "../schemes/Pool";
+import { io } from "../server";
+import { blockInfo, lastBlock } from "./states";
 
 interface getBlocksDetailsParams {
     start: number;
@@ -158,4 +160,15 @@ export async function getTxPoolDetails(count: number) {
     });
 
     return result.length > 0 ? result : [];
+}
+
+export const emitSocketInfo = async (socket) => {
+    if (config.websocket.enabled_during_sync && lastBlock) {
+        blockInfo.lastBlock = lastBlock.height
+
+        const emitter = socket || io;
+
+        emitter.emit('get_info', JSON.stringify(blockInfo));
+        emitter.emit('get_visibility_info', getVisibilityInfo());
+    }
 }

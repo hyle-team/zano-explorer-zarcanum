@@ -28,77 +28,6 @@ let pools_array = []
 let serverTimeout = 30
 
 
-// Transactions
-app.get(
-    '/api/get_tx_details/:tx_hash',
-    exceptionHandler(async (req, res, next) => {
-        let tx_hash = req.params.tx_hash.toLowerCase()
-        if (tx_hash) {
-
-            const query = {
-                text: 'SELECT transactions.*, blocks.id as block_hash, blocks.timestamp as block_timestamp FROM transactions LEFT JOIN blocks ON transactions.keeper_block = blocks.height WHERE transactions.id = $1;',
-                values: [tx_hash]
-            }
-            let result = await db.query(query)
-            if (result && result.rowCount > 0) {
-                const response = result.rows[0];
-                response.last_block = lastBlock.height
-                res.json(response);
-            } else {
-                let response = await get_tx_details(tx_hash);
-
-                let data = response.data;
-
-                if (data?.result?.tx_info)  {
-                    // data.result.tx_info.last_block = lastBlock.height
-
-                    if (data?.result?.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
-                        data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);
-                    }
-
-                    if (data?.result?.tx_info.outs && typeof data.result.tx_info.outs === 'object') {
-                        data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
-                    }
-
-                }
-
-                if (data.result !== undefined) {
-                    res.json(data.result.tx_info)
-                } else {
-                    res.status({ status: 500 }).json({
-                        message: `/get_tx_details/:tx_hash ${req.params}`
-                    })
-                }
-            }
-        }
-    })
-)
-
-app.get(
-    '/api/get_out_info/:amount/:i',
-    exceptionHandler(async (req, res, next) => {
-        let amount = req.params.amount
-        let i = parseInt(req.params.i)
-        if (!!amount && !!i) {
-            const query = {
-                text: `SELECT * FROM out_info WHERE amount = $1 AND i = $2`,
-                values: [amount, i]
-            }
-            let result = await db.query(query)
-            if (result === undefined || result.rowCount === 0) {
-                let response = await get_out_info(amount, i)
-                res.json({ tx_id: response.data.result.tx_id })
-            } else {
-                res.json(result.rows[0])
-            }
-        } else {
-            res.status({ status: 500 }).json({
-                message: `/get_out_info/:amount/:i ${req.params}`
-            })
-        }
-    })
-)
-
 // Aliases
 app.get(
     '/api/get_aliases/:offset/:count/:search',
@@ -378,51 +307,6 @@ const syncPool = async () => {
         await db.query('DELETE FROM pool')
         statusSyncPool = false
     }
-}
-
-const parseComment = (comment) => {
-    let splitComment = comment.split(/\s*,\s*/).filter((el) => !!el)
-    let splitResult = splitComment[4]
-    if (splitResult) {
-        let result = splitResult.split(/\s*"\s*/)
-        let input = result[3].toString()
-        if (input) {
-            let output = Buffer.from(input, 'hex')
-            return output.toString()
-        } else {
-            return ''
-        }
-    } else {
-        return ''
-    }
-}
-
-const parseTrackingKey = (trackingKey) => {
-    let splitKey = trackingKey.split(/\s*,\s*/)
-    let resultKey = splitKey[5]
-    if (resultKey) {
-        let key = resultKey.split(':')
-        let keyValue = key[1].replace(/\[|\]/g, '')
-        if (keyValue) {
-            return keyValue.toString().replace(/\s+/g, '')
-        } else {
-            return ''
-        }
-    } else {
-        return ''
-    }
-}
-
-const decodeString = (str) => {
-    if (!!str) {
-        str = str.replace(/'/g, "''")
-        return str.replace(/\u0000/g, '', (unicode) => {
-            return String.fromCharCode(
-                parseInt(unicode.replace(/\\u/g, ''), 16)
-            )
-        })
-    }
-    return str
 }
 
 const syncTransactions = async () => {
@@ -798,16 +682,6 @@ const syncAltBlocks = async () => {
         await db.query('ROLLBACK')
     }
     statusSyncAltBlocks = false
-}
-const emitSocketInfo = async (socket) => {
-    if (enabled_during_sync && lastBlock) {
-        blockInfo.lastBlock = lastBlock.height
-
-        const emitter = socket || io;
-
-        emitter.emit('get_info', JSON.stringify(blockInfo));
-        emitter.emit('get_visibility_info', getVisibilityInfo());
-    }
 }
 
 const getInfoTimer = async () => {
@@ -1338,22 +1212,3 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
         await new Promise(res => setTimeout(res, 60 * 1e3));
     }
 })();
-
-
-app.get("/*", function (req, res) {
-    const buildPath = path.resolve(__dirname, "../build/index.html");
-    res.sendFile(buildPath);
-});
-
-io.on('connection', async (socket) => {
-    socket.on('get-socket-info', () => {
-        emitSocketInfo(socket);
-    })
-    socket.on('get-socket-pool', async () => {
-        io.emit('get_transaction_pool_info', JSON.stringify(await getTxPoolDetails(0)))
-    });
-})
-
-server.listen(server_port, () => {
-    log(`Server listening on port ${server.address().port}`)
-})

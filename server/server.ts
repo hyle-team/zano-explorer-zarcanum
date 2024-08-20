@@ -3,35 +3,37 @@ import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import axios from "axios";
-import BigNumber from "bignumber.js";
 import exceptionHandler from "./exceptionHandler";
-import path, { parse } from "path";
+import path from "path";
 import initDB from "./database/initdb";
 import sequelize from "./database/sequelize";
-import { log, ZANO_ASSET_ID, config } from "./utils/utils";
-import { blockInfo } from "./utils/states";
-import { literal, Op } from "sequelize";
-import { getBlocksDetails, getMainBlockDetails, getTxPoolDetails, getVisibilityInfo } from "./utils/methods";
+import { log, config } from "./utils/utils";
+import { blockInfo, lastBlock } from "./utils/states";
+import { emitSocketInfo, getBlocksDetails, getMainBlockDetails, getTxPoolDetails, getVisibilityInfo } from "./utils/methods";
 import AltBlock from "./schemes/AltBlock";
+import Transaction from "./schemes/Transaction";
+import OutInfo from "./schemes/OutInfo";
+import Block from "./schemes/Block";
+import { get_out_info, get_tx_details } from "./utils/zanod";
 
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { transports: ['websocket', 'polling'] });
+export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
 (async () => {
     await initDB();
     await sequelize.authenticate();
-    await sequelize.sync();  
+    await sequelize.sync();
 
     io.engine.on('initial_headers', (headers, req) => {
         headers['Access-Control-Allow-Origin'] = config.frontend_api
     })
-    
+
     io.engine.on('headers', (headers, req) => {
         headers['Access-Control-Allow-Origin'] = config.frontend_api
     })
-    
+
     app.use(express.static('dist'));
     app.use(function (req, res, next) {
         res.header('Access-Control-Allow-Origin', '*')
@@ -41,7 +43,94 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
         )
         next()
     })
-    
+
+    app.get(
+        '/api/get_tx_details/:tx_hash',
+        exceptionHandler(async (req, res) => {
+            const tx_hash = req.params.tx_hash.toLowerCase();
+
+            if (tx_hash) {
+                // Fetching transaction details with associated block information using Sequelize
+                const transaction = await Transaction.findOne({
+                    where: { id: tx_hash },
+                    include: [
+                        {
+                            model: Block,
+                            attributes: ['id', 'timestamp'],
+                            required: false,
+                        },
+                    ],
+                });
+
+                
+                const transactionBlock = await Block.findOne({
+                    where: { tx_id: transaction?.keeper_block },
+                }).catch(() => null);
+
+                if (transaction && transactionBlock) {
+                    const response = {
+                        ...transaction.toJSON(),
+                        block_hash: transactionBlock?.tx_id,
+                        block_timestamp: transactionBlock?.timestamp,
+                        last_block: lastBlock.height, 
+                    };
+
+                    res.json(response);
+                } else {
+                    const response = await get_tx_details(tx_hash);
+                    const data = response.data;
+
+                    if (data?.result?.tx_info) {
+                        if (data.result.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
+                            data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);
+                        }
+
+                        if (data.result.tx_info.outs && typeof data.result.tx_info.outs === 'object') {
+                            data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
+                        }
+
+                        res.json(data.result.tx_info);
+                    } else {
+                        res.status(500).json({
+                            message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
+                        });
+                    }
+                }
+            } else {
+                res.status(500).json({
+                    message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
+                });
+            }
+        })
+    );
+
+    app.get(
+        '/api/get_out_info/:amount/:i',
+        exceptionHandler(async (req, res) => {
+          const { amount, i } = req.params;
+          const index = parseInt(i, 10);
+      
+          if (amount && !isNaN(index)) {
+              const outInfo = await OutInfo.findOne({
+                where: {
+                  amount: amount,
+                  i: index,
+                },
+              });
+      
+              if (!outInfo) {
+                const response = await get_out_info(amount, index);
+                res.json({ tx_id: response.data.result.tx_id });
+              } else {
+                res.json(outInfo.toJSON());
+              }
+          } else {
+            res.status(500).json({
+              message: `/get_out_info/:amount/:i ${req.params}`,
+            });
+          }
+        })
+      );
 
     app.get(
         '/api/get_info',
@@ -56,7 +145,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
         exceptionHandler(async (req, res) => {
             const start = parseInt(req.params.start, 10);
             const count = parseInt(req.params.count, 10);
-    
+
             if (start && count) {
                 const result = await getBlocksDetails({ start, count });
                 res.json(result);
@@ -65,7 +154,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
             }
         })
     );
-    
+
 
     app.get(
         '/api/get_visibility_info',
@@ -106,7 +195,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
         exceptionHandler(async (req, res, next) => {
             let offset = parseInt(req.params.offset)
             let count = parseInt(req.params.count)
-    
+
             if (count > config.maxDaemonRequestCount) {
                 count = config.maxDaemonRequestCount
             }
@@ -115,7 +204,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
                 limit: count,
                 offset: offset
             });
-    
+
             return result.length > 0 ? result.map(e => e.toJSON()) : [];
         })
     );
@@ -124,7 +213,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
         '/api/get_alt_block_details/:id',
         exceptionHandler(async (req, res, next) => {
             const id = req.params.id.toLowerCase();
-    
+
             if (id) {
                 const altBlock = await AltBlock.findOne({
                     where: {
@@ -164,7 +253,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
             res.json(response.data)
         })
     )
-    
+
     app.get(
         '/api/get_alt_block_details/:id',
         exceptionHandler(async (req, res) => {
@@ -182,7 +271,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
             res.json(response.data)
         })
     )
-    
+
     app.get(
         '/api/get_all_pool_tx_list',
         exceptionHandler(async (req, res) => {
@@ -196,7 +285,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
             res.json(response.data)
         })
     )
-    
+
     app.get(
         '/api/get_pool_txs_details',
         exceptionHandler(async (req, res) => {
@@ -210,7 +299,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
             res.json(response.data)
         })
     )
-    
+
     app.get(
         '/api/get_pool_txs_brief_details',
         exceptionHandler(async (req, res) => {
@@ -224,7 +313,7 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
             res.json(response.data)
         })
     )
-    
+
     app.get(
         '/api/get_tx_details/:tx_hash',
         exceptionHandler(async (req, res) => {
@@ -239,6 +328,26 @@ const io = new Server(server, { transports: ['websocket', 'polling'] });
             })
             res.json(response.data)
         })
-    )
-    
+    );
+
+    app.get("/*", function (req, res) {
+        const buildPath = path.resolve(__dirname, "../build/index.html");
+        res.sendFile(buildPath);
+    });
+
+    io.on('connection', async (socket) => {
+        socket.on('get-socket-info', () => {
+            emitSocketInfo(socket);
+        })
+        socket.on('get-socket-pool', async () => {
+            io.emit('get_transaction_pool_info', JSON.stringify(await getTxPoolDetails(0)))
+        });
+    })
+
+    server.listen(config.server_port, () => {
+        // @ts-ignore
+        log(`Server listening on port ${server?.address()?.port}`)
+    })
+
+
 })();

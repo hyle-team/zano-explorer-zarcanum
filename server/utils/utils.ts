@@ -38,3 +38,48 @@ export function log(msg: string) {
         msg
     )
 }
+export const parseComment = (comment) => {
+    let splitComment = comment.split(/\s*,\s*/).filter((el) => !!el)
+    let splitResult = splitComment[4]
+    if (splitResult) {
+        let result = splitResult.split(/\s*"\s*/)
+        let input = result[3].toString()
+        if (input) {
+            let output = Buffer.from(input, 'hex')
+            return output.toString()
+        } else {
+            return ''
+        }
+    } else {
+        return ''
+    }
+}
+
+export const parseTrackingKey = (trackingKey) => {
+    let splitKey = trackingKey.split(/\s*,\s*/)
+    let resultKey = splitKey[5]
+    if (resultKey) {
+        let key = resultKey.split(':')
+        let keyValue = key[1].replace(/\[|\]/g, '')
+        if (keyValue) {
+            return keyValue.toString().replace(/\s+/g, '')
+        } else {
+            return ''
+        }
+    } else {
+        return ''
+    }
+}
+
+export const decodeString = (str) => {
+    if (!!str) {
+        str = str.replace(/'/g, "''")
+        // eslint-disable-next-line no-control-regex
+        return str.replace(/\u0000/g, '', (unicode) => {
+            return String.fromCharCode(
+                parseInt(unicode.replace(/\\u/g, ''), 16)
+            )
+        })
+    }
+    return str
+}
