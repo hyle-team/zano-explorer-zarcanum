@@ -1658,7 +1658,26 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
 }));
 
 (async () => {
+
     while (true) {
+
+        await db.query(
+            `
+            WITH CTE AS (
+                SELECT 
+                    asset_id,
+                    ROW_NUMBER() OVER (PARTITION BY asset_id ORDER BY asset_id) AS rn
+                FROM assets
+            )
+            DELETE FROM assets
+            WHERE asset_id IN (
+                SELECT asset_id 
+                FROM CTE 
+                WHERE rn > 1
+            );
+            `
+        );    
+
         try {
 
             async function fetchAssets(offset, count) {
@@ -1717,7 +1736,7 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
             
             console.log('Got assets list');
 
-            const assetsRows = (await db.query("SELECT * FROM assets")).rows;
+            let assetsRows = (await db.query("SELECT * FROM assets")).rows;
             for (const assetRow of assetsRows) {
                 const foundAsset = assets.find(e => e.asset_id === assetRow.asset_id);
                 if (!foundAsset) {
@@ -1763,6 +1782,8 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
                     )
                 }
             }
+
+            assetsRows = (await db.query("SELECT * FROM assets")).rows;
             for (const asset of assets) {
                 const foundAsset = assetsRows.find(e => e.asset_id === asset.asset_id);
                 if (!foundAsset && asset.asset_id) {
@@ -1793,6 +1814,7 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
                                 meta_info,
                                 price
                             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                            ON CONFLICT (asset_id) DO NOTHING
                         `,
                         [
                             asset_id,
@@ -1806,7 +1828,7 @@ app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) =>
                             meta_info || "",
                             price
                         ]
-                    )
+                    ).catch(e => console.log('Error inserting asset: ', e));
                 }
             }
         } catch (error) {
