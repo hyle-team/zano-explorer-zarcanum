@@ -67,11 +67,11 @@ class Utils {
         if (!(result instanceof Array)) return [];
         return (reverse ? result.reverse() : result).map((e: any) => ({
             height: e.height,
-            type: e.type === 0 ? "PoS" : "PoW",
-            timestamp: parseInt(e.timestamp, 10),
+            type: e.type === '0' ? "PoS" : "PoW",
+            timestamp: +new Date(e.timestamp),
             size: e.total_txs_size,
             transactions: e.tr_count,
-            hash: !hashField ? e.id : e.hash
+            hash: !hashField ? e.tx_id : e.hash
         } as Block));
     }
 
