@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/sequelize";
+import Block from "./Block";
 
 class Transaction extends Model {
     declare readonly id: number;
@@ -44,5 +45,11 @@ Transaction.init(
         timestamps: true
     }
 );
+
+Transaction.belongsTo(Block, {
+    foreignKey: "keeper_block",
+    targetKey: "height",
+    as: "block"
+});
 
 export default Transaction;

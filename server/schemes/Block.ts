@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/sequelize";
+import Transaction from "./Transaction";
 
 class Block extends Model {
     declare readonly id: number;
@@ -39,7 +40,7 @@ Block.init(
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
-        height: { type: DataTypes.INTEGER, allowNull: false },
+        height: { type: DataTypes.INTEGER, allowNull: false, unique: true },
         actual_timestamp: { type: DataTypes.DATE, allowNull: true },
         base_reward: { type: DataTypes.TEXT, allowNull: true },
         blob: { type: DataTypes.STRING, allowNull: true },
@@ -71,5 +72,7 @@ Block.init(
         timestamps: true
     }
 );
+
+// Block.hasMany(Transaction, { foreignKey: 'keeper_block', sourceKey: 'height' });
 
 export default Block;

@@ -449,59 +449,58 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
     app.get(
         '/api/get_tx_details/:tx_hash',
         exceptionHandler(async (req, res) => {
-            const tx_hash = req.params.tx_hash.toLowerCase();
+            try {
+                const tx_hash = req.params.tx_hash.toLowerCase();
 
-            if (tx_hash) {
-                // Fetching transaction details with associated block information using Sequelize
-                const transaction = await Transaction.findOne({
-                    where: { id: tx_hash },
-                    include: [
-                        {
-                            model: Block,
-                            attributes: ['id', 'timestamp'],
-                            required: false,
-                        },
-                    ],
-                });
-
-
-                const transactionBlock = await Block.findOne({
-                    where: { tx_id: transaction?.keeper_block },
-                }).catch(() => null);
-
-                if (transaction && transactionBlock) {
-                    const response = {
-                        ...transaction.toJSON(),
-                        block_hash: transactionBlock?.tx_id,
-                        block_timestamp: transactionBlock?.timestamp,
-                        last_block: lastBlock.height,
-                    };
-
-                    res.json(response);
-                } else {
-                    const response = await get_tx_details(tx_hash);
-                    const data = response.data;
-
-                    if (data?.result?.tx_info) {
-                        if (data.result.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
-                            data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);
-                        }
-
-                        if (data.result.tx_info.outs && typeof data.result.tx_info.outs === 'object') {
-                            data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
-                        }
-
-                        res.json(data.result.tx_info);
+                if (tx_hash) {
+                    // Fetching transaction details with associated block information using Sequelize
+                    const transaction = await Transaction.findOne({
+                        where: { tx_id: tx_hash },
+                    });
+    
+    
+                    const transactionBlock = await Block.findOne({
+                        where: { height: transaction?.keeper_block },
+                    }).catch(() => null);
+    
+                    if (transaction && transactionBlock) {
+                        const response = {
+                            ...transaction.toJSON(),
+                            block_hash: transactionBlock?.tx_id,
+                            block_timestamp: transactionBlock?.timestamp,
+                            last_block: lastBlock.height,
+                        };
+    
+                        res.json(response);
                     } else {
-                        res.status(500).json({
-                            message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
-                        });
+                        const response = await get_tx_details(tx_hash);
+                        const data = response.data;
+    
+                        if (data?.result?.tx_info) {
+                            if (data.result.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
+                                data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);
+                            }
+    
+                            if (data.result.tx_info.outs && typeof data.result.tx_info.outs === 'object') {
+                                data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
+                            }
+    
+                            res.json(data.result.tx_info);
+                        } else {
+                            res.status(500).json({
+                                message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
+                            });
+                        }
                     }
+                } else {
+                    res.status(500).json({
+                        message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
+                    });
                 }
-            } else {
-                res.status(500).json({
-                    message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
-                });
+            } catch (error) {
+                console.log(error);
+                
+                res.status(500).json({ error: error.message });
             }
         })
     );
@@ -858,23 +857,6 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
         })
     )
 
-    app.get(
-        '/api/get_tx_details/:tx_hash',
-        exceptionHandler(async (req, res) => {
-            let tx_hash = req.params.tx_hash
-            const response = await axios({
-                method: 'get',
-                url: config.api,
-                data: {
-                    method: 'get_tx_details',
-                    params: { tx_hash: tx_hash }
-                }
-            })
-            res.json(response.data)
-        })
-    );
-
-
     app.get('/api/price', exceptionHandler(async (req, res) => {
         if (req.query.asset_id) {
             if (req.query.asset_id === ZANO_ASSET_ID) {
@@ -1149,6 +1131,13 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
             await sequelize.transaction(async (transaction) => {
                 try {
+
+                    if (blockInserts.length > 0) {
+                        await Block.bulkCreate(blockInserts, {
+                            transaction,
+                        });
+                    }
+
                     if (transactionInserts.length > 0) {
                         await Transaction.bulkCreate(transactionInserts, {
                             ignoreDuplicates: true,
@@ -1158,12 +1147,6 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
                     if (chartInserts.length > 0) {
                         await Chart.bulkCreate(chartInserts, {
-                            transaction,
-                        });
-                    }
-
-                    if (blockInserts.length > 0) {
-                        await Block.bulkCreate(blockInserts, {
                             transaction,
                         });
                     }
