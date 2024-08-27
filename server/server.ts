@@ -122,12 +122,12 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     const result = await getMainBlockDetails(id);
                     return res.json(result || "Block not found");
                 }
-    
+
                 res.status(400).json({ error: 'Invalid parameters' });
             } catch (error) {
                 console.log(error);
                 res.status(500).json({ error: error.message });
-                
+
             }
         })
     );
@@ -142,7 +142,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             const offset = parseInt(req.params.offset, 10);
             const count = parseInt(req.params.count, 10);
             const searchText = req.query.search || '';
-    
+
             if (!searchText) {
                 // No searchText, fetch all assets with pagination
                 const assets = await Asset.findAll({
@@ -150,10 +150,10 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     limit: count,
                     offset: offset
                 });
-    
+
                 return res.send(assets);
             }
-    
+
             // If there is searchText, count matching records
             const searchCondition = {
                 [Op.or]: [
@@ -161,11 +161,11 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     { full_name: { [Op.iLike]: `%${searchText}%` } }
                 ]
             };
-    
+
             const firstSearchRowCount = await Asset.count({
                 where: searchCondition
             });
-    
+
             if (firstSearchRowCount > 0) {
                 // Fetch records that match the searchText
                 const assets = await Asset.findAll({
@@ -174,8 +174,8 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     limit: count,
                     offset: offset
                 });
-    
-                return res.send(assets); 
+
+                return res.send(assets);
             } else {
                 // If no matching records found, fetch by asset_id
                 const assets = await Asset.findAll({
@@ -183,23 +183,23 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     limit: count,
                     offset: offset
                 });
-    
-                return res.send(assets); 
+
+                return res.send(assets);
             }
         })
     );
 
-    const getWhitelistedAssets = async (offset, count, searchText) => {  
+    const getWhitelistedAssets = async (offset, count, searchText) => {
         // Step 1: Fetch assets from external API
         const response = await axios({
             method: 'get',
             url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
         });
-    
+
         if (!response.data.assets) {
             throw new Error('Assets whitelist response not correct');
         }
-    
+
         // Step 2: Add the native Zano asset to the beginning of the array
         const allAssets = response.data.assets;
         allAssets.unshift({
@@ -214,18 +214,18 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             meta_info: "",
             price: 0
         });
-    
+
         // Step 3: Filter the assets based on searchText
         const searchTextLower = searchText?.toLowerCase();
         const filteredAssets = allAssets.filter(asset => {
-            return searchText 
+            return searchText
                 ? (
-                    asset.ticker?.toLowerCase()?.includes(searchTextLower) || 
+                    asset.ticker?.toLowerCase()?.includes(searchTextLower) ||
                     asset.full_name?.toLowerCase()?.includes(searchTextLower)
-                ) 
+                )
                 : true;
         });
-    
+
         // Step 4: Handle no search result in filtered assets
         if (filteredAssets.length > 0) {
             return filteredAssets.slice(offset, offset + count);
@@ -238,18 +238,18 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 limit: count,
                 offset: offset
             });
-    
+
             return dbAssets.map(asset => asset.toJSON());
         }
     };
-    
+
     app.get(
         '/api/get_whitelisted_assets/:offset/:count',
         exceptionHandler(async (req, res) => {
             const offset = parseInt(req.params.offset, 10);
             const count = parseInt(req.params.count, 10);
             const searchText = req.query.search || '';
-    
+
             const assets = await getWhitelistedAssets(offset, count, searchText);
             res.send(assets);
         })
@@ -290,6 +290,24 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
         })
     );
 
+    interface AggregatedData {
+        at: number;
+        sum_trc?: number;
+        bcs?: number;
+        trc?: number;
+        totalSize?: number;
+        totalTrans?: number;
+        totalD120?: number;
+        totalH100?: number;
+        totalH400?: number;
+        maxDiff?: number;
+        minDiff?: number;
+        sumDiff?: number;
+        count?: number;
+        d?: number;
+    }
+    
+
 
     app.get(
         '/api/get_chart/:chart/:period',
@@ -301,15 +319,9 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
             try {
                 if (chart === 'all') {
-                    // Fetch chart data for the 'all' case
+                    // Fetch all raw chart data for the 'all' case
                     const arrayAll = await Chart.findAll({
-                        attributes: [
-                            [col('actual_timestamp'), 'at'],
-                            [col('block_cumulative_size'), 'bcs'],
-                            [col('tr_count'), 'trc'],
-                            [col('difficulty'), 'd'],
-                            'type',
-                        ],
+                        attributes: ['actual_timestamp', 'block_cumulative_size', 'tr_count', 'difficulty', 'type'],
                         where: {
                             actual_timestamp: {
                                 [Op.gt]: period24HoursAgo,
@@ -318,24 +330,27 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                         order: [['actual_timestamp', 'DESC']],
                     });
 
-                    const rows0 = await Chart.findAll({
-                        attributes: [
-                            [fn('extract', literal("epoch from date_trunc('day', to_timestamp(actual_timestamp))")), 'at'],
-                            [fn('SUM', col('tr_count')), 'sum_trc'],
-                        ],
-                        group: ['at'],
-                        order: [['at', 'ASC']],
+                    // Fetch raw data to calculate dailySum
+                    const dailyData = await Chart.findAll({
+                        attributes: ['actual_timestamp', 'tr_count'],
+                        order: [['actual_timestamp', 'ASC']],
                     });
 
-                    const rows1 = await Chart.findAll({
-                        attributes: [
-                            'actual_timestamp',
-                            [col('difficulty120'), 'd120'],
-                            [col('hashrate100'), 'h100'],
-                            [col('hashrate400'), 'h400'],
-                        ],
+                    // Manually calculate the sum of transactions per day
+                    const dailySum: Record<number, AggregatedData> = dailyData.reduce((acc, row) => {
+                        const day = new Date(row.actual_timestamp).setHours(0, 0, 0, 0);
+                        if (!acc[day]) {
+                            acc[day] = { at: day, sum_trc: 0 };
+                        }
+                        acc[day].sum_trc += parseFloat(row.tr_count.toString());
+                        return acc;
+                    }, {});
+
+                    // Fetch raw data for hash rate calculations
+                    const hashRateData = await Chart.findAll({
+                        attributes: ['actual_timestamp', 'difficulty120', 'hashrate100', 'hashrate400'],
                         where: {
-                            type: 1,
+                            type: "1",
                             actual_timestamp: {
                                 [Op.gt]: period48HoursAgo,
                             },
@@ -345,102 +360,139 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
                     res.json({
                         data: arrayAll,
-                        dailySum: rows0,
-                        hashRateData: rows1,
+                        dailySum: Object.values(dailySum) as AggregatedData[],
+                        hashRateData,
                     });
                 } else if (chart === 'AvgBlockSize') {
-                    const result = await Chart.findAll({
-                        attributes: [
-                            [fn('extract', literal("epoch from date_trunc('hour', to_timestamp(actual_timestamp))")), 'at'],
-                            [fn('avg', col('block_cumulative_size')), 'bcs'],
-                        ],
-                        group: ['at'],
-                        order: [['at', 'ASC']],
+                    const blockSizeData = await Chart.findAll({
+                        attributes: ['actual_timestamp', 'block_cumulative_size'],
+                        order: [['actual_timestamp', 'ASC']],
                     });
+
+                    // Manually calculate average block size per hour
+                    const blockSizePerHour = blockSizeData.reduce((acc, row) => {
+                        const hour = new Date(row.actual_timestamp).setMinutes(0, 0, 0);
+                        if (!acc[hour]) {
+                            acc[hour] = { at: hour, totalSize: 0, count: 0 };
+                        }
+                        acc[hour].totalSize += parseFloat(row.block_cumulative_size);
+                        acc[hour].count++;
+                        return acc;
+                    }, {}) as Record<number, AggregatedData>;
+
+                    const result = Object.values(blockSizePerHour).map(hourData => ({
+                        at: hourData.at,
+                        bcs: (hourData?.totalSize || 0) / (hourData.count || 1),
+                    })) as AggregatedData[];
+
                     res.json(result);
                 } else if (chart === 'AvgTransPerBlock') {
-                    const result = await Chart.findAll({
-                        attributes: [
-                            [fn('extract', literal("epoch from date_trunc('hour', to_timestamp(actual_timestamp))")), 'at'],
-                            [fn('avg', col('tr_count')), 'trc'],
-                        ],
-                        group: ['at'],
-                        order: [['at', 'ASC']],
+                    const transData = await Chart.findAll({
+                        attributes: ['actual_timestamp', 'tr_count'],
+                        order: [['actual_timestamp', 'ASC']],
                     });
+
+                    // Manually calculate average transactions per block per hour
+                    const transPerHour = transData.reduce((acc, row) => {
+                        const hour = new Date(row.actual_timestamp).setMinutes(0, 0, 0);
+                        if (!acc[hour]) {
+                            acc[hour] = { at: hour, totalTrans: 0, count: 0 };
+                        }
+                        acc[hour].totalTrans += parseFloat(row.tr_count.toString());
+                        acc[hour].count++;
+                        return acc;
+                    }, {}) as Record<number, AggregatedData>;
+
+                    const result = Object.values(transPerHour).map(hourData => ({
+                        at: hourData.at,
+                        trc: (hourData.totalTrans || 0) / (hourData.count || 1),
+                    }));
+
                     res.json(result);
                 } else if (chart === 'hashRate') {
-                    const result = await Chart.findAll({
-                        attributes: [
-                            [fn('extract', literal("epoch from date_trunc('hour', to_timestamp(actual_timestamp))")), 'at'],
-                            [fn('avg', col('difficulty120')), 'd120'],
-                            [fn('avg', col('hashrate100')), 'h100'],
-                            [fn('avg', col('hashrate400')), 'h400'],
-                        ],
-                        where: { type: 1 },
-                        group: ['at'],
-                        order: [['at', 'ASC']],
+                    const hashRateData = await Chart.findAll({
+                        attributes: ['actual_timestamp', 'difficulty120', 'hashrate100', 'hashrate400'],
+                        where: { type: "1" },
+                        order: [['actual_timestamp', 'ASC']],
                     });
+
+                    // Manually calculate average hash rates per hour
+                    const hashRatePerHour = hashRateData.reduce((acc, row) => {
+                        const hour = new Date(row.actual_timestamp).setMinutes(0, 0, 0);
+                        if (!acc[hour]) {
+                            acc[hour] = { at: hour, totalD120: 0, totalH100: 0, totalH400: 0, count: 0 };
+                        }
+                        acc[hour].totalD120 += parseFloat(row.difficulty120 || "");
+                        acc[hour].totalH100 += parseFloat(row.hashrate100 || "");
+                        acc[hour].totalH400 += parseFloat(row.hashrate400 || "");
+                        acc[hour].count++;
+                        return acc;
+                    }, {}) as Record<number, AggregatedData>;
+
+                    const result = Object.values(hashRatePerHour).map(hourData => ({
+                        at: hourData.at,
+                        d120: (hourData.totalD120 || 0) / (hourData.count || 1),
+                        h100: (hourData.totalH100 || 0) / (hourData.count || 1),
+                        h400: (hourData.totalH400 || 0) / (hourData.count || 1),
+                    })) as AggregatedData[];
+
                     res.json(result);
-                } else if (chart === 'pos-difficulty') {
-                    const aggregatedResult = await Chart.findAll({
-                        attributes: [
-                            [fn('extract', literal("epoch from date_trunc('hour', to_timestamp(actual_timestamp))")), 'at'],
-                            [
-                                fn('case', literal(`when (max(difficulty) - avg(difficulty)) > (avg(difficulty) - min(difficulty)) then max(difficulty) else min(difficulty) end`)),
-                                'd',
-                            ],
-                        ],
-                        where: { type: 0 },
-                        group: ['at'],
-                        order: [['at', 'ASC']],
-                    });
-
-                    const detailedResult = await Chart.findAll({
+                } else if (chart === 'pos-difficulty' || chart === 'pow-difficulty') {
+                    const type = (chart === 'pos-difficulty' ? 0 : 1).toString();
+                    const difficultyData = await Chart.findAll({
                         attributes: ['actual_timestamp', 'difficulty'],
-                        where: { type: 0 },
+                        where: { type },
                         order: [['actual_timestamp', 'ASC']],
                     });
 
-                    res.json({
-                        aggregated: aggregatedResult,
-                        detailed: detailedResult,
-                    });
-                } else if (chart === 'pow-difficulty') {
-                    const aggregatedResult = await Chart.findAll({
-                        attributes: [
-                            [fn('extract', literal("epoch from date_trunc('hour', to_timestamp(actual_timestamp))")), 'at'],
-                            [
-                                fn('case', literal(`when (max(difficulty) - avg(difficulty)) > (avg(difficulty) - min(difficulty)) then max(difficulty) else min(difficulty) end`)),
-                                'd',
-                            ],
-                        ],
-                        where: { type: 1 },
-                        group: ['at'],
-                        order: [['at', 'ASC']],
-                    });
+                    // Manually calculate the max/min/avg difficulty logic per hour
+                    const difficultyPerHour = difficultyData.reduce((acc, row) => {
+                        const hour = new Date(row.actual_timestamp).setMinutes(0, 0, 0);
+                        if (!acc[hour]) {
+                            acc[hour] = { at: hour, maxDiff: parseFloat(row.difficulty), minDiff: parseFloat(row.difficulty), sumDiff: 0, count: 0 };
+                        }
+                        const diff = parseFloat(row.difficulty);
+                        acc[hour].maxDiff = Math.max(acc[hour].maxDiff, diff);
+                        acc[hour].minDiff = Math.min(acc[hour].minDiff, diff);
+                        acc[hour].sumDiff += diff;
+                        acc[hour].count++;
+                        return acc;
+                    }, {}) as Record<number, AggregatedData>;
 
-                    const detailedResult = await Chart.findAll({
-                        attributes: ['actual_timestamp', 'difficulty'],
-                        where: { type: 1 },
-                        order: [['actual_timestamp', 'ASC']],
-                    });
+                    const aggregatedResult = Object.values(difficultyPerHour).map(hourData => ({
+                        at: hourData.at,
+                        d:  (hourData.maxDiff || 0 - (hourData.sumDiff || 0 / (hourData.count || 1))) 
+                            > 
+                            ((hourData.sumDiff || 0 / (hourData.count || 1)) - (hourData.minDiff || 0)) ? hourData.maxDiff : hourData.minDiff,
+                    }));
+
+                    const detailedResult = difficultyData;
 
                     res.json({
                         aggregated: aggregatedResult,
                         detailed: detailedResult,
                     });
                 } else if (chart === 'ConfirmTransactPerDay') {
-                    const result = await Chart.findAll({
-                        attributes: [
-                            [fn('extract', literal("epoch from date_trunc('day', to_timestamp(actual_timestamp))")), 'at'],
-                            [fn('SUM', col('tr_count')), 'sum_trc'],
-                        ],
-                        group: ['at'],
-                        order: [['at', 'ASC']],
+                    const transData = await Chart.findAll({
+                        attributes: ['actual_timestamp', 'tr_count'],
+                        order: [['actual_timestamp', 'ASC']],
                     });
-                    res.json(result);
+
+                    // Manually calculate the sum of confirmed transactions per day
+                    const transPerDay = transData.reduce((acc, row) => {
+                        const day = new Date(row.actual_timestamp).setHours(0, 0, 0, 0);
+                        if (!acc[day]) {
+                            acc[day] = { at: day, sum_trc: 0 };
+                        }
+                        acc[day].sum_trc += parseFloat(row.tr_count.toString());
+                        return acc;
+                    }, {});
+
+                    res.json(Object.values(transPerDay));
                 }
             } catch (error) {
+                console.log(error);
+                
                 res.status(500).json({ error: error.message });
             }
         })
@@ -457,12 +509,12 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     const transaction = await Transaction.findOne({
                         where: { tx_id: tx_hash },
                     });
-    
-    
+
+
                     const transactionBlock = await Block.findOne({
                         where: { height: transaction?.keeper_block },
                     }).catch(() => null);
-    
+
                     if (transaction && transactionBlock) {
                         const response = {
                             ...transaction.toJSON(),
@@ -470,21 +522,21 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                             block_timestamp: transactionBlock?.timestamp,
                             last_block: lastBlock.height,
                         };
-    
+
                         res.json(response);
                     } else {
                         const response = await get_tx_details(tx_hash);
                         const data = response.data;
-    
+
                         if (data?.result?.tx_info) {
                             if (data.result.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
                                 data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);
                             }
-    
+
                             if (data.result.tx_info.outs && typeof data.result.tx_info.outs === 'object') {
                                 data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
                             }
-    
+
                             res.json(data.result.tx_info);
                         } else {
                             res.status(500).json({
@@ -499,7 +551,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 }
             } catch (error) {
                 console.log(error);
-                
+
                 res.status(500).json({ error: error.message });
             }
         })
@@ -599,7 +651,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 return res.json({ result: 'NOT FOUND' });
             } catch (error) {
                 console.log(error);
-                
+
                 next(error);
             }
         })
@@ -647,7 +699,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             try {
                 const start = parseInt(req.params.start, 10);
                 const count = parseInt(req.params.count, 10);
-    
+
                 if (start && count) {
                     const result = await getBlocksDetails({ start, count });
                     res.json(result);
@@ -656,7 +708,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 }
             } catch (error) {
                 console.log(error);
-                
+
                 res.status(500).json({ error: error.message });
             }
         })
@@ -863,7 +915,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 if (!state.priceData?.zano?.zano?.usd) {
                     return res.send({ success: false, data: "Price not found" });
                 }
-    
+
                 return res.send({
                     success: true,
                     data: {
@@ -873,23 +925,23 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     }
                 });
             }
-    
+
             const assetData = await Asset.findOne({
                 where: { asset_id: req.query.asset_id }
             });
-    
+
             if (!assetData) {
                 return res.json({ success: false, data: "Asset not found" });
             }
-    
+
             // Assuming that you handle further processing of the `assetData` here...
         }
-    
+
         const responseData = {
             success: true,
             data: state.priceData.zano
         };
-    
+
         switch (req.query.asset) {
             case "ethereum":
                 if (state.priceData?.ethereum?.ethereum?.usd === undefined) {
@@ -906,29 +958,29 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 }
                 break;
         }
-    
+
         return res.json(responseData);
     }));
 
 
     app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) => {
         const { asset_id } = req.params;
-    
+
         const dbAsset = await Asset.findOne({
             where: { asset_id }
         });
-    
+
         if (!dbAsset) {
             // Fetch the external asset list
             const response = await axios({
                 method: 'get',
                 url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
             });
-    
+
             if (!response.data.assets) {
                 throw new Error('Assets whitelist response not correct');
             }
-    
+
             // Add Zano to the beginning of the list
             const allAssets = response.data.assets;
             allAssets.unshift({
@@ -943,9 +995,9 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 meta_info: "",
                 price: 0
             });
-    
+
             const whitelistedAsset = allAssets.find(e => e.asset_id === asset_id);
-    
+
             if (whitelistedAsset) {
                 return res.json({ success: true, asset: whitelistedAsset });
             } else {
@@ -955,7 +1007,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             return res.json({ success: true, asset: dbAsset });
         }
     }));
-    
+
 
 
     app.get("/*", function (req, res) {
@@ -999,7 +1051,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
                     let localTr: any;
 
-                    while (!!(localTr = bl.transactions_details.splice(0, 1)[0])) {                        
+                    while (!!(localTr = bl.transactions_details.splice(0, 1)[0])) {
                         let response = await get_tx_details(localTr.id);
                         let tx_info = response.data.result.tx_info;
 
@@ -1170,7 +1222,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     })
                 } catch (error) {
                     console.log(error);
-                    
+
                     log(`SyncTransactions() Transaction Commit ERROR: ${error}`);
                     throw error;
                 }
