@@ -12,6 +12,8 @@ class OutInfo extends Model {
     declare readonly updatedAt: Date;
 }
 
+export type IOutInfo = Omit<OutInfo, keyof Model | 'createdAt' | 'updatedAt' | 'id'>;
+
 OutInfo.init(
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },

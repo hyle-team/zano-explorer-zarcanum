@@ -20,6 +20,8 @@ class Transaction extends Model {
     declare readonly updatedAt: Date;
 }
 
+export type ITransaction = Omit<Transaction, keyof Model | 'createdAt' | 'updatedAt' | 'id'>;
+
 Transaction.init(
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },

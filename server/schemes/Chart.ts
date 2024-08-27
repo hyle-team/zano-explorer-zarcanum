@@ -10,13 +10,15 @@ class Chart extends Model {
     declare difficulty: number;
     declare tr_count: BigInt;
     declare type: number;
-    declare difficulty120: number;
-    declare hashrate100: number;
-    declare hashrate400: number;
+    declare difficulty120?: number;
+    declare hashrate100?: number;
+    declare hashrate400?: number;
     
     declare readonly createdAt: Date;
     declare readonly updatedAt: Date;
 }
+
+export type IChart = Omit<Chart, keyof Model | 'createdAt' | 'updatedAt' | 'id'>;
 
 Chart.init(
     {

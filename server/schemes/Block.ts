@@ -33,6 +33,8 @@ class Block extends Model {
     declare readonly updatedAt: Date;
 }
 
+export type IBlock = Omit<Block, keyof Model | 'createdAt' | 'updatedAt' | 'id'>;
+
 Block.init(
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },

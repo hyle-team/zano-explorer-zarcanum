@@ -8,6 +8,7 @@ import Transaction from "../schemes/Transaction";
 import Pool from "../schemes/Pool";
 import { io } from "../server";
 import { blockInfo, lastBlock } from "./states";
+import { Socket } from "socket.io";
 
 interface getBlocksDetailsParams {
     start: number;
@@ -162,7 +163,7 @@ export async function getTxPoolDetails(count: number) {
     return result.length > 0 ? result : [];
 }
 
-export const emitSocketInfo = async (socket) => {
+export const emitSocketInfo = async (socket?: Socket) => {
     if (config.websocket.enabled_during_sync && lastBlock) {
         blockInfo.lastBlock = lastBlock.height
 
