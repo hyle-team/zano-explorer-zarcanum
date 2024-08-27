@@ -28,11 +28,12 @@
   },
   "scripts": {
     "postinstall": "cd server && npm i",
-    "start": "react-scripts start",
+    "client": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "concurrently \"npx nodemon --exec tsx ./server/server.ts\" \"npm start\""
+    "dev": "concurrently \"npx nodemon --exec tsx ./server/server.ts\" \"npm client\"",
+    "start": "tsx ./server/server.ts"
   },
   "eslintConfig": {
     "extends": [
