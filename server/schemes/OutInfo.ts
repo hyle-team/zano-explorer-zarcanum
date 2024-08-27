@@ -3,7 +3,7 @@ import sequelize from "../database/sequelize";
 
 class OutInfo extends Model {
     declare readonly id: number;
-    declare amount: number;
+    declare amount: string;
     declare i: BigInt;
     declare tx_id: string;
     declare block: BigInt;
@@ -17,7 +17,7 @@ export type IOutInfo = Omit<OutInfo, keyof Model | 'createdAt' | 'updatedAt' | '
 OutInfo.init(
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        amount: { type: DataTypes.INTEGER, allowNull: true },
+        amount: { type: DataTypes.TEXT, allowNull: true },
         i: { type: DataTypes.BIGINT, allowNull: true },
         tx_id: { type: DataTypes.STRING, allowNull: true },
         block: { type: DataTypes.BIGINT, allowNull: true }

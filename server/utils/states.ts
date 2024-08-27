@@ -15,11 +15,11 @@ export function setBlockInfo(newBlockInfo: IBlockInfo) {
 
 export interface ILastBlock {
     height: number,
-    id: string
+    tx_id: string
 }
 export let lastBlock: ILastBlock = {
     height: -1,
-    id: '0000000000000000000000000000000000000000000000000000000000000000'
+    tx_id: '0000000000000000000000000000000000000000000000000000000000000000'
 }
 
 export interface State {

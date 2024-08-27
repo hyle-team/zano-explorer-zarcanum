@@ -42,7 +42,7 @@ class Fetch {
         if (result.success === false) return null;
         if (!(result instanceof Array)) return null;
 
-        const hash = result[0]?.id;
+        const hash = result[0]?.tx_id;
 
         if (typeof hash !== "string") return "";
 

@@ -41,7 +41,7 @@ function Transaction() {
             if (result.success === false) return;
             if (!(typeof result === "object")) return;
             const newTransactionInfo: TransactionInfo = {
-                hash: result.id || "",
+                hash: result.hash || "",
                 amount: Utils.toShiftedNumber(result.amount || "0", 12),
                 fee: Utils.toShiftedNumber(result.fee || "0", 12),
                 size: result.blob_size || "0",

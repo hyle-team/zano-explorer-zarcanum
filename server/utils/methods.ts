@@ -21,7 +21,7 @@ export async function getBlocksDetails(params: getBlocksDetailsParams) {
     const result = await Block.findAll({
         attributes: [
             'height',
-            [literal('CASE WHEN type = 0 THEN actual_timestamp ELSE timestamp END'), 'timestamp'],
+            [literal(`CASE WHEN type = '0' THEN actual_timestamp ELSE timestamp END`), 'timestamp'],
             'base_reward',
             'blob',
             'block_cumulative_size',
@@ -30,7 +30,7 @@ export async function getBlocksDetails(params: getBlocksDetailsParams) {
             'cumulative_diff_precise',
             'difficulty',
             'effective_fee_median',
-            'id',
+            'tx_id',
             'is_orphan',
             'penalty',
             'prev_id',
@@ -107,31 +107,30 @@ export async function getVisibilityInfo() {
 
 export async function getMainBlockDetails(id: string) {
     const block = await Block.findOne({
-        where: { id: id },
-        include: [
-            {
-                model: Block,
-                as: 'nextBlock',
-                attributes: ['id'],
-                where: {
-                    height: {
-                        [Op.gt]: col('Block.height')
-                    }
-                },
-                order: [['height', 'ASC']],
-                limit: 1,
-                required: false // left join
-            }
-        ]
+        where: { tx_id: id }
     });
 
     if (block) {
         // Find transactions associated with the block
+
+        const nextBlock = await Block.findOne({
+            where: {
+                height: {
+                    [Op.gt]: block.height
+                }
+            },
+            order: [['height', 'ASC']]
+        });
+
+        if (nextBlock) {
+            block.setDataValue('nextBlock', nextBlock.tx_id);
+        }
+
         const transactions = await Transaction.findAll({
             where: { keeper_block: block.height }
         });
-
-        block.setDataValue('transactions_details', transactions);
+        
+        block.setDataValue('transactions_details', transactions.map(e => e.toJSON()));
 
         return block.toJSON();
     }

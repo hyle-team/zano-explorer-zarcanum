@@ -76,9 +76,12 @@ function Block(props: { alt?: boolean }) {
             if (result.success === false) return;
 
             setHeight(result.height || null);
+
+            console.log(result);
+            
             
             setBlockInfo({
-                type: result.type === 1 ? "PoW" : "PoS",
+                type: result.type === "1" ? "PoW" : "PoS",
                 timestamp: result.timestamp || undefined,
                 actualTimestamp: result.actual_timestamp || undefined,
                 difficulty: Utils.formatNumber(result.difficulty || "", 0),
@@ -99,7 +102,7 @@ function Block(props: { alt?: boolean }) {
                 transactionsSize: result.total_txs_size || "0",
                 alreadyGeneratedCoins: result.already_generated_coins || undefined, 
                 object_in_json: result.object_in_json || undefined,
-                id: result.id || undefined,
+                tx_id: result.tx_id || undefined,
                 prev_id: result.prev_id || undefined,
                 minor_version: result?.object_in_json?.split('\"minor_version\": ')?.[1]?.split(',')?.[0] || '-',
                 major_version: result?.object_in_json?.split('\"major_version\": ')?.[1]?.split(',')?.[0] || '-',
@@ -120,7 +123,7 @@ function Block(props: { alt?: boolean }) {
 
             setTransactions(
                 transactionsDetails.map(e => ({
-                    hash: e?.id || "",
+                    hash: e?.tx_id || "",
                     fee: Utils.toShiftedNumber(e?.fee || "0", 12),
                     amount: Utils.toShiftedNumber(e?.amount?.toString() || "0", 12),
                     size: e?.blob_size || "0"
@@ -190,15 +193,15 @@ function Block(props: { alt?: boolean }) {
                             </tr>
                             <tr>
                                 <td>Timestamp (UTC):</td>
-                                <td>{blockInfo?.timestamp ? Utils.formatTimestampUTC(blockInfo?.timestamp) : "-"}</td>
+                                <td>{blockInfo?.timestamp ? Utils.formatTimestampUTC(+new Date(blockInfo?.timestamp)) : "-"}</td>
                             </tr>
                             <tr>
                                 <td>ID</td>
-                                <td><a href="">{Utils.shortenAddress(blockInfo?.id ?? "-")}</a></td>
+                                <td><a href="">{Utils.shortenAddress(blockInfo?.tx_id ?? "-")}</a></td>
                             </tr>
                             <tr>
                                 <td>Actual Timestamp (UTC):</td>
-                                <td>{blockInfo?.actualTimestamp ? Utils.formatTimestampUTC(blockInfo?.actualTimestamp) : "-"}</td>
+                                <td>{blockInfo?.actualTimestamp ? Utils.formatTimestampUTC(+new Date(blockInfo?.actualTimestamp)) : "-"}</td>
                             </tr>
                             <tr>
                                 <td>Difficulty:</td>

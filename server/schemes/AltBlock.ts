@@ -9,17 +9,17 @@ class AltBlock extends Model {
     declare size: BigInt;
     declare hash: string;
     declare type: number;
-    declare difficulty: number;
-    declare cumulative_diff_adjusted: number;
+    declare difficulty: string;
+    declare cumulative_diff_adjusted: string;
     declare is_orphan: boolean;
-    declare base_reward: number;
-    declare total_fee: number;
+    declare base_reward: string;
+    declare total_fee: string;
     declare penalty: BigInt;
     declare summary_reward: BigInt;
-    declare block_cumulative_size:  number;
-    declare this_block_fee_median: number;
-    declare effective_fee_median: number;
-    declare total_txs_size: number;
+    declare block_cumulative_size:  string;
+    declare this_block_fee_median: string;
+    declare effective_fee_median: string;
+    declare total_txs_size: string;
     declare transaction_details: string;
     declare miner_txt_info: string;
     declare pow_seed: string;
@@ -38,17 +38,17 @@ AltBlock.init(
         size: { type: DataTypes.BIGINT, allowNull: true },
         hash: { type: DataTypes.STRING, allowNull: true },
         type: { type: DataTypes.INTEGER, allowNull: true },
-        difficulty: { type: DataTypes.INTEGER, allowNull: true },
-        cumulative_diff_adjusted: { type: DataTypes.INTEGER, allowNull: true },
+        difficulty: { type: DataTypes.TEXT, allowNull: true },
+        cumulative_diff_adjusted: { type: DataTypes.TEXT, allowNull: true },
         is_orphan: { type: DataTypes.BOOLEAN, allowNull: true },
-        base_reward: { type: DataTypes.INTEGER, allowNull: true },
-        total_fee: { type: DataTypes.INTEGER, allowNull: true },
+        base_reward: { type: DataTypes.TEXT, allowNull: true },
+        total_fee: { type: DataTypes.TEXT, allowNull: true },
         penalty: { type: DataTypes.BIGINT, allowNull: true },
         summary_reward: { type: DataTypes.BIGINT, allowNull: true },
-        block_cumulative_size: { type: DataTypes.INTEGER, allowNull: true },
-        this_block_fee_median: { type: DataTypes.INTEGER, allowNull: true },
-        effective_fee_median: { type: DataTypes.INTEGER, allowNull: true },
-        total_txs_size: { type: DataTypes.INTEGER, allowNull: true },
+        block_cumulative_size: { type: DataTypes.TEXT, allowNull: true },
+        this_block_fee_median: { type: DataTypes.TEXT, allowNull: true },
+        effective_fee_median: { type: DataTypes.TEXT, allowNull: true },
+        total_txs_size: { type: DataTypes.TEXT, allowNull: true },
         transaction_details: { type: DataTypes.STRING, allowNull: true },
         miner_txt_info: { type: DataTypes.STRING, allowNull: true },
         pow_seed: { type: DataTypes.STRING, allowNull: true }

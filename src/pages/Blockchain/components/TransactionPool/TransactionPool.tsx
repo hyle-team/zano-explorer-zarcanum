@@ -21,12 +21,12 @@ function TransactionPool() {
     const tableHeaders = [ "TIMESTAMP (UTC)", "AGE", "SIZE", "FEE", "HASH" ];
 
     useEffect(() => {
-        socket.on("get_transaction_pool_info", (data) => {
+        socket.on("get_transaction_pool_info", (data: string) => {
             try {
-                data = JSON.parse(data);
-                console.log(data);
+                const parsedData = JSON.parse(data);
+                console.log(parsedData);
                 
-                setPoolElements(data);
+                setPoolElements(parsedData);
             } catch (error) {
                 console.error(error);
             }

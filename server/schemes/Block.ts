@@ -5,25 +5,25 @@ class Block extends Model {
     declare readonly id: number;
     declare height: number;
     declare actual_timestamp: Date;
-    declare base_reward: number;
+    declare base_reward: string;
     declare blob: string;
-    declare block_cumulative_size: number;
-    declare block_tself_size: number;
-    declare cumulative_diff_adjusted: number;
-    declare cumulative_diff_precise: number;
-    declare difficulty: number;
-    declare effective_fee_median: number;
+    declare block_cumulative_size: string;
+    declare block_tself_size: string;
+    declare cumulative_diff_adjusted: string;
+    declare cumulative_diff_precise: string;
+    declare difficulty: string;
+    declare effective_fee_median: string;
     declare tx_id: string;
-    declare is_orphan: string;
-    declare penalty: BigInt;
+    declare is_orphan: boolean;
+    declare penalty: string;
     declare prev_id: string;
-    declare summary_reward: number;
-    declare this_block_fee_median: number;
+    declare summary_reward: string;
+    declare this_block_fee_median: string;
     declare timestamp: Date;
-    declare total_fee: number;
-    declare total_txs_size: number;
-    declare tr_count: BigInt;
-    declare type: number;
+    declare total_fee: string;
+    declare total_txs_size: string;
+    declare tr_count: string;
+    declare type: string;
     declare miner_text_info: string;
     declare pow_seed: string;
     declare already_generated_coins: string;
@@ -41,25 +41,25 @@ Block.init(
 
         height: { type: DataTypes.INTEGER, allowNull: false },
         actual_timestamp: { type: DataTypes.DATE, allowNull: true },
-        base_reward: { type: DataTypes.INTEGER, allowNull: true },
+        base_reward: { type: DataTypes.TEXT, allowNull: true },
         blob: { type: DataTypes.STRING, allowNull: true },
-        block_cumulative_size: { type: DataTypes.INTEGER, allowNull: true },
-        block_tself_size: { type: DataTypes.INTEGER, allowNull: true },
-        cumulative_diff_adjusted: { type: DataTypes.INTEGER, allowNull: true },
-        cumulative_diff_precise: { type: DataTypes.INTEGER, allowNull: true },
-        difficulty: { type: DataTypes.INTEGER, allowNull: true },
-        effective_fee_median: { type: DataTypes.INTEGER, allowNull: true },
+        block_cumulative_size: { type: DataTypes.TEXT, allowNull: true },
+        block_tself_size: { type: DataTypes.TEXT, allowNull: true },
+        cumulative_diff_adjusted: { type: DataTypes.TEXT, allowNull: true },
+        cumulative_diff_precise: { type: DataTypes.TEXT, allowNull: true },
+        difficulty: { type: DataTypes.TEXT, allowNull: true },
+        effective_fee_median: { type: DataTypes.TEXT, allowNull: true },
         tx_id: { type: DataTypes.STRING, allowNull: true },
-        is_orphan: { type: DataTypes.STRING, allowNull: true },
-        penalty: { type: DataTypes.BIGINT, allowNull: true },
+        is_orphan: { type: DataTypes.BOOLEAN, allowNull: true },
+        penalty: { type: DataTypes.TEXT, allowNull: true },
         prev_id: { type: DataTypes.STRING, allowNull: true },
-        summary_reward: { type: DataTypes.INTEGER, allowNull: true },
-        this_block_fee_median: { type: DataTypes.INTEGER, allowNull: true },
+        summary_reward: { type: DataTypes.TEXT, allowNull: true },
+        this_block_fee_median: { type: DataTypes.TEXT, allowNull: true },
         timestamp: { type: DataTypes.DATE, allowNull: true },
-        total_fee: { type: DataTypes.INTEGER, allowNull: true },
-        total_txs_size: { type: DataTypes.INTEGER, allowNull: true },
-        tr_count: { type: DataTypes.BIGINT, allowNull: true },
-        type: { type: DataTypes.INTEGER, allowNull: true },
+        total_fee: { type: DataTypes.TEXT, allowNull: true },
+        total_txs_size: { type: DataTypes.TEXT, allowNull: true },
+        tr_count: { type: DataTypes.TEXT, allowNull: true },
+        type: { type: DataTypes.TEXT, allowNull: true },
         miner_text_info: { type: DataTypes.STRING, allowNull: true },
         pow_seed: { type: DataTypes.STRING, allowNull: true },
         already_generated_coins: { type: DataTypes.STRING, allowNull: true },

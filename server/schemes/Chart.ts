@@ -5,14 +5,14 @@ class Chart extends Model {
     declare readonly id: number;
     declare height: number;
     declare actual_timestamp: Date;
-    declare block_cumulative_size: number;
-    declare cumulative_diff_precise: number;
-    declare difficulty: number;
+    declare block_cumulative_size: string;
+    declare cumulative_diff_precise: string;
+    declare difficulty: string;
     declare tr_count: BigInt;
-    declare type: number;
-    declare difficulty120?: number;
-    declare hashrate100?: number;
-    declare hashrate400?: number;
+    declare type: string;
+    declare difficulty120?: string;
+    declare hashrate100?: string;
+    declare hashrate400?: string;
     
     declare readonly createdAt: Date;
     declare readonly updatedAt: Date;
@@ -26,14 +26,14 @@ Chart.init(
 
         height: { type: DataTypes.INTEGER, allowNull: false },
         actual_timestamp: { type: DataTypes.DATE, allowNull: true },
-        block_cumulative_size: { type: DataTypes.INTEGER, allowNull: true },
-        cumulative_diff_precise: { type: DataTypes.INTEGER, allowNull: true },
-        difficulty: { type: DataTypes.INTEGER, allowNull: true },
-        tr_count: { type: DataTypes.BIGINT, allowNull: true },
-        type: { type: DataTypes.INTEGER, allowNull: true },
-        difficulty120: { type: DataTypes.INTEGER, allowNull: true },
-        hashrate100: { type: DataTypes.INTEGER, allowNull: true },
-        hashrate400: { type: DataTypes.INTEGER, allowNull: true }
+        block_cumulative_size: { type: DataTypes.TEXT, allowNull: true },
+        cumulative_diff_precise: { type: DataTypes.TEXT, allowNull: true },
+        difficulty: { type: DataTypes.TEXT, allowNull: true },
+        tr_count: { type: DataTypes.TEXT, allowNull: true },
+        type: { type: DataTypes.TEXT, allowNull: true },
+        difficulty120: { type: DataTypes.TEXT, allowNull: true },
+        hashrate100: { type: DataTypes.TEXT, allowNull: true },
+        hashrate400: { type: DataTypes.TEXT, allowNull: true }
     },
     {
         sequelize,

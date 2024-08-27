@@ -23,6 +23,9 @@ import Asset, { IAsset } from "./schemes/Asset";
 import { ITransaction } from "./schemes/Transaction";
 import BigNumber from "bignumber.js";
 
+// @ts-ignore
+const __dirname = import.meta.dirname;
+
 
 const app = express();
 const server = http.createServer(app);
@@ -92,23 +95,46 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
         })
     );
 
+    // app.get(
+    //     '/api/get_main_block_details/:id',
+    //     exceptionHandler(async (req, res) => {
+    //         let id = req.params.id
+    //         const response = await axios({
+    //             method: 'get',
+    //             url: config.api,
+    //             data: {
+    //                 method: 'get_main_block_details',
+    //                 params: {
+    //                     id: id
+    //                 }
+    //             }
+    //         })
+    //         res.json(response.data)
+    //     })
+    // )
+
     app.get(
         '/api/get_main_block_details/:id',
         exceptionHandler(async (req, res) => {
-            let id = req.params.id
-            const response = await axios({
-                method: 'get',
-                url: config.api,
-                data: {
-                    method: 'get_main_block_details',
-                    params: {
-                        id: id
-                    }
+            try {
+                let id = req.params.id.toLowerCase()
+                if (id) {
+                    const result = await getMainBlockDetails(id);
+                    return res.json(result || "Block not found");
                 }
-            })
-            res.json(response.data)
+    
+                res.status(400).json({ error: 'Invalid parameters' });
+            } catch (error) {
+                console.log(error);
+                res.status(500).json({ error: error.message });
+                
+            }
         })
-    )
+    );
+
+    app.get('/api/ping', exceptionHandler(async (req, res) => {
+        res.send('pong')
+    }));
 
     app.get(
         '/api/get_assets/:offset/:count',
@@ -228,28 +254,6 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             res.send(assets);
         })
     );
-
-    app.get(
-        '/api/get_blocks_details/:start/:count',
-        exceptionHandler(async (req, res) => {
-            let start = req.params.start
-            let count = req.params.count
-            const response = await axios({
-                method: 'get',
-                url: config.api,
-                data: {
-                    method: 'get_blocks_details',
-                    params: {
-                        height_start: parseInt(start ? start : "0", 10),
-                        count: parseInt(count ? count : "10", 10),
-                        ignore_transactions: false
-                    }
-                }
-            })
-            res.json(response.data)
-        })
-    )
-
 
     app.get(
         '/api/get_aliases/:offset/:count/:search',
@@ -548,7 +552,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
             try {
                 // Search in the 'blocks' table
-                let blockResult = await Block.findOne({ where: { id } });
+                let blockResult = await Block.findOne({ where: { tx_id: id } });
                 if (blockResult) {
                     return res.json({ result: 'block' });
                 }
@@ -560,7 +564,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 }
 
                 // Search in the 'transactions' table
-                let transactionResult = await Transaction.findOne({ where: { id } });
+                let transactionResult = await Transaction.findOne({ where: { tx_id: id } });
                 if (transactionResult) {
                     return res.json({ result: 'tx' });
                 }
@@ -595,6 +599,8 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 // If nothing is found
                 return res.json({ result: 'NOT FOUND' });
             } catch (error) {
+                console.log(error);
+                
                 next(error);
             }
         })
@@ -639,14 +645,20 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
     app.get(
         '/api/get_blocks_details/:start/:count',
         exceptionHandler(async (req, res) => {
-            const start = parseInt(req.params.start, 10);
-            const count = parseInt(req.params.count, 10);
-
-            if (start && count) {
-                const result = await getBlocksDetails({ start, count });
-                res.json(result);
-            } else {
-                res.status(400).json({ error: 'Invalid parameters' });
+            try {
+                const start = parseInt(req.params.start, 10);
+                const count = parseInt(req.params.count, 10);
+    
+                if (start && count) {
+                    const result = await getBlocksDetails({ start, count });
+                    res.json(result);
+                } else {
+                    res.status(400).json({ error: 'Invalid parameters' });
+                }
+            } catch (error) {
+                console.log(error);
+                
+                res.status(500).json({ error: error.message });
             }
         })
     );
@@ -706,19 +718,6 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
         exceptionHandler(async (_, res) => {
             const result = await getVisibilityInfo();
             res.send(result)
-        })
-    );
-
-    app.get(
-        '/api/get_main_block_details/:id',
-        exceptionHandler(async (req, res) => {
-            let id = req.params.id.toLowerCase()
-            if (id) {
-                const result = await getMainBlockDetails(id);
-                res.json(result || "Block not found");
-            }
-
-            res.status(400).json({ error: 'Invalid parameters' });
         })
     );
 
@@ -1018,7 +1017,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
                     let localTr: any;
 
-                    while (!!(localTr = bl.transactions_details.splice(0, 1)[0])) {
+                    while (!!(localTr = bl.transactions_details.splice(0, 1)[0])) {                        
                         let response = await get_tx_details(localTr.id);
                         let tx_info = response.data.result.tx_info;
 
@@ -1098,7 +1097,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                         let response = await get_out_info(localOutAmount, localOut.i);
 
                         outInfoInserts.push({
-                            amount: localOut.amount,
+                            amount: localOut.amount?.toString(),
                             i: localOut.i,
                             tx_id: response.data.result.tx_id,
                             block: bl.height,
@@ -1169,20 +1168,26 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                         });
                     }
 
-                    const elementOne = state.block_array[0];
-                    setLastBlock(state.block_array.pop());
+                    // const elementOne = state.block_array[0];
+                    const newLastBlock = state.block_array.pop();
+                    setLastBlock({
+                        height: newLastBlock.height,
+                        tx_id: newLastBlock.id,
+                    });
                     log(`BLOCKS: db = ${lastBlock.height}/ server = ${blockInfo.height}`);
 
-                    await sequelize.query(
-                        `CALL update_statistics(${Math.min(elementOne.height, lastBlock.height)})`,
-                        { transaction }
-                    );
+                    // await sequelize.query(
+                    //     `CALL update_statistics(${Math.min(elementOne.height, lastBlock.height)})`,
+                    //     { transaction }
+                    // );
 
                     setState({
                         ...state,
                         block_array: [],
                     })
                 } catch (error) {
+                    console.log(error);
+                    
                     log(`SyncTransactions() Transaction Commit ERROR: ${error}`);
                     throw error;
                 }
@@ -1205,7 +1210,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             let response = await get_blocks_details(lastBlock.height + 1, count);
             let localBlocks = response.data.result && response.data.result.blocks ? response.data.result.blocks : [];
 
-            if (localBlocks.length && lastBlock.id === localBlocks[0].prev_id) {
+            if (localBlocks.length && lastBlock.tx_id === localBlocks[0].prev_id) {
                 state.block_array = localBlocks;
                 await syncTransactions();
 
@@ -1239,7 +1244,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 } else {
                     setLastBlock({
                         height: -1,
-                        id: '0000000000000000000000000000000000000000000000000000000000000000'
+                        tx_id: '0000000000000000000000000000000000000000000000000000000000000000'
                     });
                 }
 
@@ -1517,7 +1522,10 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             });
 
             if (lastBlockResult) {
-                setLastBlock(lastBlockResult.dataValues)
+                setLastBlock({
+                    height: lastBlockResult.height,
+                    tx_id: lastBlockResult.tx_id
+                });
             }
 
             // Get the count of aliases

@@ -4,7 +4,7 @@ import { chartDataFieldMap, chartRequestNames } from "./constants";
 import Fetch from "./methods";
 
 class Utils {
-    static shortenAddress(address: string): string {
+    static shortenAddress(address: string): string {        
         if (address.length < 10) return address;
         return address.slice(0, 6) + "..." + address.slice(-4);
     }
