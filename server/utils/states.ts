@@ -35,6 +35,7 @@ export interface State {
     serverTimeout: number;
     block_array: any[];
     pools_array: any[];
+    priceData: any;
 }
 
 export let state: State = {
@@ -45,6 +46,7 @@ export let state: State = {
     serverTimeout: 30,
     block_array: [],
     pools_array: [],
+    priceData: {}
 }
 
 export function setState(newState: State) { 

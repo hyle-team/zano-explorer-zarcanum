@@ -19,8 +19,8 @@ import Chart, { IChart } from "./schemes/Chart";
 import { get_all_pool_tx_list, get_alt_blocks_details, get_blocks_details, get_info, get_out_info, get_pool_txs_details, get_tx_details } from "./utils/zanod";
 import { col, fn, literal, Op } from "sequelize";
 import Pool from "./schemes/Pool";
-import Asset from "./schemes/Asset";
-import {ITransaction} from "./schemes/Transaction";
+import Asset, { IAsset } from "./schemes/Asset";
+import { ITransaction } from "./schemes/Transaction";
 import BigNumber from "bignumber.js";
 
 
@@ -50,6 +50,205 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
         )
         next()
     })
+    app.use(express.static(path.resolve(__dirname, "../build/")));
+
+    app.get(
+        '/api/get_info/:flags',
+        exceptionHandler(async (req, res) => {
+            let flags = req.params.flags
+            const response = await axios({
+                method: 'get',
+                url: config.api,
+                data: {
+                    method: 'getinfo',
+                    params: { flags: parseInt(flags) }
+                }
+            })
+            res.json(response.data)
+        })
+    )
+
+    app.get(
+        '/api/get_total_coins',
+        exceptionHandler(async (req, res) => {
+            const response = await axios({
+                method: 'get',
+                url: config.api,
+                data: {
+                    method: 'getinfo',
+                    params: { flags: parseInt("4294967295") }
+                }
+            })
+
+            let str = response.data.result.total_coins
+            let result: number | undefined;
+
+            let totalCoins = Number(str)
+            if (typeof totalCoins === 'number') {
+                result = parseInt(totalCoins.toString()) / 1000000000000
+            }
+            let r2 = result?.toFixed(2)
+            res.send(r2)
+        })
+    );
+
+    app.get(
+        '/api/get_main_block_details/:id',
+        exceptionHandler(async (req, res) => {
+            let id = req.params.id
+            const response = await axios({
+                method: 'get',
+                url: config.api,
+                data: {
+                    method: 'get_main_block_details',
+                    params: {
+                        id: id
+                    }
+                }
+            })
+            res.json(response.data)
+        })
+    )
+
+    app.get(
+        '/api/get_assets/:offset/:count',
+        exceptionHandler(async (req, res) => {
+            const offset = parseInt(req.params.offset, 10);
+            const count = parseInt(req.params.count, 10);
+            const searchText = req.query.search || '';
+    
+            if (!searchText) {
+                // No searchText, fetch all assets with pagination
+                const assets = await Asset.findAll({
+                    order: [['id', 'ASC']],
+                    limit: count,
+                    offset: offset
+                });
+    
+                return res.send(assets);
+            }
+    
+            // If there is searchText, count matching records
+            const searchCondition = {
+                [Op.or]: [
+                    { ticker: { [Op.iLike]: `%${searchText}%` } },
+                    { full_name: { [Op.iLike]: `%${searchText}%` } }
+                ]
+            };
+    
+            const firstSearchRowCount = await Asset.count({
+                where: searchCondition
+            });
+    
+            if (firstSearchRowCount > 0) {
+                // Fetch records that match the searchText
+                const assets = await Asset.findAll({
+                    where: searchCondition,
+                    order: [['id', 'ASC']],
+                    limit: count,
+                    offset: offset
+                });
+    
+                return res.send(assets); 
+            } else {
+                // If no matching records found, fetch by asset_id
+                const assets = await Asset.findAll({
+                    where: { asset_id: searchText },
+                    limit: count,
+                    offset: offset
+                });
+    
+                return res.send(assets); 
+            }
+        })
+    );
+
+    const getWhitelistedAssets = async (offset, count, searchText) => {  
+        // Step 1: Fetch assets from external API
+        const response = await axios({
+            method: 'get',
+            url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
+        });
+    
+        if (!response.data.assets) {
+            throw new Error('Assets whitelist response not correct');
+        }
+    
+        // Step 2: Add the native Zano asset to the beginning of the array
+        const allAssets = response.data.assets;
+        allAssets.unshift({
+            asset_id: ZANO_ASSET_ID,
+            logo: "",
+            price_url: "",
+            ticker: "ZANO",
+            full_name: "Zano (Native)",
+            total_max_supply: "0",
+            current_supply: "0",
+            decimal_point: 0,
+            meta_info: "",
+            price: 0
+        });
+    
+        // Step 3: Filter the assets based on searchText
+        const searchTextLower = searchText?.toLowerCase();
+        const filteredAssets = allAssets.filter(asset => {
+            return searchText 
+                ? (
+                    asset.ticker?.toLowerCase()?.includes(searchTextLower) || 
+                    asset.full_name?.toLowerCase()?.includes(searchTextLower)
+                ) 
+                : true;
+        });
+    
+        // Step 4: Handle no search result in filtered assets
+        if (filteredAssets.length > 0) {
+            return filteredAssets.slice(offset, offset + count);
+        } else {
+            // Step 5: If no match found, try to fetch assets from the local database (using Sequelize)
+            const dbAssets = await Asset.findAll({
+                where: {
+                    asset_id: searchText
+                },
+                limit: count,
+                offset: offset
+            });
+    
+            return dbAssets.map(asset => asset.toJSON());
+        }
+    };
+    
+    app.get(
+        '/api/get_whitelisted_assets/:offset/:count',
+        exceptionHandler(async (req, res) => {
+            const offset = parseInt(req.params.offset, 10);
+            const count = parseInt(req.params.count, 10);
+            const searchText = req.query.search || '';
+    
+            const assets = await getWhitelistedAssets(offset, count, searchText);
+            res.send(assets);
+        })
+    );
+
+    app.get(
+        '/api/get_blocks_details/:start/:count',
+        exceptionHandler(async (req, res) => {
+            let start = req.params.start
+            let count = req.params.count
+            const response = await axios({
+                method: 'get',
+                url: config.api,
+                data: {
+                    method: 'get_blocks_details',
+                    params: {
+                        height_start: parseInt(start ? start : "0", 10),
+                        count: parseInt(count ? count : "10", 10),
+                        ignore_transactions: false
+                    }
+                }
+            })
+            res.json(response.data)
+        })
+    )
 
 
     app.get(
@@ -676,6 +875,108 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
         })
     );
 
+
+    app.get('/api/price', exceptionHandler(async (req, res) => {
+        if (req.query.asset_id) {
+            if (req.query.asset_id === ZANO_ASSET_ID) {
+                if (!state.priceData?.zano?.zano?.usd) {
+                    return res.send({ success: false, data: "Price not found" });
+                }
+    
+                return res.send({
+                    success: true,
+                    data: {
+                        name: "Zano",
+                        usd: state.priceData?.zano?.zano?.usd,
+                        usd_24h_change: state.priceData?.zano?.zano?.usd_24h_change
+                    }
+                });
+            }
+    
+            const assetData = await Asset.findOne({
+                where: { asset_id: req.query.asset_id }
+            });
+    
+            if (!assetData) {
+                return res.json({ success: false, data: "Asset not found" });
+            }
+    
+            // Assuming that you handle further processing of the `assetData` here...
+        }
+    
+        const responseData = {
+            success: true,
+            data: state.priceData.zano
+        };
+    
+        switch (req.query.asset) {
+            case "ethereum":
+                if (state.priceData?.ethereum?.ethereum?.usd === undefined) {
+                    responseData.data = {};
+                    responseData.success = false;
+                } else {
+                    responseData.data = state.priceData.ethereum;
+                }
+                break;
+            default:
+                if (state.priceData?.zano?.zano?.usd === undefined) {
+                    responseData.data = {};
+                    responseData.success = false;
+                }
+                break;
+        }
+    
+        return res.json(responseData);
+    }));
+
+
+    app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) => {
+        const { asset_id } = req.params;
+    
+        const dbAsset = await Asset.findOne({
+            where: { asset_id }
+        });
+    
+        if (!dbAsset) {
+            // Fetch the external asset list
+            const response = await axios({
+                method: 'get',
+                url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
+            });
+    
+            if (!response.data.assets) {
+                throw new Error('Assets whitelist response not correct');
+            }
+    
+            // Add Zano to the beginning of the list
+            const allAssets = response.data.assets;
+            allAssets.unshift({
+                asset_id: ZANO_ASSET_ID,
+                logo: "",
+                price_url: "",
+                ticker: "ZANO",
+                full_name: "Zano (Native)",
+                total_max_supply: "0",
+                current_supply: "0",
+                decimal_point: 0,
+                meta_info: "",
+                price: 0
+            });
+    
+            const whitelistedAsset = allAssets.find(e => e.asset_id === asset_id);
+    
+            if (whitelistedAsset) {
+                return res.json({ success: true, asset: whitelistedAsset });
+            } else {
+                return res.json({ success: false, data: "Asset not found" });
+            }
+        } else {
+            return res.json({ success: true, asset: dbAsset });
+        }
+    }));
+    
+
+
     app.get("/*", function (req, res) {
         const buildPath = path.resolve(__dirname, "../build/index.html");
         res.sendFile(buildPath);
@@ -1241,4 +1542,161 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
     };
 
     start();
+})();
+
+
+(async () => {
+    while (true) {
+        try {
+            // Fetch assets from external API
+            async function fetchAssets(offset, count) {
+                try {
+                    const response = await axios({
+                        method: 'get',
+                        url: config.api,
+                        data: {
+                            method: 'get_assets_list',
+                            params: {
+                                count: count,
+                                offset: offset,
+                            }
+                        }
+                    });
+
+                    return response?.data?.result?.assets || [];
+                } catch {
+                    return [];
+                }
+            }
+
+            // Fetch Zano price info
+            const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
+
+            await new Promise(res => setTimeout(res, 5 * 1e3));
+
+            // Fetch Ethereum price info
+            try {
+                const ethInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
+                console.log('ETH INFO: ', ethInfo);
+                if (ethInfo?.ethereum?.usd !== undefined) {
+                    setState({
+                        ...state,
+                        priceData: {
+                            ...state.priceData,
+                            ethereum: ethInfo
+                        }
+                    });
+                }
+            } catch (error) {
+                console.log('ETH PARSING ERROR');
+                console.log('Error: ', error);
+            }
+
+            console.log('ZANO INFO: ', zanoInfo);
+
+            if (zanoInfo?.zano?.usd !== undefined) {
+                setState({
+                    ...state,
+                    priceData: {
+                        ...state.priceData,
+                        zano: zanoInfo
+                    }
+                });
+            }
+
+            // Fetch all assets
+            const assets: IAsset[] = [];
+            let iterator = 0;
+            const amountPerIteration = 100;
+
+            while (true) {
+                const newAssets = await fetchAssets(iterator + 1, iterator + amountPerIteration);
+                if (!newAssets.length) break;
+                assets.push(...newAssets);
+                iterator += amountPerIteration;
+            }
+
+            console.log('Got assets list');
+
+            // Fetch existing assets from the database
+            const assetsRows = await Asset.findAll();
+
+            // Update or delete existing assets
+            for (const assetRow of assetsRows) {
+                const foundAsset = assets.find(e => e.asset_id === assetRow.asset_id);
+                if (!foundAsset) {
+                    // Delete asset if not found in the external data
+                    await Asset.destroy({
+                        where: { asset_id: assetRow.asset_id }
+                    });
+                } else {
+                    // Update existing asset
+                    const {
+                        asset_id,
+                        logo,
+                        price_url,
+                        ticker,
+                        full_name,
+                        total_max_supply,
+                        current_supply,
+                        decimal_point,
+                        meta_info,
+                        price
+                    } = foundAsset;
+
+                    await Asset.update({
+                        logo: logo || "",
+                        price_url: price_url || "",
+                        ticker: ticker || "",
+                        full_name: full_name || "",
+                        total_max_supply: total_max_supply?.toString() || "0",
+                        current_supply: current_supply?.toString() || "0",
+                        decimal_point: decimal_point || 0,
+                        meta_info: meta_info || "",
+                        price: price
+                    }, {
+                        where: { asset_id }
+                    });
+                }
+            }
+
+            // Insert new assets
+            for (const asset of assets) {
+                const foundAsset = assetsRows.find(e => e.asset_id === asset.asset_id);
+                if (!foundAsset && asset.asset_id) {
+                    const {
+                        asset_id,
+                        logo,
+                        price_url,
+                        ticker,
+                        full_name,
+                        total_max_supply,
+                        current_supply,
+                        decimal_point,
+                        meta_info,
+                        price = 0
+                    } = asset;
+
+                    await Asset.create({
+                        asset_id,
+                        logo: logo || "",
+                        price_url: price_url || "",
+                        ticker,
+                        full_name,
+                        total_max_supply: total_max_supply?.toString(),
+                        current_supply: current_supply?.toString(),
+                        decimal_point,
+                        meta_info: meta_info || "",
+                        price
+                    });
+                }
+            }
+        } catch (error) {
+            console.log('ASSETS PARSING ERROR');
+            console.log('Error: ', error);
+        }
+
+        // Wait for 60 seconds before the next iteration
+        await new Promise(res => setTimeout(res, 60 * 1e3));
+    }
 })();

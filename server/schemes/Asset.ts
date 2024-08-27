@@ -18,6 +18,8 @@ class Asset extends Model {
     declare readonly updatedAt: Date;
 }
 
+export type IAsset = Omit<Asset, keyof Model | 'createdAt' | 'updatedAt' | 'id'>;
+
 Asset.init(
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
