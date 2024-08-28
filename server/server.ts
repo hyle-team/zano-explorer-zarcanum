@@ -1242,7 +1242,9 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             }
 
             // Get block details from the external service
+            console.time('get_blocks_details')
             let response = await get_blocks_details(lastBlock.height + 1, count);
+            console.timeEnd('get_blocks_details')
             let localBlocks = response.data.result && response.data.result.blocks ? response.data.result.blocks : [];
 
             if (localBlocks.length && lastBlock.tx_id === localBlocks[0].prev_id) {
