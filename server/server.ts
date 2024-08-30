@@ -1181,6 +1181,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 });
             }
 
+            console.time('writing txs to db');
             await sequelize.transaction(async (transaction) => {
                 try {
 
@@ -1227,6 +1228,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     throw error;
                 }
             });
+            console.timeEnd('writing txs to db');
         }
     };
 
@@ -1242,16 +1244,12 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             }
 
             // Get block details from the external service
-            console.time('get_blocks_details')
             let response = await get_blocks_details(lastBlock.height + 1, count);
-            console.timeEnd('get_blocks_details')
             let localBlocks = response.data.result && response.data.result.blocks ? response.data.result.blocks : [];
 
             if (localBlocks.length && lastBlock.tx_id === localBlocks[0].prev_id) {
                 state.block_array = localBlocks;
-                console.time('sync transactions time:')
                 await syncTransactions();
-                console.timeEnd('sync transactions time:')
 
                 if (lastBlock.height >= (blockInfo?.height || 0) - 1) {
                     state.now_blocks_sync = false;
