@@ -1249,7 +1249,9 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
             if (localBlocks.length && lastBlock.tx_id === localBlocks[0].prev_id) {
                 state.block_array = localBlocks;
+                console.time('sync transactions time:')
                 await syncTransactions();
+                console.timeEnd('sync transactions time:')
 
                 if (lastBlock.height >= (blockInfo?.height || 0) - 1) {
                     state.now_blocks_sync = false;
