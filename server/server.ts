@@ -1051,6 +1051,8 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
                     let localTr: any;
 
+                    console.time('txs details while');
+                    
                     while (!!(localTr = bl.transactions_details.splice(0, 1)[0])) {
                         let response = await get_tx_details(localTr.id);
                         let tx_info = response.data.result.tx_info;
@@ -1111,6 +1113,8 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                             ),
                         });
                     }
+
+                    console.timeEnd('txs details while');
                 } catch (error) {
                     log(`SyncTransactions() Inserting aliases ERROR: ${error}`);
                 }
@@ -1181,7 +1185,6 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 });
             }
 
-            console.time('writing txs to db');
             await sequelize.transaction(async (transaction) => {
                 try {
 
@@ -1228,7 +1231,6 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     throw error;
                 }
             });
-            console.timeEnd('writing txs to db');
         }
     };
 
