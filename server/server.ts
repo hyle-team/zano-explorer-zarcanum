@@ -1052,9 +1052,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     let localTr: any;
                     
                     while (!!(localTr = bl.transactions_details.splice(0, 1)[0])) {
-                        console.time('txs details call');
                         let response = await get_tx_details(localTr.id);
-                        console.timeEnd('txs details call');
                         
                         let tx_info = response.data.result.tx_info;
 
@@ -1114,8 +1112,6 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                             ),
                         });
                     }
-
-                    console.timeEnd('txs details while');
                 } catch (error) {
                     log(`SyncTransactions() Inserting aliases ERROR: ${error}`);
                 }
