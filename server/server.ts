@@ -1050,11 +1050,12 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     if (bl.tr_out === undefined) bl.tr_out = [];
 
                     let localTr: any;
-
-                    console.time('txs details while');
                     
                     while (!!(localTr = bl.transactions_details.splice(0, 1)[0])) {
+                        console.time('txs details call');
                         let response = await get_tx_details(localTr.id);
+                        console.timeEnd('txs details call');
+                        
                         let tx_info = response.data.result.tx_info;
 
                         for (let item of tx_info.extra) {
