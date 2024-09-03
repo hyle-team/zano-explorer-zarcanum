@@ -72,9 +72,10 @@ function Assets() {
     const [inputState, setInputState] = useState("");
     const [initFetched, setInitFetched] = useState(false);
 
-    const [assetsStats, setAssetStats] = useState<
-        { assetsAmount?: number, whitelistedAssetsAmount?: number }
-    >({});
+    const [assetsStats, setAssetStats] = useState<{
+        assetsAmount?: number;
+        whitelistedAssetsAmount?: number;
+    }>({});
     
     const fetchIdRef = useRef<string>(nanoid());
 

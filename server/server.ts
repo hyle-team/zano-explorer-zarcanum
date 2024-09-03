@@ -317,6 +317,25 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
         }),
     );
 
+    app.get(
+        '/api/get_aliases_count',
+        exceptionHandler(async (req, res) => {
+            const aliasesAmount = await Alias.count();
+            const premiumAliasesAmount = await Alias.count({
+                where: sequelize.where(
+                    sequelize.fn(
+                        'LENGTH',
+                        sequelize.col('alias')
+                    ),
+                    {
+                        [Op.lte]: 5
+                    }
+                )
+            });
+            return res.json({ aliasesAmount, premiumAliasesAmount });
+        }),
+    );
+
     interface AggregatedData {
         at: number;
         sum_trc?: number;

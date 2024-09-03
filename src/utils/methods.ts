@@ -90,6 +90,10 @@ class Fetch {
     static async getAssetsCount() {
         return await fetch(this.proxyPath + "/get_assets_count").then(res => res.json());
     }
+
+    static async getAliasesCount() {
+        return await fetch(this.proxyPath + "/get_aliases_count").then(res => res.json());
+    }
 }
 
 export default Fetch;

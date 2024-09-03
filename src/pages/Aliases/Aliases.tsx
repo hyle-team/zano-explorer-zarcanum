@@ -6,6 +6,7 @@ import Table from "../../components/default/Table/Table";
 import Alias from "../../interfaces/state/Alias";
 import Fetch from "../../utils/methods";
 import crownImg from "../../assets/images/UI/crown.svg";
+import CommonStatsPanel from "../../components/UI/CommonStatsPanel/CommonStatsPanel";
 
 function Aliases() {
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -14,8 +15,11 @@ function Aliases() {
 
     const [itemsOnPage, setItemsOnPage] = useState("20");
     const [page, setPage] = useState("1");
-
     const [searchState, setSearchState] = useState("");
+    const [aliasStats, setAliasStats] = useState<{
+        aliasesAmount?: number;
+        premiumAliasesAmount?: number;
+    }>({});
 
     const fetchAliases = useCallback(async () => {
         const currentPage = parseInt(page, 10) || 0;
@@ -40,6 +44,20 @@ function Aliases() {
         return () => clearInterval(id);
     }, [fetchAliases]);
 
+    useEffect(() => {
+        async function fetchAliasesCount() {
+            const result = await Fetch.getAliasesCount();
+            const aliasesAmount = result?.aliasesAmount;
+            const premiumAliasesAmount = result?.premiumAliasesAmount;
+            setAliasStats({
+                aliasesAmount: typeof aliasesAmount === "number" ? aliasesAmount : undefined,
+                premiumAliasesAmount: typeof premiumAliasesAmount === "number" ? premiumAliasesAmount : undefined
+            });
+        }
+        
+        fetchAliasesCount();
+    }, []);
+
     const tableHeaders = [ "NAME", "ADDRESS" ];
 
     function ShortAlias({ alias }: { alias: string }) {
@@ -60,6 +78,11 @@ function Aliases() {
         e.address
     ]);
 
+    const statsPanelData = [
+        { key: "Total Assets", value: aliasStats.aliasesAmount?.toString() || "..." },
+        { key: "Whitelisted", value: aliasStats.premiumAliasesAmount?.toString() || "..." }
+    ];
+
     return (
         <div className="aliases">
             <Header 
@@ -76,6 +99,7 @@ function Aliases() {
                     setState: setSearchState
                 }}
             />
+            <CommonStatsPanel pairs={statsPanelData} className="aliases__stats" />
             <div className="aliases__table custom-scroll">
                 <Table 
                     headers={tableHeaders}
