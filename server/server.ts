@@ -290,6 +290,33 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
         })
     );
 
+    async function fetchWhitelistedAssets() {
+        const response = await axios({
+            method: 'get',
+            url: config.assets_whitelist_url || 'https://api.zano.org/assets_whitelist_testnet.json'
+        });
+
+        if (!response.data.assets) {
+            throw new Error('Assets whitelist response not correct');
+        }
+
+        const allAssets = response.data.assets;
+
+        return allAssets;
+    }
+
+    app.get(
+        '/api/get_assets_count', 
+        exceptionHandler(async (req, res) => {
+            const whitelistedAssets = await fetchWhitelistedAssets();
+            const whitelistedAssetsAmount = whitelistedAssets.length + 1;
+
+            const assetsAmount =  await Asset.count();
+
+            return res.json({ assetsAmount, whitelistedAssetsAmount });
+        }),
+    );
+
     interface AggregatedData {
         at: number;
         sum_trc?: number;

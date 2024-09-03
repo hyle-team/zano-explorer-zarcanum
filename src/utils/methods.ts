@@ -86,6 +86,10 @@ class Fetch {
     static async getAssetDetails(assetId: string) {
         return await fetch(this.proxyPath + "/get_asset_details/" + assetId + "/").then(res => res.json());
     }
+
+    static async getAssetsCount() {
+        return await fetch(this.proxyPath + "/get_assets_count").then(res => res.json());
+    }
 }
 
 export default Fetch;

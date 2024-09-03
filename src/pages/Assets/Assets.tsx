@@ -11,6 +11,7 @@ import { nanoid } from "nanoid";
 import Button from "../../components/UI/Button/Button";
 import { useSearchParams } from "react-router-dom";
 import CopyButton from "../../components/CopyButton/CopyButton";
+import CommonStatsPanel from "../../components/UI/CommonStatsPanel/CommonStatsPanel";
 
 const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
 
@@ -45,7 +46,7 @@ const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
             </div>
         )
     )
-})
+});
 
 function Assets() {
 
@@ -70,6 +71,10 @@ function Assets() {
 
     const [inputState, setInputState] = useState("");
     const [initFetched, setInitFetched] = useState(false);
+
+    const [assetsStats, setAssetStats] = useState<
+        { assetsAmount?: number, whitelistedAssetsAmount?: number }
+    >({});
     
     const fetchIdRef = useRef<string>(nanoid());
 
@@ -78,6 +83,26 @@ function Assets() {
         const price = result?.data?.zano?.usd;
         return price;
     }
+
+    useEffect(() => {
+        async function fetchAssetsStats() {
+            const result = await Fetch.getAssetsCount();
+            const assetsAmount = result?.assetsAmount;
+            const whitelistedAssetsAmount = result?.whitelistedAssetsAmount;
+            setAssetStats({
+                assetsAmount: 
+                    typeof assetsAmount === "number" 
+                        ? assetsAmount 
+                        : undefined,
+                whitelistedAssetsAmount: 
+                    typeof whitelistedAssetsAmount === "number" 
+                        ? whitelistedAssetsAmount 
+                        : undefined
+            })
+        }
+
+        fetchAssetsStats();
+    }, []);
 
     useEffect(() => {
         async function fetchParamAsset() {
@@ -173,6 +198,11 @@ function Assets() {
         e?.price ? `${e?.price}$` : "No data"
     ]);
 
+    const statsPanelData = [
+        { key: "Total Assets", value: assetsStats.assetsAmount?.toString() || "..." },
+        { key: "Whitelisted", value: assetsStats.whitelistedAssetsAmount?.toString() || "..." }
+    ];
+
     return (
         <div className="assets">
             <Header 
@@ -199,6 +229,7 @@ function Assets() {
                     />
                 }
             />
+            <CommonStatsPanel pairs={statsPanelData} className={"assets__stats"} />
             <div className="assets__table">
                 <Table 
                     headers={tableHeaders}

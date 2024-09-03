@@ -33,7 +33,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "concurrently \"npx nodemon --exec tsx ./server/server.ts\" \"npm client\"",
+    "dev": "concurrently \"npx nodemon --exec tsx ./server/server.ts\" \"npm run client\"",
     "start": "tsx ./server/server.ts"
   },
   "eslintConfig": {
