@@ -4,8 +4,9 @@ import VisibilityInfo from "../../../interfaces/state/VisibilityInfo";
 import Fetch from "../../../utils/methods";
 import Utils from "../../../utils/utils";
 import "./StatsPanel.scss";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { socket } from "../../../utils/socket";
+import { ReactComponent as BurnImg } from "../../../assets/images/UI/flame_ico.svg";
 
 function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: boolean }) {
     const { visibilityInfo } = props;
@@ -43,19 +44,25 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
     const percentage = visibilityInfo?.percentage || "...";
     const APY = visibilityInfo?.apy ? parseFloat((visibilityInfo?.apy || 0).toFixed(4)) : "...";
     const devFund = Utils.toShiftedNumber(visibilityInfo?.balance.toString(), 12) || "...";
+    const zanoBurned = visibilityInfo?.zano_burned ?? "...";
 
-    function TopItem(props: { title: string, amount: string, percent?: string, customCurrency?: boolean }) {
+    function TopItem(props: { title: string, amount: string | ReactNode, percent?: string, customCurrency?: boolean }) {
         const { title, amount, percent, customCurrency } = props;
 
+        const isAmountString = typeof amount === "string";
+        
         return (
             <div className="main__top__item">
                 <div>
                     <p className="main__top__item__header">{title}</p>
                 </div>
                 <div className="item__value">
-                    <p>{amount + (!customCurrency ? " ZANO" : "")}</p>
+                    {isAmountString 
+                        ? <p>{amount + (!customCurrency ? " ZANO" : "")}</p> 
+                        : amount
+                    }
                     {percent &&
-                        <div>
+                        <div className="item__precent">
                             <div>
                                 <p>
                                     {percent + "%"}
@@ -101,6 +108,15 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                 title="Real Time APY" 
                 amount={`${APY}%`}
                 customCurrency={true}
+            />
+            <TopItem 
+                title="Zano Burned" 
+                amount={
+                    <div className="item__value__burn">
+                        <BurnImg />
+                        <p>{zanoBurned} ZANO</p>
+                    </div>
+                }
             />
         </div>
         );

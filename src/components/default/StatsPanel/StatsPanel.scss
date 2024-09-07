@@ -49,7 +49,7 @@
     margin-bottom: 25px;
 
     .info__main__top {
-        height: 70px;
+        height: 129px;
         display: flex;
         gap: 24px;
 
@@ -68,6 +68,7 @@
             border-radius: 10px;
             overflow: hidden;
             display: flex;
+            flex-direction: column;
 
             > div:first-child {
                 background: linear-gradient(to right,#1b3a8a,#32439f);
@@ -93,9 +94,10 @@
                 > p {
                     font-size: 25px;
                     font-weight: 300;
+                    text-align: center;
                 }
 
-                > div {
+                .item__precent {
                     display: flex;
                     gap: 8px;
                     align-items: center;
@@ -182,6 +184,18 @@
     }
 }
 
+.item__value__burn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    > p {
+        font-size: 25px;
+        font-weight: 300;
+        text-align: center;
+    }
+}
+
 
 
 
@@ -189,6 +203,17 @@
     display: none;
     flex-direction: column;
     gap: 25px;
+
+    .item__value__burn {
+        > p {
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        > svg {
+            scale: 0.7;
+        }
+    }
 
     .info__main__top, .info__main__bottom {
         display: flex;
@@ -227,7 +252,7 @@
                     flex-direction: column;
                     gap: 4px;
 
-                    > div {
+                    .item__precent {
                         display: flex;
                         flex-direction: column;
                         align-items: center;

@@ -4,6 +4,7 @@ interface VisibilityInfo {
     percentage: string;
     balance: number;
     apy: number;
+    zano_burned?: number;
 }
 
 export default VisibilityInfo;

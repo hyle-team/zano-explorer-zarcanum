@@ -36,6 +36,7 @@ export interface State {
     block_array: any[];
     pools_array: any[];
     priceData: any;
+    zanoBurned?: number;
 }
 
 export let state: State = {

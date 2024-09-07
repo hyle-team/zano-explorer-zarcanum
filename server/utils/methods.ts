@@ -7,7 +7,7 @@ import BigNumber from "bignumber.js";
 import Transaction from "../schemes/Transaction";
 import Pool from "../schemes/Pool";
 import { io } from "../server";
-import { blockInfo, lastBlock } from "./states";
+import { blockInfo, lastBlock, state } from "./states";
 import { Socket } from "socket.io";
 
 interface getBlocksDetailsParams {
@@ -64,7 +64,8 @@ export async function getVisibilityInfo() {
         percentage: 0,
         balance: 0,
         unlocked_balance: 0,
-        apy: 0
+        apy: 0,
+        zano_burned: undefined as (number | undefined),
     }
 
     try {
@@ -93,8 +94,9 @@ export async function getVisibilityInfo() {
 
             result.amount = stakedCoins.toNumber();
             result.balance = res1.data.result.balance
-            result.unlocked_balance = res1.data.result.unlocked_balance
-
+            result.unlocked_balance = res1.data.result.unlocked_balance;
+            result.zano_burned = state.zanoBurned;
+            
             const stakedNumber = new BigNumber(result.amount).dividedBy(new BigNumber(10 ** 12)).toNumber();
 
             result.apy = 720 * 365 / stakedNumber * 100

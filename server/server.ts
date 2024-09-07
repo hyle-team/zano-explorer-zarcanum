@@ -1519,12 +1519,40 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             try {
                 const response = await get_info();
                 setBlockInfo(response.data.result);
+
+                const txPageSize = 10e3;
+                let pageNumber = 0;
+                
+                let zanoBurnedBig = new BigNumber(0);
+                let iterations = 0;
+                const maxIterations = 1e6;
+                // Getting summary fee for transactions from 2555000
+                while (true) {
+                    iterations++;
+                    const txs = await Transaction.findAll({
+                        where: {
+                            keeper_block: {
+                                [Op.gte]: 2555000
+                            },
+                        },
+                        limit: txPageSize,
+                        offset: txPageSize * pageNumber,
+                    });
+                    if (!txs.length || iterations > maxIterations) break;
+                    zanoBurnedBig = zanoBurnedBig.plus(
+                        txs.reduce((acc, tx) => tx.fee ? acc.plus(tx.fee) : acc, new BigNumber(0))
+                    );
+                }
+
+                const zanoBurned = zanoBurnedBig.div(new BigNumber(10).pow(12)).toNumber();
+
                 setState({
                     ...state,
                     countAliasesServer: response.data.result.alias_count,
                     countAltBlocksServer: response.data.result.alt_blocks_count,
                     countTrPoolServer: response.data.result.tx_pool_size,
-                })
+                    zanoBurned,
+                });
 
                 if (!state.statusSyncPool) {
                     // Fetch the count of transactions in the pool using Sequelize
