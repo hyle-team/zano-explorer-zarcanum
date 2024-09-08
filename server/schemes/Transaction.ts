@@ -9,7 +9,7 @@ class Transaction extends Model {
     declare amount: string;
     declare blob_size: string;
     declare extra: string;
-    declare fee: number;
+    declare fee: string;
     declare ins: string;
     declare outs: string;
     declare pub_key: string;

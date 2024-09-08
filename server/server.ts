@@ -1524,11 +1524,9 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 let pageNumber = 0;
                 
                 let zanoBurnedBig = new BigNumber(0);
-                let iterations = 0;
                 const maxIterations = 1e6;
                 // Getting summary fee for transactions from 2555000
                 while (true) {
-                    iterations++;
                     const txs = await Transaction.findAll({
                         where: {
                             keeper_block: {
@@ -1538,10 +1536,11 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                         limit: txPageSize,
                         offset: txPageSize * pageNumber,
                     });
-                    if (!txs.length || iterations > maxIterations) break;
+                    if (!txs.length || pageNumber > maxIterations) break;
                     zanoBurnedBig = zanoBurnedBig.plus(
-                        txs.reduce((acc, tx) => tx.fee ? acc.plus(tx.fee) : acc, new BigNumber(0))
+                        txs.reduce((acc, tx) => tx.fee !== "0" ? acc.plus(tx.fee) : acc, new BigNumber(0))
                     );
+                    pageNumber++;
                 }
 
                 const zanoBurned = zanoBurnedBig.div(new BigNumber(10).pow(12)).toNumber();
