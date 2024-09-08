@@ -66,11 +66,12 @@ export async function getVisibilityInfo() {
         unlocked_balance: 0,
         apy: 0,
         zano_burned: undefined as (number | undefined),
+        pos_value: 0,
     }
 
     try {
         if (config.enableVisibilityInfo) {
-            const [res1, , res3] = await axios.all([
+            const [res1, res2, res3] = await axios.all([
                 getbalance(),
                 get_mining_history(),
                 get_info()
@@ -99,7 +100,19 @@ export async function getVisibilityInfo() {
             
             const stakedNumber = new BigNumber(result.amount).dividedBy(new BigNumber(10 ** 12)).toNumber();
 
-            result.apy = 720 * 365 / stakedNumber * 100
+            result.apy = 720 * 365 / stakedNumber * 100;
+
+            let stakedCoinsLast7Days = new BigNumber(0);
+
+            if ('mined_entries' in res2.data.result) {
+                for (const item of res2.data.result.mined_entries) {
+                    stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
+                }
+            }
+
+            let posValueDecimal = stakedCoinsLast7Days.div(7);
+
+            result.pos_value = posValueDecimal.toNumber();
         }
     } catch (error) {
         log(`getVisibilityInfo() ERROR ${error}`)

@@ -45,6 +45,9 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
     const APY = visibilityInfo?.apy ? parseFloat((visibilityInfo?.apy || 0).toFixed(4)) : "...";
     const devFund = Utils.toShiftedNumber(visibilityInfo?.balance.toString(), 12) || "...";
     const zanoBurned = visibilityInfo?.zano_burned ?? "...";
+    const posValue = visibilityInfo?.pos_value
+        ? Utils.formatNumber(visibilityInfo?.pos_value, 3) || "..."
+        : "...";
 
     function TopItem(props: { title: string, amount: string | ReactNode, percent?: string, customCurrency?: boolean }) {
         const { title, amount, percent, customCurrency } = props;
@@ -148,7 +151,15 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                         <p className="item__text__large">{transactionsString}</p>
                     </BottomItem>
                     <BottomItem title="Hash Rate (aprox):">
-                        <p className="item__text__large">{hashrate} GH/sec</p>
+                        <div className="item__difficulty">
+                            <div>
+                                <p>PoS: {posValue}</p>
+                            </div>
+                        
+                            <div>
+                                <p>PoW: {hashrate} GH/sec</p>
+                            </div>
+                        </div>
                     </BottomItem>
                 </div>
             </div>
@@ -179,7 +190,16 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                         <p className="item__text__large">{transactionsString}</p>
                     </BottomItem>
                     <BottomItem title="Hash Rate (aprox):">
-                        <p className="item__text__large">{hashrate} GH/sec</p>
+
+                        <div className="item__difficulty">
+                            <div>
+                                <p>PoS: {posValue}</p>
+                            </div>
+                        
+                            <div>
+                                <p>PoW: {hashrate} GH/sec</p>
+                            </div>
+                        </div>
                     </BottomItem>
                 </div>
             </div>

@@ -5,6 +5,7 @@ interface VisibilityInfo {
     balance: number;
     apy: number;
     zano_burned?: number;
+    pos_value: number;
 }
 
 export default VisibilityInfo;
