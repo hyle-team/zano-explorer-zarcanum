@@ -77,6 +77,8 @@ export async function getVisibilityInfo() {
                 get_info()
             ])
 
+            console.log('RES1', res1.data);
+
             const pos_diff_to_total_ratio = new BigNumber(res3.data.result.pos_difficulty)
                 .dividedBy(new BigNumber(res3.data.result.total_coins));
 
