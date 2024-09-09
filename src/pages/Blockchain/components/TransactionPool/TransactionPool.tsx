@@ -12,6 +12,7 @@ function TransactionPool() {
         fee: string,
         id: string,
         timestamp: string,
+        tx_id: string,
     }
 
     const [turnedOn, setTurnedOn] = useState(true);
@@ -77,7 +78,7 @@ function TransactionPool() {
         timeAgo(parseInt(element.timestamp, 10)*1000),
         element.blob_size + " bytes",
         parseInt(element.fee, 10)/10**12,
-        <AliasText to={`/transaction/${element.id}`}>{element.id}</AliasText>
+        <AliasText to={`/transaction/${element.id}`}>{element.tx_id}</AliasText>
     ]));
 
     return (

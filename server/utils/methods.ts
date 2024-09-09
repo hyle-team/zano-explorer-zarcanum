@@ -160,7 +160,7 @@ export async function getTxPoolDetails(count: number) {
     // When count is 0, retrieve all records ordered by timestamp DESC
     if (count === 0) {
         const result = await Pool.findAll({
-            attributes: ['blob_size', 'fee', 'id', 'timestamp'],
+            attributes: ['blob_size', 'fee', 'id', 'timestamp', 'tx_id'],
             order: [['timestamp', 'DESC']]
         });
         return result.length > 0 ? result : [];
@@ -173,6 +173,7 @@ export async function getTxPoolDetails(count: number) {
             'fee',
             'id',
             'timestamp',
+            'tx_id',
             [literal('false'), 'isNew'] // Adding a literal false as "isNew"
         ],
         order: [['timestamp', 'DESC']],
