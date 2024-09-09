@@ -114,13 +114,10 @@ export async function getVisibilityInfo() {
 
 
             const coinsPerDay = stakedCoinsLast7Days.div(7);
-
+   
             const neededToStakeCoinPerDay = new BigNumber(res1.data.result.balance).div(coinsPerDay);
             
-
-            const posValueDecimal = neededToStakeCoinPerDay.div(new BigNumber(10 ** 12));
-
-            result.pos_value = posValueDecimal.toNumber();
+            result.pos_value = neededToStakeCoinPerDay.toNumber();
         }
     } catch (error) {
         log(`getVisibilityInfo() ERROR ${error}`)
