@@ -25,8 +25,8 @@ function App() {
                     <Route path="/block/:hash" element={<Block />} />
                     <Route path="/transaction/:hash" element={<Transaction />} />
                     <Route path="/alt-blocks/:hash" element={<Block alt />} />
-                    <Route path="/charts" element={<Charts />} />
-                    <Route path="/charts/:name" element={<ChartsPage />} />
+                    {/* <Route path="/charts" element={<Charts />} />
+                    <Route path="/charts/:name" element={<ChartsPage />} /> */}
                     {/* {NET_MODE === "TEST" &&
                         <Route path="/assets" element={<Assets />} />
                     } */}
