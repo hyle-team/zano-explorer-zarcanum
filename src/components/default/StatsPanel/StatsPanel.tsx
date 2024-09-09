@@ -153,7 +153,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                     <BottomItem title="Hash Rate (aprox):">
                         <div className="item__difficulty">
                             <div>
-                                <p>PoS: {posValue}</p>
+                                <p>PoS: {posValue} block/day stake</p>
                             </div>
                         
                             <div>
