@@ -1426,7 +1426,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                         // Delete pool entries not in the current pool list from the server
                         await Pool.destroy({
                             where: {
-                                id: {
+                                tx_id: {
                                     [Op.notIn]: state.pools_array
                                 }
                             }
