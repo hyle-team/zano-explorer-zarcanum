@@ -17,7 +17,7 @@ import Block, { IBlock } from "./schemes/Block";
 import Alias from "./schemes/Alias";
 import Chart, { IChart } from "./schemes/Chart";
 import { get_all_pool_tx_list, get_alt_blocks_details, get_blocks_details, get_info, get_out_info, get_pool_txs_details, get_tx_details } from "./utils/zanod";
-import { col, fn, literal, Op } from "sequelize";
+import { Op } from "sequelize";
 import Pool from "./schemes/Pool";
 import Asset, { IAsset } from "./schemes/Asset";
 import { ITransaction } from "./schemes/Transaction";
@@ -94,24 +94,6 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
             res.send(r2)
         })
     );
-
-    // app.get(
-    //     '/api/get_main_block_details/:id',
-    //     exceptionHandler(async (req, res) => {
-    //         let id = req.params.id
-    //         const response = await axios({
-    //             method: 'get',
-    //             url: config.api,
-    //             data: {
-    //                 method: 'get_main_block_details',
-    //                 params: {
-    //                     id: id
-    //                 }
-    //             }
-    //         })
-    //         res.json(response.data)
-    //     })
-    // )
 
     app.get(
         '/api/get_main_block_details/:id',
