@@ -1453,7 +1453,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                                     const txInserts = response.data.result.txs.map(tx => ({
                                         blob_size: tx.blob_size,
                                         fee: tx.fee,
-                                        id: tx.id,
+                                        tx_id: tx.id,
                                         timestamp: tx.timestamp
                                     }));
 
