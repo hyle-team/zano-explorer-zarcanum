@@ -82,11 +82,11 @@ export async function getVisibilityInfo() {
             const pos_diff_to_total_ratio = new BigNumber(res3.data.result.pos_difficulty)
                 .dividedBy(new BigNumber(res3.data.result.total_coins));
 
-            const divider = new BigNumber(176.3630 * 100);
+            const divider = new BigNumber(176.3630);
 
             const stakedPercentage = (
                 new BigNumber(0.55).multipliedBy(pos_diff_to_total_ratio)
-            ).dividedBy(divider).toNumber();
+            ).dividedBy(divider).multipliedBy(100).toNumber();
 
 
             result.percentage = parseFloat(stakedPercentage.toFixed(2));
