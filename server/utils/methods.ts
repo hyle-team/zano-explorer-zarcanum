@@ -64,15 +64,20 @@ async function testFetchCoinsWeekly() {
     const mining_history = await get_mining_history();
 
     let stakedCoinsLast7Days = new BigNumber(0);
+    
+    const mined_entries = mining_history?.data?.result?.mined_entries || [];
 
-    console.log(mining_history.data.result);
+    const sumNonBigNum = mined_entries.reduce((acc: number, item: any) => acc + item.a, 0);
+
+    console.log(sumNonBigNum / (10 ** 12));
     
 
-    if ('mined_entries' in mining_history.data.result) {
-        for (const item of mining_history.data.result.mined_entries) {
-            stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
-        }
+    for (const item of mined_entries) {
+        stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
     }
+
+    console.log(stakedCoinsLast7Days.toNumber() / (10 ** 12));
+    
 }
 
 testFetchCoinsWeekly();
@@ -118,7 +123,7 @@ export async function getVisibilityInfo() {
             result.balance = res1.data.result.balance
             result.unlocked_balance = res1.data.result.unlocked_balance;
             result.zano_burned = state.zanoBurned;
-            
+
             const stakedNumber = new BigNumber(result.amount).dividedBy(new BigNumber(10 ** 12)).toNumber();
 
             result.apy = 720 * 365 / stakedNumber * 100;
@@ -165,7 +170,7 @@ export async function getMainBlockDetails(id: string) {
         const transactions = await Transaction.findAll({
             where: { keeper_block: block.height }
         });
-        
+
         block.setDataValue('transactions_details', transactions.map(e => e.toJSON()));
 
         return block.toJSON();
