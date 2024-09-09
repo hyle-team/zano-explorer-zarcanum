@@ -107,6 +107,10 @@ export function get_mining_history(howManyDays = 7) {
     let now = new Date();
     let date = now.getDate() - howManyDays;
     let timestamp = Math.round(now.setDate(date) / 1000);
+
+    console.log('Mining history timestamp:', timestamp);
+    
+
     return axios({
         method: 'post',
         url: config.auditable_wallet.api,

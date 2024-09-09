@@ -1,4 +1,4 @@
-import { col, literal, Op } from "sequelize";
+import { literal, Op } from "sequelize";
 import Block from "../schemes/Block";
 import axios from "axios";
 import { config, log } from "./utils";
@@ -82,11 +82,11 @@ export async function getVisibilityInfo() {
             const pos_diff_to_total_ratio = new BigNumber(res3.data.result.pos_difficulty)
                 .dividedBy(new BigNumber(res3.data.result.total_coins));
 
-            const divider = new BigNumber(176.3630 * 100);
+            const divider = new BigNumber(176.3630);
 
             const stakedPercentage = (
                 new BigNumber(0.55).multipliedBy(pos_diff_to_total_ratio)
-            ).dividedBy(divider).toNumber();
+            ).dividedBy(divider).multipliedBy(100).toNumber();
 
 
             result.percentage = parseFloat(stakedPercentage.toFixed(2));
@@ -99,22 +99,25 @@ export async function getVisibilityInfo() {
             result.balance = res1.data.result.balance
             result.unlocked_balance = res1.data.result.unlocked_balance;
             result.zano_burned = state.zanoBurned;
-            
+
             const stakedNumber = new BigNumber(result.amount).dividedBy(new BigNumber(10 ** 12)).toNumber();
 
             result.apy = 720 * 365 / stakedNumber * 100;
 
             let stakedCoinsLast7Days = new BigNumber(0);
-
-            if ('mined_entries' in res2.data.result) {
-                for (const item of res2.data.result.mined_entries) {
-                    stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
-                }
+    
+            const mined_entries = res2?.data?.result?.mined_entries || [];
+        
+            for (const item of mined_entries) {
+                stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
             }
 
-            let posValueDecimal = stakedCoinsLast7Days.div(7);
 
-            result.pos_value = posValueDecimal.toNumber();
+            const coinsPerDay = stakedCoinsLast7Days.div(7);
+   
+            const neededToStakeCoinPerDay = new BigNumber(res1.data.result.balance).div(coinsPerDay);
+            
+            result.pos_value = neededToStakeCoinPerDay.toNumber();
         }
     } catch (error) {
         log(`getVisibilityInfo() ERROR ${error}`)
@@ -146,7 +149,7 @@ export async function getMainBlockDetails(id: string) {
         const transactions = await Transaction.findAll({
             where: { keeper_block: block.height }
         });
-        
+
         block.setDataValue('transactions_details', transactions.map(e => e.toJSON()));
 
         return block.toJSON();

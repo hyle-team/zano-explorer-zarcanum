@@ -80,11 +80,11 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
     }
 
 
-    function BottomItem(props: { title: string, children: React.ReactNode }) {
-        const { title, children } = props;
+    function BottomItem(props: { title: string, children: React.ReactNode, style?: React.CSSProperties }) {
+        const { title, children, style } = props;
 
         return (
-            <div className="main__bottom__item">
+            <div className="main__bottom__item" style={style}>
                 <div>
                     <p>{title}</p>
                 </div>
@@ -153,7 +153,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                     <BottomItem title="Hash Rate (aprox):">
                         <div className="item__difficulty">
                             <div>
-                                <p>PoS: {posValue}</p>
+                                <p>PoS: {posValue} block/day</p>
                             </div>
                         
                             <div>
@@ -193,7 +193,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
 
                         <div className="item__difficulty">
                             <div>
-                                <p>PoS: {posValue}</p>
+                                <p>PoS: {posValue} block/day</p>
                             </div>
                         
                             <div>
