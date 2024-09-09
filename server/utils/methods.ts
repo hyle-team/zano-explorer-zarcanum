@@ -58,6 +58,25 @@ export async function getBlocksDetails(params: getBlocksDetailsParams) {
     return result.length > 0 ? result.map(e => e.toJSON()) : [];
 }
 
+
+async function testFetchCoinsWeekly() {
+
+    const mining_history = await get_mining_history();
+
+    let stakedCoinsLast7Days = new BigNumber(0);
+
+    console.log(mining_history.data.result);
+    
+
+    if ('mined_entries' in mining_history.data.result) {
+        for (const item of mining_history.data.result.mined_entries) {
+            stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
+        }
+    }
+}
+
+testFetchCoinsWeekly();
+
 export async function getVisibilityInfo() {
     const result = {
         amount: 0,
