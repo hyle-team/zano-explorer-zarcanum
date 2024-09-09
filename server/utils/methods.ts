@@ -69,14 +69,14 @@ async function testFetchCoinsWeekly() {
 
     const sumNonBigNum = mined_entries.reduce((acc: number, item: any) => acc + item.a, 0);
 
-    console.log(sumNonBigNum / (10 ** 12));
+    console.log('Result without BigNumber:', sumNonBigNum / (10 ** 12));
     
 
     for (const item of mined_entries) {
         stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
     }
 
-    console.log(stakedCoinsLast7Days.toNumber() / (10 ** 12));
+    console.log('Result with BigNumber:',  stakedCoinsLast7Days.toNumber() / (10 ** 12));
     
 }
 
