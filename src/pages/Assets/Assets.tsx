@@ -191,7 +191,7 @@ function Assets() {
         e?.ticker || "",
         <div className="assets__table_asset-id">
             <CopyButton text={e?.asset_id || ""} />
-            <AliasText href="/" onClick={(event) => onAssetClick(event, e)}>
+            <AliasText to="/" onClick={(event) => onAssetClick(event, e)}>
                 {e?.asset_id || ""}
             </AliasText>
             

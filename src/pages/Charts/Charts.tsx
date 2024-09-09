@@ -8,6 +8,7 @@ import { chartOptions } from "../../utils/constants";
 import Utils from "../../utils/utils";
 import ChartSeriesElem from "../../interfaces/common/ChartSeriesElem";
 import Preloader from "../../components/UI/Preloader/Preloader";
+import { Link } from "react-router-dom";
 
 function Charts() {
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -65,7 +66,7 @@ function Charts() {
         } = props;
 
         return (
-            <a href={"/charts/" + requestTitle} className="charts__chart__wrapper">
+            <Link to={"/charts/" + requestTitle} className="charts__chart__wrapper">
                 <div className="charts__chart__title">
                     <p>{title}</p>
                 </div>
@@ -117,7 +118,7 @@ function Charts() {
                         }
                     }}
                 />
-            </a>
+            </Link>
             
         )
     }

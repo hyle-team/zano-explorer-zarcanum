@@ -6,7 +6,7 @@ import StatsPanel from "../../components/default/StatsPanel/StatsPanel";
 import Table from "../../components/default/Table/Table";
 import TransactionInfo, { Input } from "../../interfaces/common/TransactionInfo";
 import Fetch from "../../utils/methods";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Utils from "../../utils/utils";
 import { nanoid } from "nanoid";
 import Popup from "../../components/default/Popup/Popup";
@@ -141,16 +141,16 @@ function Transaction() {
             e.globalIndexes.length,
             e.globalIndexes.length > 1 ?
             (
-                <a href="/" onClick={event => showIndexesClick(event, e)}>Show all...</a>
+                <Link to="/" onClick={event => showIndexesClick(event, e)}>Show all...</Link>
             )
             : 
             (
-                <a 
-                    href="/" 
+                <Link
+                    to="/" 
                     onClick={event => onIndexClick(event, e.amount, e.globalIndexes[0])}
                 >
                     {e.globalIndexes[0] ?? ""}
-                </a>
+                </Link>
             )
         ])
     ) : [];
@@ -177,13 +177,13 @@ function Transaction() {
                 <div>
                     {popupIndexes.map(e => 
                         (
-                            <a 
-                                href="/" 
+                            <Link
+                                to="/" 
                                 key={e}
                                 onClick={event => onIndexClick(event, amount, e)}
                             >
                                 {e}
-                            </a>
+                            </Link>
                         )
                     )}
                 </div>
@@ -269,12 +269,12 @@ function Transaction() {
                     className="custom-scroll"
                     headers={[ "HASH", "HEIGHT", "TIMESTAMP (UTC)" ]}
                     elements={[[ 
-                        <a 
+                        <Link
                             className="table__hash" 
-                            href={blockOrigin?.hash ? "/block/" + blockOrigin.hash : undefined}
+                            to={blockOrigin?.hash ? "/block/" + blockOrigin.hash : "/"}
                         >
                             {blockOrigin?.hash}
-                        </a>,
+                        </Link>,
                         blockOrigin?.height || "",
                         blockOrigin?.timestamp ? Utils.formatTimestampUTC(parseInt(blockOrigin.timestamp, 10)) : "" 
                     ]]}

@@ -5,7 +5,7 @@ import { ReactComponent as SearchImg } from "../../../assets/images/UI/search.sv
 import { ReactComponent as BackImg } from "../../../assets/images/UI/back.svg";
 import { useState } from "react";
 import Fetch from "../../../utils/methods";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import InfoTopPanelProps from "./InfoTopPanel.props";
 
 function InfoTopPanel(props: InfoTopPanelProps) {
@@ -74,12 +74,12 @@ function InfoTopPanel(props: InfoTopPanelProps) {
         >
 
             {back &&
-                <a href="/" onClick={onBackClick}>
+                <Link to="/" onClick={onBackClick}>
                     <div className="info__back">
                         <BackImg />
                         <p>Back</p>
                     </div>
-                </a>
+                </Link>
             }
             <div className={"info__top__title"}>
                 <h4 className={contentNotHiding ? "hiding_element" : undefined}>{title}</h4>

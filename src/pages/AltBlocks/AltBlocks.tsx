@@ -7,6 +7,7 @@ import AliasText from "../../components/default/AliasText/AliasText";
 import Block from "../../interfaces/state/Block";
 import Fetch from "../../utils/methods";
 import Utils from "../../utils/utils";
+import { Link } from "react-router-dom";
 
 
 function AltBlocks() {
@@ -45,14 +46,14 @@ function AltBlocks() {
 
         return [
             <p>
-                <a href={hashLink}>{e.height}</a>
+                <Link to={hashLink}>{e.height}</Link>
                 {` (${e.type})`}
             </p>,
             Utils.formatTimestampUTC(e.timestamp),
             Utils.formatTimestampUTC(e.timestamp),
             `${e.size} bytes`,
             e.transactions?.toString() || "0",
-            <AliasText href={hashLink}>{e.hash}</AliasText>
+            <AliasText to={hashLink}>{e.hash}</AliasText>
         ]
     });
 
