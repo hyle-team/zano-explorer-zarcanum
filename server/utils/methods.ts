@@ -1,4 +1,4 @@
-import { col, literal, Op } from "sequelize";
+import { literal, Op } from "sequelize";
 import Block from "../schemes/Block";
 import axios from "axios";
 import { config, log } from "./utils";
@@ -58,30 +58,6 @@ export async function getBlocksDetails(params: getBlocksDetailsParams) {
     return result.length > 0 ? result.map(e => e.toJSON()) : [];
 }
 
-
-async function testFetchCoinsWeekly() {
-
-    const mining_history = await get_mining_history();
-
-    let stakedCoinsLast7Days = new BigNumber(0);
-    
-    const mined_entries = mining_history?.data?.result?.mined_entries || [];
-
-    const sumNonBigNum = mined_entries.reduce((acc: number, item: any) => acc + item.a, 0);
-
-    console.log('Result without BigNumber:', sumNonBigNum / (10 ** 12));
-    
-
-    for (const item of mined_entries) {
-        stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
-    }
-
-    console.log('Result with BigNumber:',  stakedCoinsLast7Days.toNumber() / (10 ** 12));
-    
-}
-
-testFetchCoinsWeekly();
-
 export async function getVisibilityInfo() {
     const result = {
         amount: 0,
@@ -129,14 +105,19 @@ export async function getVisibilityInfo() {
             result.apy = 720 * 365 / stakedNumber * 100;
 
             let stakedCoinsLast7Days = new BigNumber(0);
-
-            if ('mined_entries' in res2.data.result) {
-                for (const item of res2.data.result.mined_entries) {
-                    stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
-                }
+    
+            const mined_entries = res2?.data?.result?.mined_entries || [];
+        
+            for (const item of mined_entries) {
+                stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
             }
 
-            let posValueDecimal = stakedCoinsLast7Days.div(7);
+
+            const coinsPerDay = stakedCoinsLast7Days.div(7);
+
+            const neededToStakeCoinPerDay = new BigNumber(res3.data.result.total_coins).div(coinsPerDay);
+
+            let posValueDecimal = neededToStakeCoinPerDay.div(new BigNumber(10 ** 12));
 
             result.pos_value = posValueDecimal.toNumber();
         }
