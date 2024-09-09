@@ -80,7 +80,7 @@ function Aliases() {
 
     const statsPanelData = [
         { key: "Total Assets", value: aliasStats.aliasesAmount?.toString() || "..." },
-        { key: "Whitelisted", value: aliasStats.premiumAliasesAmount?.toString() || "..." }
+        { key: "Premium", value: aliasStats.premiumAliasesAmount?.toString() || "..." }
     ];
 
     return (

@@ -150,10 +150,10 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                     <BottomItem title="Transactions">
                         <p className="item__text__large">{transactionsString}</p>
                     </BottomItem>
-                    <BottomItem title="Hash Rate (aprox):" style={{ 'flexBasis': '27%' }}>
+                    <BottomItem title="Hash Rate (aprox):">
                         <div className="item__difficulty">
                             <div>
-                                <p>PoS: {posValue} block/day stake</p>
+                                <p>PoS: {posValue} block/day</p>
                             </div>
                         
                             <div>
@@ -189,11 +189,11 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                     <BottomItem title="Transactions">
                         <p className="item__text__large">{transactionsString}</p>
                     </BottomItem>
-                    <BottomItem title="Hash Rate (aprox):" style={{ 'flexBasis': '27%' }}>
+                    <BottomItem title="Hash Rate (aprox):">
 
                         <div className="item__difficulty">
                             <div>
-                                <p>PoS: {posValue} block/day stake</p>
+                                <p>PoS: {posValue} block/day</p>
                             </div>
                         
                             <div>
