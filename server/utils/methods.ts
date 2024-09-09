@@ -115,9 +115,16 @@ export async function getVisibilityInfo() {
 
             const coinsPerDay = stakedCoinsLast7Days.div(7);
 
+            console.log('coinsPerDay', coinsPerDay.toString());
+            
+
             const neededToStakeCoinPerDay = new BigNumber(res3.data.result.total_coins).div(coinsPerDay);
 
-            let posValueDecimal = neededToStakeCoinPerDay.div(new BigNumber(10 ** 12));
+            console.log('neededToStakeCoinPerDay', neededToStakeCoinPerDay.toString());
+            console.log('total_coins', res3.data.result.total_coins);
+            
+
+            const posValueDecimal = neededToStakeCoinPerDay.div(new BigNumber(10 ** 12));
 
             result.pos_value = posValueDecimal.toNumber();
         }
