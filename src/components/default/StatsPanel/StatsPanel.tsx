@@ -80,11 +80,11 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
     }
 
 
-    function BottomItem(props: { title: string, children: React.ReactNode }) {
-        const { title, children } = props;
+    function BottomItem(props: { title: string, children: React.ReactNode, style?: React.CSSProperties }) {
+        const { title, children, style } = props;
 
         return (
-            <div className="main__bottom__item">
+            <div className="main__bottom__item" style={style}>
                 <div>
                     <p>{title}</p>
                 </div>
@@ -150,7 +150,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                     <BottomItem title="Transactions">
                         <p className="item__text__large">{transactionsString}</p>
                     </BottomItem>
-                    <BottomItem title="Hash Rate (aprox):">
+                    <BottomItem title="Hash Rate (aprox):" style={{ 'flexBasis': '27%' }}>
                         <div className="item__difficulty">
                             <div>
                                 <p>PoS: {posValue} block/day stake</p>
@@ -189,7 +189,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                     <BottomItem title="Transactions">
                         <p className="item__text__large">{transactionsString}</p>
                     </BottomItem>
-                    <BottomItem title="Hash Rate (aprox):">
+                    <BottomItem title="Hash Rate (aprox):" style={{ 'flexBasis': '27%' }}>
 
                         <div className="item__difficulty">
                             <div>
