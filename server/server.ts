@@ -1519,13 +1519,14 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                         offset: txPageSize * pageNumber,
                     });
                     if (!txs.length || pageNumber > maxIterations) break;
+
+                    console.log('txs', txs.length);
+                    
                     zanoBurnedBig = zanoBurnedBig.plus(
                         txs.reduce((acc, tx) => tx.fee !== "0" ? acc.plus(tx.fee) : acc, new BigNumber(0))
                     );
                     pageNumber++;
                 }
-
-                console.log('Not divided', zanoBurnedBig);
                 
                 const zanoBurned = zanoBurnedBig.div(new BigNumber(10).pow(12)).toNumber();
 
