@@ -78,7 +78,7 @@ function TransactionPool() {
         timeAgo(new Date(element.timestamp).getTime()),
         element.blob_size + " bytes",
         parseInt(element.fee, 10)/10**12,
-        <AliasText to={`/transaction/${element.id}`}>{element.tx_id}</AliasText>
+        <AliasText to={`/transaction/${element.tx_id}`}>{element.tx_id}</AliasText>
     ]));
 
     return (
