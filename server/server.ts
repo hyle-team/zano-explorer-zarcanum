@@ -1525,6 +1525,8 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                     pageNumber++;
                 }
 
+                console.log('Not divided', zanoBurnedBig);
+                
                 const zanoBurned = zanoBurnedBig.div(new BigNumber(10).pow(12)).toNumber();
 
                 setState({
