@@ -1507,13 +1507,24 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                         keeper_block: {
                             [Op.gte]: 2555000
                         },
-                    }
+                        fee: {
+                            [Op.ne]: "0"
+                        }
+                    },
+                    attributes: ['fee'],
+                    raw: true
                 });
 
-                console.log('txs amount', txs.length);
+                let zanoBurnedBig = new BigNumber(0);
+
+                txs.forEach(tx => {
+                    zanoBurnedBig = zanoBurnedBig.plus(new BigNumber(tx.fee));
+                });
                 
-                const zanoBurnedBig = txs.reduce((acc, tx) => tx.fee !== "0" ? acc.plus(tx.fee) : acc, new BigNumber(0))
+
+                console.log('ZANO BURNED: ', zanoBurnedBig.toString());
                 
+
                 const zanoBurned = zanoBurnedBig.div(new BigNumber(10).pow(12)).toNumber();
 
                 setState({
