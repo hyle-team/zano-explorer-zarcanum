@@ -1454,7 +1454,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                                         blob_size: tx.blob_size,
                                         fee: tx.fee,
                                         tx_id: tx.id,
-                                        timestamp: tx.timestamp
+                                        timestamp: tx.timestamp * 1e3,
                                     }));
 
                                     // Insert the new transactions into the pool
