@@ -4,6 +4,7 @@ import { ReactComponent as BurgerImg } from "../../../assets/images/UI/burger.sv
 import HeaderProps from "./Header.props";
 import Button from "../../UI/Button/Button";
 import { NET_MODE } from "../../../config/config";
+import { Link } from "react-router-dom";
 
 function Header(props: HeaderProps) {
     const { page, burgerOpened, setBurgerOpened } = props;
@@ -11,53 +12,53 @@ function Header(props: HeaderProps) {
     function Nav({ className }: { className?: string }) {
         return (
             <nav className={className}>
-                <a
+                <Link
                     className={page === "Blockchain" ? "selected" : undefined}
-                    href="/"
+                    to="/"
                 >
                     Blockchain
-                </a>
-                <a
+                </Link>
+                <Link
                     className={page === "Alt-blocks" ? "selected" : undefined}
-                    href="/alt-blocks"
+                    to="/alt-blocks"
                 >
                     Alt-blocks
-                </a>
-                <a
+                </Link>
+                <Link
                     className={page === "Aliases" ? "selected" : undefined}
-                    href="/aliases"
+                    to="/aliases"
                 >
                     Aliases
-                </a>
+                </Link>
                 {/* {NET_MODE === "TEST" ?
-                    <a 
+                    <Link 
                         className={page === "Assets" ? "selected" : undefined} 
-                        href="/assets"
+                        to="/assets"
                     >
                         Assets
-                    </a> :
+                    </Link> :
                     <p>
                         Assets
                     </p>
                 } */}
-                <a
+                <Link
                     className={page === "Assets" ? "selected" : undefined}
-                    href="/assets"
+                    to="/assets"
                 >
                     Assets
-                </a>
-                <a
+                </Link>
+                {/* <Link
                     className={page === "Charts" ? "selected" : undefined}
-                    href="/charts"
+                    to="/charts"
                 >
                     Charts
-                </a>
-                <a
+                </Link> */}
+                <Link
                     className={page === "API" ? "selected" : undefined}
-                    href="/zano_api"
+                    to="/zano_api"
                 >
                     API
-                </a>
+                </Link>
                 {NET_MODE === "MAIN" &&
                     <p>
                         Governance
@@ -71,25 +72,25 @@ function Header(props: HeaderProps) {
         <header className="header">
             <div className="header__top">
                 <div className="header__top__main">
-                    <a href="/">
+                    <Link to="/">
                         <div className="header__logo">
                             <LogoImg />
                             <p>ZANO</p>
                         </div>
-                    </a>
+                    </Link>
                     <Nav />
                 </div>
 
                 <div className="header__top__right">
-                    <a
-                        href={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
+                    <Link
+                        to={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
                         target="_blank"
                         rel="noreferrer"
                     >
                         <Button>
                             <p>Switch to {NET_MODE === "TEST" ? "Main Net" : "Test Net"}</p>
                         </Button>
-                    </a>
+                    </Link>
                     <Button
                         onClick={() => setBurgerOpened(!burgerOpened)}
                         className="header__burger__button"

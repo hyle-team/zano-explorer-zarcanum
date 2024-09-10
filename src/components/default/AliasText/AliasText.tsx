@@ -1,6 +1,7 @@
+import { Link, LinkProps } from "react-router-dom";
 import "./AliasText.scss";
 
-interface AliasTextProps extends React.HTMLProps<HTMLAnchorElement> {
+interface AliasTextProps extends LinkProps {
     children: React.ReactNode
 }
 
@@ -9,9 +10,9 @@ function AliasText(props: AliasTextProps) {
 
     return (
         <span className="alias__text">
-            <a {...restProps}>
+            <Link {...restProps}>
                 {children}
-            </a>
+            </Link>
         </span>
     )
 }

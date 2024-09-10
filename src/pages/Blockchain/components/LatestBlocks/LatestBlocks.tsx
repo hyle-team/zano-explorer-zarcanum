@@ -7,6 +7,7 @@ import Utils from "../../../../utils/utils";
 import "./LatestBlocks.scss";
 import { useState, useEffect } from "react";
 import { socket } from "../../../../utils/socket";
+import { Link } from "react-router-dom";
 
 function LatestBlocks() {
 
@@ -82,14 +83,14 @@ function LatestBlocks() {
         const hashLink = hash ? "/block/" + hash : "/";
         return [
             <p>
-                <a href={hashLink}>{e.height}</a>
+                <Link to={hashLink}>{e.height}</Link>
                 {` (${e.type})`}
             </p>,
             Utils.formatTimestampUTC(e.timestamp),
             Utils.timeElapsedString(e.timestamp),
             `${e.size} bytes`,
             e.transactions?.toString() || "0",
-            <AliasText href={hashLink}>{hash}</AliasText>
+            <AliasText to={hashLink}>{hash}</AliasText>
         ]
     });
 

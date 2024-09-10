@@ -1,5 +1,5 @@
 import "../../styles/Assets.scss";
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef, memo, useCallback } from "react";
 import Header from "../../components/default/Header/Header";
 import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
 import Table from "../../components/default/Table/Table";
@@ -85,6 +85,18 @@ function Assets() {
         return price;
     }
 
+    const fetchZanoPrice = useCallback(async () => {
+        const zanoPrice = await getZanoPrice();
+        setAssets(prev => {
+            const newAssets = [...prev];
+            const zanoAsset = newAssets.find(e => e.asset_id === ZANO_ID);
+            if (zanoAsset) {
+                zanoAsset.price = zanoPrice;
+            }
+            return newAssets;
+        });
+    }, []);
+
     useEffect(() => {
         async function fetchAssetsStats() {
             const result = await Fetch.getAssetsCount();
@@ -131,21 +143,15 @@ function Assets() {
     }, [searchParams, initFetched]);
 
     useEffect(() => {
-        async function fetchZanoPrice() {
-            const zanoPrice = await getZanoPrice();
-            setAssets(prev => {
-                const newAssets = [...prev];
-                const zanoAsset = newAssets.find(e => e.asset_id === ZANO_ID);
-                if (zanoAsset) {
-                    zanoAsset.price = zanoPrice;
-                }
-                return newAssets;
-            });
-        }
+        fetchZanoPrice();
 
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             fetchZanoPrice();
         }, 10e3);
+
+        return () => {
+            clearInterval(intervalId);
+        }
     }, []);
 
     useEffect(() => {
@@ -173,6 +179,7 @@ function Assets() {
             if (!resultAssets || !(resultAssets instanceof Array)) return;
 
             setAssets(resultAssets);
+            fetchZanoPrice();
         }
         
         fetchAssets();
@@ -191,7 +198,7 @@ function Assets() {
         e?.ticker || "",
         <div className="assets__table_asset-id">
             <CopyButton text={e?.asset_id || ""} />
-            <AliasText href="/" onClick={(event) => onAssetClick(event, e)}>
+            <AliasText to="/" onClick={(event) => onAssetClick(event, e)}>
                 {e?.asset_id || ""}
             </AliasText>
             

@@ -7,7 +7,7 @@ import Table from "../../components/default/Table/Table";
 import { ReactComponent as ArrowImg } from "../../assets/images/UI/arrow.svg";
 import BlockInfo from "../../interfaces/common/BlockInfo";
 import Utils from "../../utils/utils";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Fetch from "../../utils/methods";
 import Popup from "../../components/default/Popup/Popup";
 
@@ -37,9 +37,9 @@ function Block(props: { alt?: boolean }) {
         !alt 
         ? 
         (
-            <a href={"/transaction/" + (e.hash || "")} className="block__table__hash">
+            <Link to={"/transaction/" + (e.hash || "")} className="block__table__hash">
                 {e.hash}
-            </a>
+            </Link>
         )
         : 
         (
@@ -165,15 +165,15 @@ function Block(props: { alt?: boolean }) {
                     <h2>Zano Block</h2>
                     <div>
                         {!alt && prevHash !== "" &&
-                            <a href={prevHash ? "/block/" + prevHash : undefined}> 
+                            <Link to={prevHash ? "/block/" + prevHash : "/"}> 
                                 <ArrowImg />
-                            </a>
+                            </Link>
                         }
                         <h2>{height}</h2>
                         {!alt && nextHash !== "" &&
-                            <a href={nextHash ? "/block/" + nextHash : undefined}>
+                            <Link to={nextHash ? "/block/" + nextHash : "/"}>
                                 <ArrowImg />
-                            </a>
+                            </Link>
                         }
                     </div>
                     <p>{hash?.toUpperCase() || ""}</p>
@@ -197,7 +197,7 @@ function Block(props: { alt?: boolean }) {
                             </tr>
                             <tr>
                                 <td>ID</td>
-                                <td><a href="">{Utils.shortenAddress(blockInfo?.tx_id ?? "-")}</a></td>
+                                <td><Link to="/">{Utils.shortenAddress(blockInfo?.tx_id ?? "-")}</Link></td>
                             </tr>
                             <tr>
                                 <td>Actual Timestamp (UTC):</td>
@@ -249,7 +249,7 @@ function Block(props: { alt?: boolean }) {
                             </tr>
                             <tr>
                                 <td>Previous ID:</td>
-                                <td><a href={`/block/${blockInfo?.prev_id}`}>{Utils.shortenAddress(blockInfo?.prev_id ?? "-")}</a></td>
+                                <td><Link to={`/block/${blockInfo?.prev_id}`}>{Utils.shortenAddress(blockInfo?.prev_id ?? "-")}</Link></td>
                             </tr>
                             <tr>
                                 <td>Total block size, bytes:</td>
@@ -286,15 +286,15 @@ function Block(props: { alt?: boolean }) {
                             <tr>
                                 <td>JSON data:</td>
                                 <td>
-                                    <a 
-                                        href="/" 
+                                    <Link
+                                        to="/" 
                                         onClick={(e) => {
                                             e.preventDefault();
                                             setJsonPopupOpened(true);
                                         }}
                                     >
                                         [ &nbsp;view &nbsp;]
-                                    </a>
+                                    </Link>
                                 </td>
                             </tr>
                         </tbody>
