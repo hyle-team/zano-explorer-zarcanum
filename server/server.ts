@@ -1442,7 +1442,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                         });
 
                         // Find new transactions that are not already in the pool
-                        const existingIds = existingTransactions.map(tx => tx.id);
+                        const existingIds = existingTransactions.map(tx => tx.tx_id);
                         const new_ids = state.pools_array.filter(id => !existingIds.includes(id));
 
                         if (new_ids.length) {
