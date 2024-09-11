@@ -595,7 +595,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
                 const transactions = await Transaction.findAll({
                     where: {
                         ins: {
-                            [Op.like]: `%${id}%`
+                            [Op.like]: `%"kimage_or_ms_id":"${id}"%`
                         }
                     }
                 });

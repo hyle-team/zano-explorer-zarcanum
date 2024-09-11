@@ -36,8 +36,7 @@ function InfoTopPanel(props: InfoTopPanelProps) {
             const txByKeyimageRes = await Fetch.getTxByKeyimage(input);
 
             if (txByKeyimageRes && typeof txByKeyimageRes === "object" && txByKeyimageRes.data) {
-                const { data } = txByKeyimageRes; 
-                return navigate("/transaction/" + data);
+                return navigate("/transaction/" + input);
             }
 
             if (input.match(/^\d+$/)) {
