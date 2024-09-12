@@ -38,10 +38,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
     const powDiff = Utils.formatNumber(info?.pow_difficulty, 0) || "...";
     const coinsEmitted = Utils.toShiftedNumber(info?.total_coins, 12) || "...";
     const transactionsString = Utils.formatNumber(transactions, 0) || "...";
-    const hashrate = Utils.toShiftedNumber(
-        parseFloat(info?.current_network_hashrate_350.toFixed(2) || "0"), 
-        NET_MODE === "TEST" ? 0 : 9, 3
-    ) || "...";
+    const hashrate = Utils.toShiftedNumber(info?.current_network_hashrate_350, NET_MODE === "TEST" ? 0 : 9, 2) || "...";
 
     const stackedCoins = Utils.toShiftedNumber(visibilityInfo?.amount.toString(), 12) || "...";
     const percentage = visibilityInfo?.percentage || "...";
@@ -49,7 +46,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
     const devFund = Utils.toShiftedNumber(visibilityInfo?.balance.toString(), 12) || "...";
     const zanoBurned = visibilityInfo?.zano_burned ?? "...";
     const posValue = visibilityInfo?.pos_value
-        ? Utils.formatNumber(parseFloat(visibilityInfo?.pos_value.toFixed(2)), 3) || "..."
+        ? Utils.formatNumber(visibilityInfo?.pos_value, 2) || "..."
         : "...";
 
     function TopItem(props: { title: string, amount: string | ReactNode, percent?: string, customCurrency?: boolean }) {
