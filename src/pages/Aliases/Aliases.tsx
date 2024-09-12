@@ -79,7 +79,7 @@ function Aliases() {
     ]);
 
     const statsPanelData = [
-        { key: "Total Assets", value: aliasStats.aliasesAmount?.toString() || "..." },
+        { key: "Total Aliases", value: aliasStats.aliasesAmount?.toString() || "..." },
         { key: "Premium", value: aliasStats.premiumAliasesAmount?.toString() || "..." }
     ];
 
