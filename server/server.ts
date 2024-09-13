@@ -22,7 +22,7 @@ import Pool from "./schemes/Pool";
 import Asset, { IAsset } from "./schemes/Asset";
 import { ITransaction } from "./schemes/Transaction";
 import BigNumber from "bignumber.js";
-
+import { rateLimit } from 'express-rate-limit';
 // @ts-ignore
 const __dirname = import.meta.dirname;
 
@@ -30,6 +30,14 @@ const __dirname = import.meta.dirname;
 const app = express();
 const server = http.createServer(app);
 export const io = new Server(server, { transports: ['websocket', 'polling'] });
+
+
+const requestsLimiter = rateLimit({
+	windowMs: 10 * 1000,
+	limit: 1,
+	standardHeaders: 'draft-7',
+	legacyHeaders: false,
+});
 
 (async () => {
     await initDB();
@@ -54,6 +62,39 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
         next()
     })
     app.use(express.static(path.resolve(__dirname, "../build/")));
+
+    app.use([
+        "/api/find_outs_in_recent_blocks"
+    ], requestsLimiter);
+
+    app.get('/api/find_outs_in_recent_blocks', exceptionHandler(async (req, res) => {
+        const address = req.query.address;
+        const viewkey = req.query.viewkey;
+        const limit = req.query.limit || 5;
+
+
+        if (!address) {
+            return res.status(400).json({ error: 'Address is required' });
+        }
+
+        if (!viewkey) {
+            return res.status(400).json({ error: 'Viewkey is required' });
+        }
+
+        const response = await axios({
+            method: 'get',
+            url: config.api,
+            data: {
+                method: 'getinfo',
+                params: { 
+                    "address": address, 
+                    "viewkey": viewkey,
+                    "blocks_limit": limit
+                }
+            }
+        })
+        res.json(response.data)
+    }));
 
     app.get(
         '/api/get_info/:flags',
