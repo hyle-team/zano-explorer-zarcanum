@@ -1,15 +1,16 @@
-import "../../styles/Block.scss";
-import Header from "../../components/default/Header/Header";
-import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
-import StatsPanel from "../../components/default/StatsPanel/StatsPanel";
+import styles from "@/styles/Block.module.scss";
+import Header from "@/components/default/Header/Header";
+import InfoTopPanel from "@/components/default/InfoTopPanel/InfoTopPanel";
+import StatsPanel from "@/components/default/StatsPanel/StatsPanel";
 import { useEffect, useState } from "react";
-import Table from "../../components/default/Table/Table";
-import { ReactComponent as ArrowImg } from "../../assets/images/UI/arrow.svg";
-import BlockInfo from "../../interfaces/common/BlockInfo";
-import Utils from "../../utils/utils";
-import { Link, useParams } from "react-router-dom";
-import Fetch from "../../utils/methods";
-import Popup from "../../components/default/Popup/Popup";
+import Table from "@/components/default/Table/Table";
+import ArrowImg from "@/assets/images/UI/arrow.svg";
+import BlockInfo from "@/interfaces/common/BlockInfo";
+import Utils from "@/utils/utils";
+import Link from "next/link";
+import Fetch from "@/utils/methods";
+import Popup from "@/components/default/Popup/Popup";
+import { useRouter } from "next/router";
 
 interface Transaction {
     hash: string;
@@ -24,27 +25,26 @@ function Block(props: { alt?: boolean }) {
     const [burgerOpened, setBurgerOpened] = useState(false);
     const [jsonPopupOpened, setJsonPopupOpened] = useState(false);
 
-    const { hash } = useParams();
+    const router = useRouter();
+    const { hashQuery } = router.query;
 
-    const tableHeaders = [ "HASH", "FEE", "TOTAL AMOUNT", "SIZE" ];
+    const hash = Array.isArray(hashQuery) ? hashQuery[0] : hashQuery;
 
+    const tableHeaders = ["HASH", "FEE", "TOTAL AMOUNT", "SIZE"];
 
     const [blockInfo, setBlockInfo] = useState<BlockInfo | null>(null);
     const [transactions, setTransactions] = useState<Transaction[]>([]);
-    
 
     const tableElements = transactions.map(e => [
-        !alt 
-        ? 
-        (
-            <Link to={"/transaction/" + (e.hash || "")} className="block__table__hash">
-                {e.hash}
-            </Link>
-        )
-        : 
-        (
-            <p className="block__table__hash">{e.hash}</p>
-        ),
+        !alt
+            ? (
+                <Link href={"/transaction/" + (e.hash || "")} className={styles["block__table__hash"]}>
+                    {e.hash}
+                </Link>
+            )
+            : (
+                <p className={styles["block__table__hash"]}>{e.hash}</p>
+            ),
         e.fee,
         e.amount,
         e.size + " bytes"
@@ -63,7 +63,7 @@ function Block(props: { alt?: boolean }) {
             setPrevHash(prevHashFetched);
             setNextHash(nextHashFetched);
         }
-        
+
         fetchHash();
     }, [height]);
 
@@ -78,8 +78,7 @@ function Block(props: { alt?: boolean }) {
             setHeight(result.height || null);
 
             console.log(result);
-            
-            
+
             setBlockInfo({
                 type: result.type === "1" ? "PoW" : "PoS",
                 timestamp: result.timestamp || undefined,
@@ -100,24 +99,24 @@ function Block(props: { alt?: boolean }) {
                 currentTxsMedian: undefined,
                 transactions: result.tr_count || "0",
                 transactionsSize: result.total_txs_size || "0",
-                alreadyGeneratedCoins: result.already_generated_coins || undefined, 
+                alreadyGeneratedCoins: result.already_generated_coins || undefined,
                 object_in_json: result.object_in_json || undefined,
                 tx_id: result.tx_id || undefined,
                 prev_id: result.prev_id || undefined,
                 minor_version: result?.object_in_json?.split('\"minor_version\": ')?.[1]?.split(',')?.[0] || '-',
                 major_version: result?.object_in_json?.split('\"major_version\": ')?.[1]?.split(',')?.[0] || '-',
-            }); 
+            });
 
             const rawTransactionsDetails = result.transactions_details;
 
-            const transactionsDetails = 
-                typeof rawTransactionsDetails === "string" 
-                ? (() => {
-                    try {
-                        return JSON.parse(rawTransactionsDetails);
-                    } catch {}
-                })() 
-                : rawTransactionsDetails;
+            const transactionsDetails =
+                typeof rawTransactionsDetails === "string"
+                    ? (() => {
+                        try {
+                            return JSON.parse(rawTransactionsDetails);
+                        } catch { }
+                    })()
+                    : rawTransactionsDetails;
 
             if (!(transactionsDetails instanceof Array)) return;
 
@@ -133,14 +132,14 @@ function Block(props: { alt?: boolean }) {
 
         fetchBlock();
     }, [hash]);
-    
+
     function BlockInfo() {
-        
+
         function JsonPopup() {
             return (
-                <div className="block__info__json">
+                <div className={styles["block__info__json"]}>
                     {/* <button>x</button> */}
-                    <div className="block__info__json__content">
+                    <div className={styles["block__info__json__content"]}>
                         {blockInfo?.object_in_json || ''}
                     </div>
                 </div>
@@ -148,9 +147,9 @@ function Block(props: { alt?: boolean }) {
         }
 
         return (
-            <div className="block__info">
-                {jsonPopupOpened && 
-                    <Popup 
+            <div className={styles["block__info"]}>
+                {jsonPopupOpened &&
+                    <Popup
                         Content={JsonPopup}
                         close={() => setJsonPopupOpened(false)}
                         settings={{
@@ -158,34 +157,34 @@ function Block(props: { alt?: boolean }) {
                         }}
                         scroll
                         blur
-                        classList={["block__json_popup"]}
+                        classList={[styles["block__json_popup"]]}
                     />
                 }
-                <div className="block__info__title">
+                <div className={styles["block__info__title"]}>
                     <h2>Zano Block</h2>
                     <div>
                         {!alt && prevHash !== "" &&
-                            <Link to={prevHash ? "/block/" + prevHash : "/"}> 
+                            <Link href={prevHash ? "/block/" + prevHash : "/"}>
                                 <ArrowImg />
                             </Link>
                         }
                         <h2>{height}</h2>
                         {!alt && nextHash !== "" &&
-                            <Link to={nextHash ? "/block/" + nextHash : "/"}>
+                            <Link href={nextHash ? "/block/" + nextHash : "/"}>
                                 <ArrowImg />
                             </Link>
                         }
                     </div>
                     <p>{hash?.toUpperCase() || ""}</p>
                 </div>
-                <div className="block__info__table">
+                <div className={styles["block__info__table"]}>
                     <table>
                         <tbody>
                             <tr>
                                 <td>Type:</td>
                                 <td>
-                                    <span 
-                                        className={`block__info__type ${blockInfo?.type === "PoS" ? "type__pos" : "type__pow"}`}
+                                    <span
+                                        className={`${styles["block__info__type"]} ${blockInfo?.type === "PoS" ? styles["type__pos"] : styles["type__pow"]}`}
                                     >
                                         {blockInfo?.type ?? "-"}
                                     </span>
@@ -197,7 +196,7 @@ function Block(props: { alt?: boolean }) {
                             </tr>
                             <tr>
                                 <td>ID</td>
-                                <td><Link to="/">{Utils.shortenAddress(blockInfo?.tx_id ?? "-")}</Link></td>
+                                <td><Link href="/">{Utils.shortenAddress(blockInfo?.tx_id ?? "-")}</Link></td>
                             </tr>
                             <tr>
                                 <td>Actual Timestamp (UTC):</td>
@@ -249,7 +248,7 @@ function Block(props: { alt?: boolean }) {
                             </tr>
                             <tr>
                                 <td>Previous ID:</td>
-                                <td><Link to={`/block/${blockInfo?.prev_id}`}>{Utils.shortenAddress(blockInfo?.prev_id ?? "-")}</Link></td>
+                                <td><Link href={`/block/${blockInfo?.prev_id}`}>{Utils.shortenAddress(blockInfo?.prev_id ?? "-")}</Link></td>
                             </tr>
                             <tr>
                                 <td>Total block size, bytes:</td>
@@ -287,7 +286,7 @@ function Block(props: { alt?: boolean }) {
                                 <td>JSON data:</td>
                                 <td>
                                     <Link
-                                        to="/" 
+                                        href="/"
                                         onClick={(e) => {
                                             e.preventDefault();
                                             setJsonPopupOpened(true);
@@ -301,28 +300,28 @@ function Block(props: { alt?: boolean }) {
                     </table>
                 </div>
             </div>
-            
+
         )
     }
-    
+
     return (
-        <div className="block">
+        <div className={styles["block"]}>
             <Header
-                page="Blockchain" 
-                burgerOpened={burgerOpened} 
-                setBurgerOpened={setBurgerOpened} 
+                page="Blockchain"
+                burgerOpened={burgerOpened}
+                setBurgerOpened={setBurgerOpened}
             />
-            <InfoTopPanel 
-                burgerOpened={burgerOpened} 
+            <InfoTopPanel
+                burgerOpened={burgerOpened}
                 title=""
                 back
-                className="block__info__top"
+                className={styles["block__info__top"]}
             />
-            <StatsPanel noStats={true}/>
+            <StatsPanel noStats={true} />
             <BlockInfo />
-            <div className="block__transactions">
+            <div className={styles["block__transactions"]}>
                 <h2>Transactions</h2>
-                <Table 
+                <Table
                     headers={tableHeaders}
                     elements={tableElements}
                 />

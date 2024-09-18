@@ -1,10 +1,10 @@
-import "./Header.scss";
-import { ReactComponent as LogoImg } from "../../../assets/images/UI/logo.svg";
-import { ReactComponent as BurgerImg } from "../../../assets/images/UI/burger.svg";
+import styles from "./Header.module.scss";
+import LogoImg from "../../../assets/images/UI/logo.svg";
+import BurgerImg from "../../../assets/images/UI/burger.svg";
 import HeaderProps from "./Header.props";
 import Button from "../../UI/Button/Button";
 import { NET_MODE } from "../../../config/config";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 function Header(props: HeaderProps) {
     const { page, burgerOpened, setBurgerOpened } = props;
@@ -14,19 +14,19 @@ function Header(props: HeaderProps) {
             <nav className={className}>
                 <Link
                     className={page === "Blockchain" ? "selected" : undefined}
-                    to="/"
+                    href="/"
                 >
                     Blockchain
                 </Link>
                 <Link
                     className={page === "Alt-blocks" ? "selected" : undefined}
-                    to="/alt-blocks"
+                    href="/alt-blocks"
                 >
                     Alt-blocks
                 </Link>
                 <Link
                     className={page === "Aliases" ? "selected" : undefined}
-                    to="/aliases"
+                    href="/aliases"
                 >
                     Aliases
                 </Link>
@@ -43,19 +43,19 @@ function Header(props: HeaderProps) {
                 } */}
                 <Link
                     className={page === "Assets" ? "selected" : undefined}
-                    to="/assets"
+                    href="/assets"
                 >
                     Assets
                 </Link>
                 {/* <Link
                     className={page === "Charts" ? "selected" : undefined}
-                    to="/charts"
+                    href="/charts"
                 >
                     Charts
                 </Link> */}
                 <Link
                     className={page === "API" ? "selected" : undefined}
-                    to="/zano_api"
+                    href="/zano_api"
                 >
                     API
                 </Link>
@@ -69,11 +69,11 @@ function Header(props: HeaderProps) {
     }
 
     return (
-        <header className="header">
-            <div className="header__top">
-                <div className="header__top__main">
-                    <Link to="/">
-                        <div className="header__logo">
+        <header className={styles["header"]}>
+            <div className={styles["header__top"]}>
+                <div className={styles["header__top__main"]}>
+                    <Link href="/">
+                        <div className={styles["header__logo"]}>
                             <LogoImg />
                             <p>ZANO</p>
                         </div>
@@ -81,9 +81,9 @@ function Header(props: HeaderProps) {
                     <Nav />
                 </div>
 
-                <div className="header__top__right">
+                <div className={styles["header__top__right"]}>
                     <Link
-                        to={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
+                        href={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
                         target="_blank"
                         rel="noreferrer"
                     >
@@ -93,13 +93,13 @@ function Header(props: HeaderProps) {
                     </Link>
                     <Button
                         onClick={() => setBurgerOpened(!burgerOpened)}
-                        className="header__burger__button"
+                        className={styles["header__burger__button"]}
                     >
                         <BurgerImg />
                     </Button>
                 </div>
             </div>
-            {burgerOpened && <Nav className="header__nav__mobile" />}
+            {burgerOpened && <Nav className={styles["header__nav__mobile"]} />}
         </header>
     )
 }

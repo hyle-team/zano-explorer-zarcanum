@@ -1,4 +1,4 @@
-import "./Input.scss";
+import styles from "./Input.module.scss";
 
 interface InputProps extends React.HTMLProps<HTMLInputElement> {
     onEnterPress?: () => void;
@@ -19,7 +19,7 @@ function Input(props: InputProps) {
         <input 
             {...restProps}
             onKeyDown={onKeyDown}
-            className={"input " + (props.className || "")}
+            className={`${styles["input"]} ${props.className ? styles[props.className] : ""}`}
         />
     )
 }

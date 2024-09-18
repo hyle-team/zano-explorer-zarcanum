@@ -1,11 +1,11 @@
-import "../../styles/Aliases.scss";
+import styles from "@/styles/Aliases.module.scss";
 import { useState, useEffect, useCallback } from "react";
 import Header from "../../components/default/Header/Header";
 import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
 import Table from "../../components/default/Table/Table";
 import Alias from "../../interfaces/state/Alias";
 import Fetch from "../../utils/methods";
-import crownImg from "../../assets/images/UI/crown.svg";
+import CrownImg from "../../assets/images/UI/crown.svg";
 import CommonStatsPanel from "../../components/UI/CommonStatsPanel/CommonStatsPanel";
 
 function Aliases() {
@@ -63,10 +63,10 @@ function Aliases() {
     function ShortAlias({ alias }: { alias: string }) {
         return (
             <div>
-                <div className="short_alias">
+                <div className={styles["short_alias"]}>
                     {alias}
-                    <div className="short_alias__crown">
-                        <img src={crownImg} alt="" />
+                    <div className={styles["short_alias__crown"]}>
+                        <img src={CrownImg} alt="" />
                     </div>
                 </div>
             </div>
@@ -84,7 +84,7 @@ function Aliases() {
     ];
 
     return (
-        <div className="aliases">
+        <div className={styles["aliases"]}>
             <Header 
                 page="Aliases" 
                 burgerOpened={burgerOpened} 
@@ -99,8 +99,8 @@ function Aliases() {
                     setState: setSearchState
                 }}
             />
-            <CommonStatsPanel pairs={statsPanelData} className="aliases__stats" />
-            <div className="aliases__table custom-scroll">
+            <CommonStatsPanel pairs={statsPanelData} className={styles["aliases__stats"]} />
+            <div className={`${styles["aliases__table"]} custom-scroll`}>
                 <Table 
                     headers={tableHeaders}
                     elements={tableElements}

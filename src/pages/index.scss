@@ -10,7 +10,7 @@
     color: #ffffff;
 }
 
-#root {
+#__next {
     max-width: 1200px;
     padding: 0 15px;
     margin: 0 auto;
@@ -72,42 +72,42 @@ button {
 
 @font-face {
     font-family: 'Open Sans';
-    src: url(./assets/fonts/OpenSans/OpenSans-Light.ttf) format("opentype");
+    src: url(../assets/fonts/OpenSans/OpenSans-Light.ttf) format("opentype");
     font-weight: 300;
 }
 
 @font-face {
     font-family: 'Open Sans';
-    src: url(./assets/fonts/OpenSans/OpenSans-Regular.ttf) format("opentype");
+    src: url(../assets/fonts/OpenSans/OpenSans-Regular.ttf) format("opentype");
     font-weight: 400;
 }
 
 @font-face {
     font-family: 'Open Sans';
-    src: url(./assets/fonts/OpenSans/OpenSans-Medium.ttf) format("opentype");
+    src: url(../assets/fonts/OpenSans/OpenSans-Medium.ttf) format("opentype");
     font-weight: 500;
 }
 
 @font-face {
     font-family: 'Open Sans';
-    src: url(./assets/fonts/OpenSans/OpenSans-SemiBold.ttf) format("opentype");
+    src: url(../assets/fonts/OpenSans/OpenSans-SemiBold.ttf) format("opentype");
     font-weight: 600;
 }
 
 @font-face {
     font-family: 'Open Sans';
-    src: url(./assets/fonts/OpenSans/OpenSans-Bold.ttf) format("opentype");
+    src: url(../assets/fonts/OpenSans/OpenSans-Bold.ttf) format("opentype");
     font-weight: 700;
 }
 
 @font-face {
     font-family: 'Open Sans';
-    src: url(./assets/fonts/OpenSans/OpenSans-ExtraBold.ttf) format("opentype");
+    src: url(../assets/fonts/OpenSans/OpenSans-ExtraBold.ttf) format("opentype");
     font-weight: 800;
 }
 
 @font-face {
     font-family: "Inconsolata";
-    src: url(./assets/fonts/Inconsolata/Inconsolata-Regular.ttf) format("opentype");
+    src: url(../assets/fonts/Inconsolata/Inconsolata-Regular.ttf) format("opentype");
     font-weight: 400;
 }

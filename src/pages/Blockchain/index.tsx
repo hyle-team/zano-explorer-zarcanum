@@ -1,12 +1,12 @@
-import "../../styles/Blockchain.scss";
-import Header from "../../components/default/Header/Header";
-import StatsPanel from "../../components/default/StatsPanel/StatsPanel";
-import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
+import styles from "@/styles/Blockchain.module.scss";
+import Header from "@/components/default/Header/Header";
+import StatsPanel from "@/components/default/StatsPanel/StatsPanel";
+import InfoTopPanel from "@/components/default/InfoTopPanel/InfoTopPanel";
 import LatestBlocks from "./components/LatestBlocks/LatestBlocks";
 import TransactionPool from "./components/TransactionPool/TransactionPool";
 import { useEffect, useState } from "react";
-import Fetch from "../../utils/methods";
-import VisibilityInfo from "../../interfaces/state/VisibilityInfo";
+import Fetch from "@/utils/methods";
+import VisibilityInfo from "@/interfaces/state/VisibilityInfo";
 
 function Blockchain() {
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -41,7 +41,7 @@ function Blockchain() {
     }, []);
 
     return (
-        <div className="blockchain">
+        <div className={styles["blockchain"]}>
             <Header 
                 page="Blockchain" 
                 burgerOpened={burgerOpened} 
@@ -51,7 +51,7 @@ function Blockchain() {
                 burgerOpened={burgerOpened} 
                 title="Blockchain" 
                 content={
-                    <div className="info__top__daemon">
+                    <div className={styles["info__top__daemon"]}>
                         <p>Daemon state: {isOnline ? 'Online' : 'Offline'}</p>
                         <p>Default network fee: 0,01</p>
                         <p>Minimum network fee: 0,01</p>

@@ -22,13 +22,18 @@ import Pool from "./schemes/Pool";
 import Asset, { IAsset } from "./schemes/Asset";
 import { ITransaction } from "./schemes/Transaction";
 import BigNumber from "bignumber.js";
+import next from "next";
 import { rateLimit } from 'express-rate-limit';
 // @ts-ignore
 const __dirname = import.meta.dirname;
+const dev = process.env.NODE_ENV !== 'production';
+const nextApp = next({ dev });
 
+const handle = nextApp.getRequestHandler();
 
 const app = express();
 const server = http.createServer(app);
+
 export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
 
@@ -40,6 +45,9 @@ const requestsLimiter = rateLimit({
 });
 
 (async () => {
+
+    await nextApp.prepare();
+
     await initDB();
     await sequelize.authenticate();
     await sequelize.sync();
@@ -50,7 +58,11 @@ const requestsLimiter = rateLimit({
 
     io.engine.on('headers', (headers, req) => {
         headers['Access-Control-Allow-Origin'] = config.frontend_api
-    })
+    });
+
+    app.all('*', (req, res) => {
+        return handle(req, res);
+    });
 
     app.use(express.static('dist'));
     app.use(function (req, res, next) {
@@ -1121,9 +1133,7 @@ const requestsLimiter = rateLimit({
                     let localTr: any;
                     
                     while (!!(localTr = bl.transactions_details.splice(0, 1)[0])) {
-                        console.time('txs details call');
                         let response = await get_tx_details(localTr.id);
-                        console.timeEnd('txs details call');
                         
                         let tx_info = response.data.result.tx_info;
 

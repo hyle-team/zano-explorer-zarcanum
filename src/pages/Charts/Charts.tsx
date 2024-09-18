@@ -1,14 +1,14 @@
-import "../../styles/Charts.scss";
+import styles from "@/styles/Charts.module.scss";
 import { useState, useEffect } from "react";
-import Header from "../../components/default/Header/Header";
-import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
+import Header from "@/components/default/Header/Header";
+import InfoTopPanel from "@/components/default/InfoTopPanel/InfoTopPanel";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts from "highcharts";
-import { chartOptions } from "../../utils/constants";
-import Utils from "../../utils/utils";
-import ChartSeriesElem from "../../interfaces/common/ChartSeriesElem";
-import Preloader from "../../components/UI/Preloader/Preloader";
-import { Link } from "react-router-dom";
+import { chartOptions } from "@/utils/constants";
+import Utils from "@/utils/utils";
+import ChartSeriesElem from "@/interfaces/common/ChartSeriesElem";
+import Preloader from "@/components/UI/Preloader/Preloader";
+import Link from "next/link";
 
 function Charts() {
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -66,8 +66,8 @@ function Charts() {
         } = props;
 
         return (
-            <Link to={"/charts/" + requestTitle} className="charts__chart__wrapper">
-                <div className="charts__chart__title">
+            <Link href={"/charts/" + requestTitle} className={styles["charts__chart__wrapper"]}>
+                <div className={styles["charts__chart__title"]}>
                     <p>{title}</p>
                 </div>
                 <HighchartsReact 
@@ -86,7 +86,7 @@ function Charts() {
                         chart: {
                             ...chartOptions.chart,
                             height: 280,
-                            className: "charts__chart"
+                            className: styles["charts__chart"]
                         },
                         tooltip: {
                             enabled: false
@@ -124,7 +124,7 @@ function Charts() {
     }
 
     return (
-        <div className="charts">
+        <div className={styles["charts"]}>
             <Header 
                 page="Charts" 
                 burgerOpened={burgerOpened} 
@@ -135,7 +135,7 @@ function Charts() {
                 title="Charts" 
             />
             {loaded ?
-                <div className="charts__container">
+                <div className={styles["charts__container"]}>
                     <Chart 
                         title="Average Block Size"
                         requestTitle="avg-block-size"
@@ -161,7 +161,7 @@ function Charts() {
                         requestTitle="confirm-trans-per-day" 
                     />
                 </div> : 
-                <div className="charts__preloader">
+                <div className={styles["charts__preloader"]}>
                     <Preloader />
                 </div>
             }

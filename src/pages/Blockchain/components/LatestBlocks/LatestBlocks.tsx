@@ -1,13 +1,12 @@
-import AliasText from "../../../../components/default/AliasText/AliasText";
-import Table from "../../../../components/default/Table/Table";
-import Block from "../../../../interfaces/state/Block";
-import Info from "../../../../interfaces/state/Info";
-import Fetch from "../../../../utils/methods";
-import Utils from "../../../../utils/utils";
-import "./LatestBlocks.scss";
+import AliasText from "@/components/default/AliasText/AliasText";
+import Table from "@/components/default/Table/Table";
+import Block from "@/interfaces/state/Block";
+import Info from "@/interfaces/state/Info";
+import Fetch from "@/utils/methods";
+import Utils from "@/utils/utils";
+import styles from "./LatestBlocks.module.scss";
 import { useState, useEffect } from "react";
-import { socket } from "../../../../utils/socket";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 function LatestBlocks() {
 
@@ -83,19 +82,19 @@ function LatestBlocks() {
         const hashLink = hash ? "/block/" + hash : "/";
         return [
             <p>
-                <Link to={hashLink}>{e.height}</Link>
+                <Link href={hashLink}>{e.height}</Link>
                 {` (${e.type})`}
             </p>,
             Utils.formatTimestampUTC(e.timestamp),
             Utils.timeElapsedString(e.timestamp),
             `${e.size} bytes`,
             e.transactions?.toString() || "0",
-            <AliasText to={hashLink}>{hash}</AliasText>
+            <AliasText href={hashLink}>{hash}</AliasText>
         ]
     });
 
     return (
-        <div className="blockchain__latest_blocks custom-scroll">
+        <div className={styles["blockchain__latest_blocks"] + " " + styles["custom-scroll"]}>
             <h3>Latest Blocks</h3>
             <Table 
                 pagination

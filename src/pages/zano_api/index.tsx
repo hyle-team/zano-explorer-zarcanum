@@ -1,10 +1,10 @@
 import { useState } from "react";
-import Header from "../../components/default/Header/Header";
-import "../../styles/API.scss";
-import APIItemValue from "../../interfaces/common/APIItemValue";
+import Header from "@/components/default/Header/Header";
+import styles from "@/styles/API.module.scss";
+import APIItemValue from "@/interfaces/common/APIItemValue";
 import examples from "./examples";
 import { nanoid } from "nanoid";
-import JsonViewStyled from "../../components/UI/JsonViewStyled/JsonViewStyled";
+import JsonViewStyled from "@/components/UI/JsonViewStyled/JsonViewStyled";
 
 interface APIEndpointItemProps {
     title: string, 
@@ -92,14 +92,14 @@ function API() {
         const { title, values, json } = props;
 
         return (
-            <div className="api__item">
-                <div className="api__item__title">
+            <div className={styles["api__item"]}>
+                <div className={styles["api__item__title"]}>
                     <h3>{title}</h3>
                 </div>
-                <div className="api__item__units">
+                <div className={styles["api__item__units"]}>
                     {
                         values?.map(e => (
-                            <div key={e.key} className="api__item__unit">
+                            <div key={e.key} className={styles["api__item__unit"]}>
                                 <div>
                                     <p>{e.key}</p>
                                 </div>
@@ -111,7 +111,7 @@ function API() {
                     }
                 </div>
                 {json &&
-                    <div className="api__item__json">
+                    <div className={styles["api__item__json"]}>
                         <p>JSON Response</p>
                         <JsonViewStyled 
                             data={json} 
@@ -137,16 +137,16 @@ function API() {
     }
 
     return (
-        <div className="api">
+        <div className={styles["api"]}>
             <Header 
                 page="API" 
                 burgerOpened={burgerOpened} 
                 setBurgerOpened={setBurgerOpened} 
             />
-            <div className="api__title">
+            <div className={styles["api__title"]}>
                 <p>API Documentation</p>
             </div>
-            <div className="api__items">
+            <div className={styles["api__items"]}>
                 <APIItem title="How to use" values={howToUseValues} />
                 {
                     endpoints.map(e => (

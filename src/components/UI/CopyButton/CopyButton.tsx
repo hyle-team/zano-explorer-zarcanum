@@ -1,6 +1,6 @@
-import "./CopyButton.scss";
-import Button from "../UI/Button/Button";
-import { ReactComponent as CopyImg } from "../../assets/images/UI/copy.svg";
+import styles from "@/components/UI/CopyButton/CopyButton.module.scss";
+import Button from "@/components/UI/Button/Button";
+import CopyImg from "@/assets/images/UI/copy.svg";
 import { useState } from "react";
 
 
@@ -18,7 +18,7 @@ export default function CopyButton({ text }: { text: string }) {
     }
 
     return (
-        <Button className={copied ? "copy-button_copied" : undefined} onClick={onClick} wrapper>
+        <Button className={copied ? styles["copy-button_copied"] : undefined} onClick={onClick} wrapper>
             <CopyImg />
         </Button>
     );

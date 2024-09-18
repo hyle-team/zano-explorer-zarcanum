@@ -1,9 +1,9 @@
-import "./TransactionPool.scss";
+import styles from "./TransactionPool.module.scss";
 import { useState, useEffect } from "react";
-import Button from "../../../../components/UI/Button/Button";
-import Table from "../../../../components/default/Table/Table";
-import AliasText from "../../../../components/default/AliasText/AliasText";
-import { socket } from "../../../../utils/socket";
+import Button from "@/components/UI/Button/Button";
+import Table from "@/components/default/Table/Table";
+import AliasText from "@/components/default/AliasText/AliasText";
+import { socket } from "@/utils/socket";
 
 function TransactionPool() {
 
@@ -78,12 +78,12 @@ function TransactionPool() {
         timeAgo(new Date(element.timestamp).getTime()),
         element.blob_size + " bytes",
         parseInt(element.fee, 10)/10**12,
-        <AliasText to={`/transaction/${element.tx_id}`}>{element.tx_id}</AliasText>
+        <AliasText href={`/transaction/${element.tx_id}`}>{element.tx_id}</AliasText>
     ]));
 
     return (
-        <div className="transaction_pool custom-scroll">
-            <div className="transation_pool__title">
+        <div className={styles["transaction_pool"] + " custom-scroll"}>
+            <div className={styles["transation_pool__title"]}>
                 <h3>Transaction Pool</h3>
                 <Button 
                     style={ turnedOn ? { color: "#ff5252" } : { color: "#00c853" }}
@@ -93,11 +93,11 @@ function TransactionPool() {
                 </Button>
             </div>
             {!turnedOn || !tableElements[0] ?
-                <div className="transation_pool__empty">
+                <div className={styles["transation_pool__empty"]}>
                     <p>Pool is empty</p>
                 </div> :
                 <Table 
-                    className="transaction__table"
+                    className={styles["transaction__table"]}
                     headers={tableHeaders}
                     elements={tableElements}
                 />

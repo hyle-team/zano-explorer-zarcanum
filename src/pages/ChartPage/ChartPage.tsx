@@ -1,14 +1,14 @@
-import "../../styles/ChartPage.scss";
+import styles from "@/styles/ChartPage.module.scss";
 import { useEffect, useState } from "react";
-import Header from "../../components/default/Header/Header";
-import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
+import Header from "@/components/default/Header/Header";
+import InfoTopPanel from "@/components/default/InfoTopPanel/InfoTopPanel";
 import HighchartsReact from "highcharts-react-official";
 import Highcharts from "highcharts/highstock";
-import { chartFontColor, chartOptions, chartRequestNames } from "../../utils/constants";
-import { useNavigate, useParams } from "react-router-dom";
-import ChartSeriesElem from "../../interfaces/common/ChartSeriesElem";
-import Utils from "../../utils/utils";
-import Preloader from "../../components/UI/Preloader/Preloader";
+import { chartFontColor, chartOptions, chartRequestNames } from "@/utils/constants";
+import ChartSeriesElem from "@/interfaces/common/ChartSeriesElem";
+import Utils from "@/utils/utils";
+import Preloader from "@/components/UI/Preloader/Preloader";
+import { useRouter } from "next/router";
 
 interface ChartInfo {
     title: string;
@@ -17,7 +17,6 @@ interface ChartInfo {
 }
 
 function ChartPage() {
-
 
     const chartsInfo: { [key: string]: ChartInfo } = {
         "avg-block-size": {
@@ -58,16 +57,16 @@ function ChartPage() {
 
     // The only values that chartId param can have are the keys of the chartRequestNames object. 
     // Other values will cause redirect to the home page.
-    const { name: chartId } = useParams();
+    const router = useRouter();
+    const { name } = router.query;
+    const chartId: string | undefined = Array.isArray(name) ? name[0] : name;
 
     const [chartSeries, setChartSeries] = useState<ChartSeriesElem[][]>([]);
     const chartSeriesTitles = [
         chartsInfo[chartId || ""]?.seriesTitle || "",
         "Hash Rate 400",
         "Difficulty 120"
-    ]
-
-    const navigate = useNavigate();
+    ];
 
     useEffect(() => {
         async function fetchChart() {
@@ -80,14 +79,14 @@ function ChartPage() {
         }
 
         if (!(chartId && chartRequestNames[chartId])) {
-            navigate("/");
+            router.push("/");
         } else {
             fetchChart();
         }
     }, [chartId]);
 
     return (
-        <div className="chart_page">
+        <div className={styles["chart_page"]}>
             <Header
                 page="Charts"
                 burgerOpened={burgerOpened}
@@ -98,11 +97,11 @@ function ChartPage() {
                 title="Charts"
                 back
             />
-            <div className="chart_page__chart__wrapper">
+            <div className={styles["chart_page__chart__wrapper"]}>
                 {
                     loading ?
                     (
-                        <div className="chart_page__preloader">
+                        <div className={styles["chart_page__preloader"]}>
                             <Preloader />
                         </div>
                     )
@@ -133,7 +132,7 @@ function ChartPage() {
                                 },
                                 chart: {
                                     ...chartOptions.chart,
-                                    className: "chart_page__chart",
+                                    className: styles["chart_page__chart"],
                                     height: 700,
                                 },
                                 rangeSelector: {

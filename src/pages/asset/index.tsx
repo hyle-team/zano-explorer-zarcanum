@@ -1,8 +1,8 @@
-import "../../styles/Asset.scss";
+import styles from "@/styles/Asset.module.scss";
 import { useState } from "react";
-import Header from "../../components/default/Header/Header";
-import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
-import Table from "../../components/default/Table/Table";
+import Header from "@/components/default/Header/Header";
+import InfoTopPanel from "@/components/default/InfoTopPanel/InfoTopPanel";
+import Table from "@/components/default/Table/Table";
 
 export default function Asset() {
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -27,13 +27,13 @@ export default function Asset() {
                 burgerOpened={burgerOpened} 
                 title=""
                 back
-                className="block__info__top"
+                className={styles["block__info__top"]}
             />
             <Table 
                 columnsWidth={[50, 50]}
                 headers={["NAME", "AMOUNT"]}
                 elements={assetsRows}
-                className="asset__table"
+                className={styles["asset__table"]}
             />
         </div>
     )

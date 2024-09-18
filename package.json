@@ -2,6 +2,7 @@
   "name": "zano-explorer",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -17,10 +18,10 @@
     "highcharts-react-official": "^3.2.1",
     "http-proxy-middleware": "^2.0.6",
     "nanoid": "^5.0.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "next": "^14.2.12",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-json-view-lite": "^1.1.0",
-    "react-router-dom": "^6.16.0",
     "react-scripts": "5.0.1",
     "sass": "^1.68.0",
     "socket.io-client": "^4.7.5",
@@ -30,11 +31,11 @@
   },
   "scripts": {
     "postinstall": "cd server && npm i",
-    "client": "react-scripts start",
+    "client": "next dev",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "concurrently \"npx nodemon --exec tsx ./server/server.ts\" \"npm run client\"",
+    "dev": "npx nodemon --exec tsx ./server/server.ts",
     "start": "tsx ./server/server.ts"
   },
   "eslintConfig": {

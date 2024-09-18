@@ -1,17 +1,18 @@
-import "../../styles/Assets.scss";
+import styles from "@/styles/Assets.module.scss";
 import { useState, useEffect, useRef, memo, useCallback } from "react";
-import Header from "../../components/default/Header/Header";
-import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
-import Table from "../../components/default/Table/Table";
-import Fetch from "../../utils/methods";
-import AliasText from "../../components/default/AliasText/AliasText";
-import JSONPopup from "../../components/default/JSONPopup/JSONPopup";
-import Switch from "../../components/UI/Switch/Switch";
+import Header from "@/components/default/Header/Header";
+import InfoTopPanel from "@/components/default/InfoTopPanel/InfoTopPanel";
+import Table from "@/components/default/Table/Table";
+import Fetch from "@/utils/methods";
+import AliasText from "@/components/default/AliasText/AliasText";
+import JSONPopup from "@/components/default/JSONPopup/JSONPopup";
+import Switch from "@/components/UI/Switch/Switch";
 import { nanoid } from "nanoid";
-import Button from "../../components/UI/Button/Button";
-import { useSearchParams } from "react-router-dom";
-import CopyButton from "../../components/CopyButton/CopyButton";
-import CommonStatsPanel from "../../components/UI/CommonStatsPanel/CommonStatsPanel";
+import Button from "@/components/UI/Button/Button";
+import CopyButton from "@/components/UI/CopyButton/CopyButton";
+import CommonStatsPanel from "@/components/UI/CommonStatsPanel/CommonStatsPanel";
+import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
 
 const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
 
@@ -35,11 +36,11 @@ const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
 
     return (
         assetLink ? (
-            <div className="asset_popup__bottom">
+            <div className={styles["asset_popup__bottom"]}>
                 <Button onClick={copy}>{clicked ? 'Copied' : 'Copy asset link'}</Button>
             </div>
         ) : (
-            <div className="asset_popup__not_found">
+            <div className={styles["asset_popup__not_found"]}>
                 <h3>
                     Asset not found or does not exist. For newly created assets, please allow one minute to appear in the explorer
                 </h3>
@@ -49,8 +50,8 @@ const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
 });
 
 function Assets() {
-
-    const [searchParams, setSearchParams] = useSearchParams();
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
     const ZANO_ID = 
         "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a";
@@ -119,7 +120,10 @@ function Assets() {
 
     useEffect(() => {
         async function fetchParamAsset() {
-            const assetId = decodeURIComponent(searchParams.get("asset_id") || '');
+            const assetId = decodeURIComponent(
+                searchParams.get('asset_id') || ""
+            );
+
 
             if (assetId) {
                 const response = await Fetch.getAssetDetails(assetId);
@@ -196,9 +200,9 @@ function Assets() {
     const tableElements = assets.map(e => [
         e?.full_name || "",
         e?.ticker || "",
-        <div className="assets__table_asset-id">
+        <div className={styles["assets__table_asset-id"]}>
             <CopyButton text={e?.asset_id || ""} />
-            <AliasText to="/" onClick={(event) => onAssetClick(event, e)}>
+            <AliasText href="/" onClick={(event) => onAssetClick(event, e)}>
                 {e?.asset_id || ""}
             </AliasText>
             
@@ -212,7 +216,7 @@ function Assets() {
     ];
 
     return (
-        <div className="assets">
+        <div className={styles["assets"]}>
             <Header 
                 page="Assets" 
                 burgerOpened={burgerOpened} 
@@ -237,8 +241,8 @@ function Assets() {
                     />
                 }
             />
-            <CommonStatsPanel pairs={statsPanelData} className={"assets__stats"} />
-            <div className="assets__table">
+            <CommonStatsPanel pairs={statsPanelData} className={styles["assets__stats"]} />
+            <div className={styles["assets__table"]}>
                 <Table 
                     headers={tableHeaders}
                     elements={tableElements}
@@ -265,9 +269,15 @@ function Assets() {
                         />
                     ),
                     onClose: () => {
-                        if (searchParams.get("asset_id")) {
-                            searchParams.delete("asset_id");
-                            setSearchParams(searchParams);
+                        if (searchParams.get('asset_id')) {
+                            const removeQueryParam = (param: string) => {
+                                const updatedQuery = router.query;
+                                delete updatedQuery[param];
+                            
+                                router.push({ query: updatedQuery }, undefined, { shallow: true });
+                            }
+
+                            removeQueryParam('asset_id');
                         }
                         setNotFountPopupState(false);
                     }

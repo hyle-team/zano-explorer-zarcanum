@@ -1,14 +1,13 @@
-import "../../styles/AltBlocks.scss";
+import styles from "@/styles/AltBlocks.module.scss";
 import { useState, useEffect } from "react";
-import Header from "../../components/default/Header/Header";
-import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
-import Table from "../../components/default/Table/Table";
-import AliasText from "../../components/default/AliasText/AliasText";
-import Block from "../../interfaces/state/Block";
-import Fetch from "../../utils/methods";
-import Utils from "../../utils/utils";
-import { Link } from "react-router-dom";
-
+import Header from "@/components/default/Header/Header";
+import InfoTopPanel from "@/components/default/InfoTopPanel/InfoTopPanel";
+import Table from "@/components/default/Table/Table";
+import AliasText from "@/components/default/AliasText/AliasText";
+import Block from "@/interfaces/state/Block";
+import Fetch from "@/utils/methods";
+import Utils from "@/utils/utils";
+import Link from "next/link";
 
 function AltBlocks() {
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -38,7 +37,7 @@ function AltBlocks() {
         return () => clearInterval(id);
     }, [itemsOnPage, page]);
 
-    const tableHeaders = [ "HEIGHT", "TIMESTAMP (UTC)", "ACTIAL TIMESTAMP (UTC)", "SIZE", "TRANSACTIONS", "HASH" ];
+    const tableHeaders = ["HEIGHT", "TIMESTAMP (UTC)", "ACTIAL TIMESTAMP (UTC)", "SIZE", "TRANSACTIONS", "HASH"];
 
     const tableElements = altBlocks.map(e => {
         const hash = e.hash;
@@ -46,31 +45,30 @@ function AltBlocks() {
 
         return [
             <p>
-                <Link to={hashLink}>{e.height}</Link>
+                <Link href={hashLink}>{e.height}</Link>
                 {` (${e.type})`}
             </p>,
             Utils.formatTimestampUTC(e.timestamp),
             Utils.formatTimestampUTC(e.timestamp),
             `${e.size} bytes`,
             e.transactions?.toString() || "0",
-            <AliasText to={hashLink}>{e.hash}</AliasText>
+            <AliasText href={hashLink}>{e.hash}</AliasText>
         ]
     });
 
-
     return (
-        <div className="alt_blocks">
-            <Header 
-                page="Alt-blocks" 
-                burgerOpened={burgerOpened} 
-                setBurgerOpened={setBurgerOpened} 
+        <div className={styles["alt_blocks"]}>
+            <Header
+                page="Alt-blocks"
+                burgerOpened={burgerOpened}
+                setBurgerOpened={setBurgerOpened}
             />
-            <InfoTopPanel 
-                burgerOpened={burgerOpened} 
-                title="Alt-blocks" 
+            <InfoTopPanel
+                burgerOpened={burgerOpened}
+                title="Alt-blocks"
             />
-            <div className="alt_blocks__table custom-scroll">
-                <Table 
+            <div className={`${styles["alt_blocks__table"]} custom-scroll`}>
+                <Table
                     headers={tableHeaders}
                     elements={tableElements}
                     pagination
