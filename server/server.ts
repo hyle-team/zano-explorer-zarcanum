@@ -46,8 +46,6 @@ const requestsLimiter = rateLimit({
 
 (async () => {
 
-    await nextApp.prepare();
-
     await initDB();
     await sequelize.authenticate();
     await sequelize.sync();
@@ -60,9 +58,8 @@ const requestsLimiter = rateLimit({
         headers['Access-Control-Allow-Origin'] = config.frontend_api
     });
 
-    app.all('*', (req, res) => {
-        return handle(req, res);
-    });
+    await nextApp.prepare();
+
 
     app.use(express.static('dist'));
     app.use(function (req, res, next) {
@@ -1090,12 +1087,6 @@ const requestsLimiter = rateLimit({
     }));
 
 
-
-    app.get("/*", function (req, res) {
-        const buildPath = path.resolve(__dirname, "../build/index.html");
-        res.sendFile(buildPath);
-    });
-
     io.on('connection', async (socket) => {
         socket.on('get-socket-info', () => {
             emitSocketInfo(socket);
@@ -1104,6 +1095,10 @@ const requestsLimiter = rateLimit({
             io.emit('get_transaction_pool_info', JSON.stringify(await getTxPoolDetails(0)))
         });
     })
+
+    app.all('*', (req, res) => {
+        return handle(req, res);
+    });
 
     server.listen(config.server_port, () => {
         // @ts-ignore

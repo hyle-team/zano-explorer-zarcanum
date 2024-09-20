@@ -26,7 +26,7 @@ function Block(props: { alt?: boolean }) {
     const [jsonPopupOpened, setJsonPopupOpened] = useState(false);
 
     const router = useRouter();
-    const { hashQuery } = router.query;
+    const { hash: hashQuery } = router.query;
 
     const hash = Array.isArray(hashQuery) ? hashQuery[0] : hashQuery;
 
