@@ -27,4 +27,4 @@ interface TransactionInfo {
 
 export default TransactionInfo;
 
-export { Input, Output };
+export type { Input, Output };
