@@ -2,7 +2,7 @@ import { useState } from "react";
 import Header from "@/components/default/Header/Header";
 import styles from "@/styles/API.module.scss";
 import APIItemValue from "@/interfaces/common/APIItemValue";
-import examples from "./examples";
+import examples from "@/utils/apiExamples";
 import { nanoid } from "nanoid";
 import JsonViewStyled from "@/components/UI/JsonViewStyled/JsonViewStyled";
 
