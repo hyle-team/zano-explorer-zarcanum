@@ -38,7 +38,6 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "postinstall": "cd server && npm i",
     "client": "next dev",
     "build": "next build",
     "dev": "npx nodemon --exec tsx ./server/server.ts",
