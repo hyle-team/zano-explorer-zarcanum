@@ -40,9 +40,7 @@
   "scripts": {
     "postinstall": "cd server && npm i",
     "client": "next dev",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "build": "next build",
     "dev": "npx nodemon --exec tsx ./server/server.ts",
     "start": "tsx ./server/server.ts"
   },
