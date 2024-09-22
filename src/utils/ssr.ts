@@ -1,9 +1,9 @@
 import VisibilityInfo from "@/interfaces/state/VisibilityInfo";
 import Fetch from "./methods";
 import Block from "@/interfaces/state/Block";
-import { PoolElement } from "@/pages/Blockchain/components/TransactionPool/TransactionPool";
+import { PoolElement } from "@/components/default/TransactionPool/TransactionPool";
 import Info from "@/interfaces/state/Info";
-import { latestBlocksInitState } from "@/pages/Blockchain/components/LatestBlocks/LatestBlocks";
+import { latestBlocksInitState } from "@/components/default/LatestBlocks/LatestBlocks";
 import Utils from "./utils";
 import { DEFAULT_ITEMS_ON_PAGE } from "@/pages/aliases";
 import { DEFAULT_ASSETS_ON_PAGE } from "@/pages/assets";
