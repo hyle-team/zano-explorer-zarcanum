@@ -1,5 +1,7 @@
 import { chartRequestNames } from "./constants";
 
+const PORT = process.env.SERVER_PORT;
+
 async function postFetch(path: string, body: Object) {
     return await fetch("/api/user/set-theme", {
         method: "POST",
@@ -11,7 +13,7 @@ async function postFetch(path: string, body: Object) {
 }
 
 class Fetch {
-    static readonly proxyPath = "/api";
+    static readonly proxyPath = typeof window === "undefined" ? `http://localhost:${PORT}/api` : "/api";
 
     static async getInfo() {
         return await fetch(this.proxyPath + "/get_info").then(res => res.json());
@@ -93,6 +95,10 @@ class Fetch {
 
     static async getAliasesCount() {
         return await fetch(this.proxyPath + "/get_aliases_count").then(res => res.json());
+    }
+
+    static async getTxPoolInfo(count: number) {
+        return await fetch(this.proxyPath + `/get_tx_pool_details/${encodeURIComponent(count)}`).then(res => res.json());
     }
 }
 

@@ -7,10 +7,16 @@ import Utils from "@/utils/utils";
 import styles from "./LatestBlocks.module.scss";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import BigNumber from "bignumber.js";
 
-function LatestBlocks() {
+export const latestBlocksInitState = {
+    itemsInPage: 10,
+    page: 1,
+}
 
-    const [info, setInfo] = useState<Info | null>(null);
+function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info | null, fetchedLatestBlocks: Block[] }) {
+
+    const [info, setInfo] = useState<Info | null>(fetchedInfo);
 
     useEffect(() => {
         async function fetchInfo() {
@@ -28,11 +34,15 @@ function LatestBlocks() {
     }, []);
 
 
-    const [blocks, setBlocks] = useState<Block[]>([]);
+    const [blocks, setBlocks] = useState<Block[]>(fetchedLatestBlocks);
 
-    const [itemsOnPage, setItemsOnPage] = useState("10");
+    const [itemsOnPage, setItemsOnPage] = useState(
+        new BigNumber(latestBlocksInitState.itemsInPage).toFixed()
+    );
     const [pagesAmount, setPagesAmount] = useState(0);
-    const [page, setPage] = useState("1");
+    const [page, setPage] = useState(
+        new BigNumber(latestBlocksInitState.page).toFixed()
+    );
     const [goToBlock, setGoToBlock] = useState("");
 
     useEffect(() => {
@@ -63,7 +73,7 @@ function LatestBlocks() {
             if (!info) return;
             const { height } = info;
             const result = await Fetch.getBlockDetails(height - items * pageNumber, items);
-            if (result.sucess === false) return;
+            if (result.success === false) return;
             if (!(result instanceof Array)) return;
             setBlocks(
                 Utils.transformToBlocks(result, true)

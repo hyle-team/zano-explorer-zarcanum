@@ -7,10 +7,10 @@ import { useState, useEffect, ReactNode } from "react";
 import { socket } from "../../../utils/socket";
 import BurnImg from "../../../assets/images/UI/flame_ico.svg";
 
-function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: boolean }) {
-    const { visibilityInfo } = props;
+function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo: Info | null, noStats?: boolean }) {
+    const { visibilityInfo, fetchedInfo } = props;
 
-    const [info, setInfo] = useState<Info | null>(null);
+    const [info, setInfo] = useState<Info | null>(fetchedInfo);
     useEffect(() => {
         socket.on("get_info", (data) => {
             try {

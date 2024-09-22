@@ -5,19 +5,23 @@ import Table from "@/components/default/Table/Table";
 import AliasText from "@/components/default/AliasText/AliasText";
 import { socket } from "@/utils/socket";
 
-function TransactionPool() {
+export interface PoolElement {
+    blob_size: string,
+    fee: string,
+    id: string,
+    timestamp: string,
+    tx_id: string,
+}
 
-    interface PoolElement {
-        blob_size: string,
-        fee: string,
-        id: string,
-        timestamp: string,
-        tx_id: string,
-    }
+function TransactionPool({
+    fetchedTxPoolElements
+}: {
+    fetchedTxPoolElements: PoolElement[],
+}) {
 
     const [turnedOn, setTurnedOn] = useState(true);
 
-    const [poolElements, setPoolElements] = useState<PoolElement[]>([]);
+    const [poolElements, setPoolElements] = useState<PoolElement[]>(fetchedTxPoolElements);
 
     const tableHeaders = [ "TIMESTAMP (UTC)", "AGE", "SIZE", "FEE", "HASH" ];
 

@@ -3,16 +3,30 @@ import Header from "@/components/default/Header/Header";
 import StatsPanel from "@/components/default/StatsPanel/StatsPanel";
 import InfoTopPanel from "@/components/default/InfoTopPanel/InfoTopPanel";
 import LatestBlocks from "./components/LatestBlocks/LatestBlocks";
-import TransactionPool from "./components/TransactionPool/TransactionPool";
+import TransactionPool, { PoolElement } from "./components/TransactionPool/TransactionPool";
 import { useEffect, useState } from "react";
 import Fetch from "@/utils/methods";
 import VisibilityInfo from "@/interfaces/state/VisibilityInfo";
+import Info from "@/interfaces/state/Info";
+import Block from "@/interfaces/state/Block";
 
-function Blockchain() {
+function Blockchain({
+    fetchedVisibilityInfo,
+    fetchedIsOnline,
+    fetchedInfo,
+    fetchedLatestBlocks,
+    fetchedTxPoolElements, 
+}: {
+    fetchedVisibilityInfo: VisibilityInfo | null,
+    fetchedInfo: Info | null,
+    fetchedIsOnline: boolean,
+    fetchedLatestBlocks: Block[],
+    fetchedTxPoolElements: PoolElement[],
+}) {
     const [burgerOpened, setBurgerOpened] = useState(false);
 
-    const [visibliltyInfo, setVisibilityInfo] = useState<VisibilityInfo | null>(null);
-    const [isOnline, setIsOnline] = useState(true);
+    const [visibilityInfo, setVisibilityInfo] = useState<VisibilityInfo | null>(fetchedVisibilityInfo);
+    const [isOnline, setIsOnline] = useState(fetchedIsOnline);
 
     useEffect(() => {
         async function fetchVisibilityInfo() {
@@ -58,9 +72,14 @@ function Blockchain() {
                     </div>
                 }
             />
-            <StatsPanel visibilityInfo={visibliltyInfo} />
-            <LatestBlocks />
-            <TransactionPool />
+            <StatsPanel visibilityInfo={visibilityInfo} fetchedInfo={fetchedInfo} />
+            <LatestBlocks
+                fetchedLatestBlocks={fetchedLatestBlocks}
+                fetchedInfo={fetchedInfo}
+            />
+            <TransactionPool
+                fetchedTxPoolElements={fetchedTxPoolElements}
+            />
         </div>
     )
 }
