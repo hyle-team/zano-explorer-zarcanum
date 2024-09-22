@@ -39,7 +39,7 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
     const [itemsOnPage, setItemsOnPage] = useState(
         new BigNumber(latestBlocksInitState.itemsInPage).toFixed()
     );
-    const [pagesAmount, setPagesAmount] = useState(0);
+    const [pagesAmount, setPagesAmount] = useState(Math.ceil(((info?.height || 0) - 1) / parseInt(itemsOnPage || "0", 10)));
     const [page, setPage] = useState(
         new BigNumber(latestBlocksInitState.page).toFixed()
     );
