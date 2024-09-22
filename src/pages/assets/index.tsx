@@ -13,6 +13,13 @@ import CopyButton from "@/components/UI/CopyButton/CopyButton";
 import CommonStatsPanel from "@/components/UI/CommonStatsPanel/CommonStatsPanel";
 import { useRouter } from "next/router";
 import { useSearchParams } from "next/navigation";
+import { GetServerSideProps } from "next";
+import { AssetsPageProps, getAssets } from "@/utils/ssr";
+import Utils from "@/utils/utils";
+import { ZANO_ID } from "@/utils/constants";
+
+
+export const DEFAULT_ASSETS_ON_PAGE = "10";
 
 const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
 
@@ -49,23 +56,20 @@ const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
     )
 });
 
-function Assets() {
+function Assets(props: AssetsPageProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    const ZANO_ID = 
-        "d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a";
-
     const [burgerOpened, setBurgerOpened] = useState(false);
 
-    const [assets, setAssets] = useState<any[]>([]);
+    const [assets, setAssets] = useState<any[]>(props.assets);
 
     const [assetJson, setAssetJson] = useState<Record<string, any>>({});
 
     const [popupState, setPopupState] = useState(false);
     const [notFountPopupState, setNotFountPopupState] = useState(false);
 
-    const [itemsOnPage, setItemsOnPage] = useState("10");
+    const [itemsOnPage, setItemsOnPage] = useState(DEFAULT_ASSETS_ON_PAGE);
     const [page, setPage] = useState("1");
 
     const [isWhitelist, setIsWhitelist] = useState(true);
@@ -76,20 +80,17 @@ function Assets() {
     const [assetsStats, setAssetStats] = useState<{
         assetsAmount?: number;
         whitelistedAssetsAmount?: number;
-    }>({});
+    }>({
+        assetsAmount: props.assetsAmount,
+        whitelistedAssetsAmount: props.whitelistedAssetsAmount
+    });
     
     const fetchIdRef = useRef<string>(nanoid());
 
-    async function getZanoPrice(): Promise<number | undefined> {
-        const result = await Fetch.getPrice();
-        const price = result?.data?.zano?.usd;
-        return price;
-    }
-
-    const fetchZanoPrice = useCallback(async () => {
-        const zanoPrice = await getZanoPrice();
+    const fetchZanoPrice = useCallback(async (assets?: any[]) => {
+        const zanoPrice = await Utils.getZanoPrice();
         setAssets(prev => {
-            const newAssets = [...prev];
+            const newAssets = [...(assets || prev)];
             const zanoAsset = newAssets.find(e => e.asset_id === ZANO_ID);
             if (zanoAsset) {
                 zanoAsset.price = zanoPrice;
@@ -182,8 +183,7 @@ function Assets() {
             const resultAssets = result;
             if (!resultAssets || !(resultAssets instanceof Array)) return;
 
-            setAssets(resultAssets);
-            fetchZanoPrice();
+            fetchZanoPrice(resultAssets);
         }
         
         fetchAssets();
@@ -286,5 +286,9 @@ function Assets() {
         </div>
     )
 }
+
+
+const getServerSideProps: GetServerSideProps = getAssets;
+export { getServerSideProps };
 
 export default Assets;

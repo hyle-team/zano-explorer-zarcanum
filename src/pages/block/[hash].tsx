@@ -11,6 +11,8 @@ import Link from "next/link";
 import Fetch from "@/utils/methods";
 import Popup from "@/components/default/Popup/Popup";
 import { useRouter } from "next/router";
+import { getStats, BlockPageProps, getBlock } from "@/utils/ssr";
+import { GetServerSideProps } from "next";
 
 interface Transaction {
     hash: string;
@@ -19,7 +21,11 @@ interface Transaction {
     size: string;
 }
 
-function Block(props: { alt?: boolean }) {
+interface BlockProps extends BlockPageProps {
+    alt?: boolean;
+}
+
+function Block(props: BlockProps) {
     const { alt } = props;
 
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -32,8 +38,8 @@ function Block(props: { alt?: boolean }) {
 
     const tableHeaders = ["HASH", "FEE", "TOTAL AMOUNT", "SIZE"];
 
-    const [blockInfo, setBlockInfo] = useState<BlockInfo | null>(null);
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [blockInfo, setBlockInfo] = useState<BlockInfo | null>(props.blockData?.blockInfo || null);
+    const [transactions, setTransactions] = useState<Transaction[]>(props.blockData?.transactionsDetails || []);
 
     const tableElements = transactions.map(e => [
         !alt
@@ -50,7 +56,7 @@ function Block(props: { alt?: boolean }) {
         e.size + " bytes"
     ]);
 
-    const [height, setHeight] = useState<number | null>(null);
+    const [height, setHeight] = useState<number | null>(props.blockData?.height || null);
 
     const [prevHash, setPrevHash] = useState<string | null>(null);
     const [nextHash, setNextHash] = useState<string | null>(null);
@@ -69,65 +75,21 @@ function Block(props: { alt?: boolean }) {
 
     useEffect(() => {
         async function fetchBlock() {
-            if (!hash) return;
-            setBlockInfo(null);
-            const result = await Fetch.getBlockInfo(hash, alt);
 
-            if (result.success === false) return;
+            if (!hash) {
+                return;
+            }
 
-            setHeight(result.height || null);
+            const blockData = await Utils.fetchBlock(hash, alt);
 
-            console.log(result);
+            if (!blockData) {
+                return;
+            }
 
-            setBlockInfo({
-                type: result.type === "1" ? "PoW" : "PoS",
-                timestamp: result.timestamp || undefined,
-                actualTimestamp: result.actual_timestamp || undefined,
-                difficulty: Utils.formatNumber(result.difficulty || "", 0),
-                minerTextInfo: result.miner_text_info || undefined,
-                cummulativeDiffAdjusted: Utils.formatNumber(result.cumulative_diff_adjusted || "", 0),
-                cummulativeDiffPresize: Utils.formatNumber(result.cumulative_diff_precise || "", 0),
-                orphan: result.is_orphan || false,
-                baseReward: Utils.toShiftedNumber(result.base_reward || "0", 12),
-                transactionsFee: Utils.toShiftedNumber(result.total_fee || "0", 12),
-                rewardPenalty: "",
-                reward: Utils.toShiftedNumber(result.summary_reward || "0", 12),
-                totalBlockSize: result.block_tself_size || undefined,
-                effectiveTxsMedian: undefined,
-                blockFeeMedian: Utils.toShiftedNumber(result.this_block_fee_median || "0", 12),
-                effectiveFeeMedian: Utils.toShiftedNumber(result.effective_fee_median || "0", 12),
-                currentTxsMedian: undefined,
-                transactions: result.tr_count || "0",
-                transactionsSize: result.total_txs_size || "0",
-                alreadyGeneratedCoins: result.already_generated_coins || undefined,
-                object_in_json: result.object_in_json || undefined,
-                tx_id: result.tx_id || undefined,
-                prev_id: result.prev_id || undefined,
-                minor_version: result?.object_in_json?.split('\"minor_version\": ')?.[1]?.split(',')?.[0] || '-',
-                major_version: result?.object_in_json?.split('\"major_version\": ')?.[1]?.split(',')?.[0] || '-',
-            });
+            setBlockInfo(blockData.blockInfo || null);
+            setTransactions(blockData.transactionsDetails);
+            setHeight(blockData.height);
 
-            const rawTransactionsDetails = result.transactions_details;
-
-            const transactionsDetails =
-                typeof rawTransactionsDetails === "string"
-                    ? (() => {
-                        try {
-                            return JSON.parse(rawTransactionsDetails);
-                        } catch { }
-                    })()
-                    : rawTransactionsDetails;
-
-            if (!(transactionsDetails instanceof Array)) return;
-
-            setTransactions(
-                transactionsDetails.map(e => ({
-                    hash: e?.tx_id || "",
-                    fee: Utils.toShiftedNumber(e?.fee || "0", 12),
-                    amount: Utils.toShiftedNumber(e?.amount?.toString() || "0", 12),
-                    size: e?.blob_size || "0"
-                }))
-            );
         }
 
         fetchBlock();
@@ -317,7 +279,7 @@ function Block(props: { alt?: boolean }) {
                 back
                 className={styles["block__info__top"]}
             />
-            <StatsPanel noStats={true} />
+            <StatsPanel noStats={true} visibilityInfo={props.visibilityInfo} fetchedInfo={props.info} />
             <BlockInfo />
             <div className={styles["block__transactions"]}>
                 <h2>Transactions</h2>
@@ -329,5 +291,8 @@ function Block(props: { alt?: boolean }) {
         </div>
     )
 }
+
+const getServerSideProps: GetServerSideProps = getBlock;
+export { getServerSideProps };
 
 export default Block;

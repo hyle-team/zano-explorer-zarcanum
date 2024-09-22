@@ -13,6 +13,8 @@ import Popup from "@/components/default/Popup/Popup";
 import CrossImg from "@/assets/images/UI/cross.svg";
 import Button from "@/components/UI/Button/Button";
 import { useRouter } from "next/router";
+import { GetServerSideProps } from "next";
+import { getStats, getTransaction, StatsPageProps, TransactionPageProps } from "@/utils/ssr";
 
 interface Block {
     hash: string;
@@ -20,11 +22,16 @@ interface Block {
     timestamp: string;
 }
 
-function Transaction() {
+function Transaction({
+    visibilityInfo,
+    info,
+    transactionsData
+} : TransactionPageProps) {
+
     const [burgerOpened, setBurgerOpened] = useState(false);
 
-    const [transactionInfo, setTransactionInfo] = useState<TransactionInfo | null>(null);
-    const [blockOrigin, setBlockOrigin] = useState<Block | null>(null);
+    const [transactionInfo, setTransactionInfo] = useState<TransactionInfo | null>(transactionsData?.transactionInfo || null);
+    const [blockOrigin, setBlockOrigin] = useState<Block | null>(transactionsData?.blockOrigin || null);
 
     const [popupState, setPopupState] = useState(false);
     const [selectedInput, setSelectedInput] = useState<Input | null>(null);
@@ -35,88 +42,26 @@ function Transaction() {
 
     const hash = Array.isArray(hashQuery) ? hashQuery[0] : hashQuery;
 
+
+    
+    const fetchTransaction = Utils.fetchTransaction;
+
     useEffect(() => {
-        async function fetchTransaction() {
-            if (!hash) return;
-            const result = await Fetch.getTransaction(hash);
-            if (result.success === false) return;
-            if (!(typeof result === "object")) return;
-            
-            const newTransactionInfo: TransactionInfo = {
-                hash: result.tx_id || "",
-                amount: Utils.toShiftedNumber(result.amount || "0", 12),
-                fee: Utils.toShiftedNumber(result.fee || "0", 12),
-                size: result.blob_size || "0",
-                confirmations: parseInt(result.last_block, 10) - parseInt(result.keeper_block, 10),
-                publicKey: result.pub_key || "-",
-                mixin: "-",
-                extraItems: [],
-                ins: [],
-                outs: [],
-                attachments: undefined
+        async function fetchTransactionInfo() {
+
+            if (!hash) {
+                return;
             }
-            setBlockOrigin({
-                hash: result.block_hash || "",
-                height: Utils.formatNumber(result.keeper_block || "0", 0),
-                timestamp: result.timestamp || ""
-            });
-            
-            try {
-                const parsedExtraItems = JSON.parse(result.extra);
-                if (parsedExtraItems instanceof Array) {
-                    newTransactionInfo.extraItems = parsedExtraItems.map(e => {
-                        return `(${e.type || ""}) ${e.short_view || ""}`;
-                    });
-                }
-            } catch {}
 
-            try {
-                const parsedIns = JSON.parse(result.ins);
-                if (parsedIns instanceof Array) {
-                    newTransactionInfo.ins = parsedIns.map(e => {
-                        const mixins = (e?.mixins instanceof Array) ? e?.mixins : [];
-                        const globalIndexes = (e?.global_indexes instanceof Array) ? e?.global_indexes : [];
+            const transactionInfo = await fetchTransaction(hash);
 
-                        const existingAmount = ((e?.amount || 0) / 1e12);
-                        if (existingAmount) {
-                            e.convertedAmount = Utils.convertENotationToString(existingAmount?.toExponential());
-                        }
-
-                        return {
-                            amount: e.convertedAmount,
-                            keyimage: e?.kimage_or_ms_id || "",
-                            mixins: mixins,
-                            globalIndexes: globalIndexes
-                        }
-                    });
-                }
-            } catch {}
-
-            try {
-                const parsedOuts = JSON.parse(result.outs);
-                if (parsedOuts instanceof Array) {
-                    newTransactionInfo.outs = parsedOuts.map(e => {
-                        const { pub_keys } = e;
-                        const pubKeys = (pub_keys instanceof Array) ? pub_keys : [];
-
-                        const existingAmount = (e?.amount / 1e12);
-                        if (existingAmount) {
-                            e.convertedAmount = Utils.convertENotationToString(existingAmount?.toExponential());
-                        }
-
-                        return {
-                            amount: e.convertedAmount || "0",
-                            publicKeys: pubKeys.slice(0, 4),
-                            globalIndex: e?.global_index || 0
-                        }
-                    })
-                }
-            } catch {}
-
-            setTransactionInfo(newTransactionInfo);
+            if (transactionInfo) {
+                setTransactionInfo(transactionInfo?.transactionInfo);
+                setBlockOrigin(transactionInfo?.blockOrigin);
+            }
         }
 
-        fetchTransaction();
+        fetchTransactionInfo();
     }, [hash]);
 
     function showIndexesClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>, input: Input) {
@@ -211,7 +156,7 @@ function Transaction() {
                 back
                 className={styles["block__info__top"]}
             />
-            <StatsPanel noStats={true}/>
+            <StatsPanel noStats={true} visibilityInfo={visibilityInfo} fetchedInfo={info} />
             <div className={styles["transaction__info"]}>
                 <h2>Transaction</h2>
                 <table>
@@ -311,5 +256,8 @@ function Transaction() {
         </div>
     )
 }
+
+const getServerSideProps: GetServerSideProps = getTransaction;
+export { getServerSideProps };
 
 export default Transaction;

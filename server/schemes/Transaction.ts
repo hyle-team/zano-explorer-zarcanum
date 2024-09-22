@@ -42,7 +42,12 @@ Transaction.init(
     {
         sequelize,
         modelName: "transactions",
-        timestamps: true
+        timestamps: true,
+        indexes: [
+            {
+                fields: ['keeper_block'],
+            },
+        ],
     }
 );
 

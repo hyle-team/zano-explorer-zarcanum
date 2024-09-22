@@ -131,7 +131,6 @@ export async function getMainBlockDetails(id: string) {
     });
 
     if (block) {
-        // Find transactions associated with the block
 
         const nextBlock = await Block.findOne({
             where: {

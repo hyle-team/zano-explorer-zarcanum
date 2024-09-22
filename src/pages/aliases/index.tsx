@@ -7,19 +7,26 @@ import Alias from "../../interfaces/state/Alias";
 import Fetch from "../../utils/methods";
 import CrownImg from "../../assets/images/UI/crown.svg";
 import CommonStatsPanel from "../../components/UI/CommonStatsPanel/CommonStatsPanel";
+import { GetServerSideProps } from "next";
+import { AliasesPageProps, getAliases } from "@/utils/ssr";
 
-function Aliases() {
+export const DEFAULT_ITEMS_ON_PAGE = "20";
+
+function Aliases(props: AliasesPageProps) {
     const [burgerOpened, setBurgerOpened] = useState(false);
 
-    const [aliases, setAliases] = useState<Alias[]>([]);
+    const [aliases, setAliases] = useState<Alias[]>(props.aliases);
 
-    const [itemsOnPage, setItemsOnPage] = useState("20");
+    const [itemsOnPage, setItemsOnPage] = useState(DEFAULT_ITEMS_ON_PAGE);
     const [page, setPage] = useState("1");
     const [searchState, setSearchState] = useState("");
     const [aliasStats, setAliasStats] = useState<{
         aliasesAmount?: number;
         premiumAliasesAmount?: number;
-    }>({});
+    }>({
+        aliasesAmount: props.aliasesAmount,
+        premiumAliasesAmount: props.premiumAliasesAmount
+    });
 
     const fetchAliases = useCallback(async () => {
         const currentPage = parseInt(page, 10) || 0;
@@ -115,5 +122,8 @@ function Aliases() {
         </div>
     )
 }
+
+const getServerSideProps: GetServerSideProps = getAliases;
+export { getServerSideProps };
 
 export default Aliases;

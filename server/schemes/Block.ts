@@ -69,7 +69,12 @@ Block.init(
     {
         sequelize,
         modelName: "blocks",
-        timestamps: true
+        timestamps: true,
+        indexes: [
+            {
+                fields: ['height'],
+            },
+        ],
     }
 );
 

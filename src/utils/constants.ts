@@ -145,4 +145,7 @@ const chartDataFieldMap: { [key: string]: string } = {
     "difficulty-pow": "d"
 };
 
-export { chartOptions, chartFontColor, chartRequestNames, chartDataFieldMap };
+const ZANO_ID = 
+"d6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a";
+
+export { chartOptions, chartFontColor, chartRequestNames, chartDataFieldMap, ZANO_ID };
