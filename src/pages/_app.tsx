@@ -38,7 +38,6 @@ function App(data: AppCustomProps) {
 }
 
 App.getInitialProps = async () => {
-    console.log('APP INITIAL PROPS', process.env);
     return {
         netMode: process.env.NET_MODE === "MAIN" ? "MAIN" : "TEST" as NetMode,
     }

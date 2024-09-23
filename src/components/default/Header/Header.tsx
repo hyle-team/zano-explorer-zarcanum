@@ -1,5 +1,6 @@
 import styles from "./Header.module.scss";
-import LogoImg from "../../../assets/images/UI/logo.svg";
+import LogoImg from "../../../assets/images/UI/zano_logo.svg";
+import LogoMainnetImg from "../../../assets/images/UI/zano_logo_mainnet.svg";
 import BurgerImg from "../../../assets/images/UI/burger.svg";
 import HeaderProps from "./Header.props";
 import Button from "../../UI/Button/Button";
@@ -10,6 +11,8 @@ import { Store } from "@/store/store-reducer";
 function Header(props: HeaderProps) {
     const { state } = useContext(Store);
     const { page, burgerOpened, setBurgerOpened } = props;
+
+    const { netMode } = state;
 
     function Nav({ className }: { className?: string }) {
         return (
@@ -32,7 +35,7 @@ function Header(props: HeaderProps) {
                 >
                     Aliases
                 </Link>
-                {/* {state.netMode === "TEST" ?
+                {/* {netMode === "TEST" ?
                     <Link 
                         className={page === "Assets" ? "selected" : undefined} 
                         to="/assets"
@@ -61,7 +64,7 @@ function Header(props: HeaderProps) {
                 >
                     API
                 </Link>
-                {state.netMode === "MAIN" &&
+                {netMode === "MAIN" &&
                     <p>
                         Governance
                     </p>
@@ -75,22 +78,19 @@ function Header(props: HeaderProps) {
             <div className={styles["header__top"]}>
                 <div className={styles["header__top__main"]}>
                     <Link href="/">
-                        <div className={styles["header__logo"]}>
-                            <LogoImg />
-                            <p>ZANO</p>
-                        </div>
+                        {netMode === "TEST" ? <LogoImg /> : <LogoMainnetImg />}
                     </Link>
                     <Nav />
                 </div>
 
                 <div className={styles["header__top__right"]}>
                     <Link
-                        href={state.netMode === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
+                        href={netMode === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
                         target="_blank"
                         rel="noreferrer"
                     >
                         <Button>
-                            <p>Switch to {state.netMode === "TEST" ? "Main Net" : "Test Net"}</p>
+                            <p>Switch to {netMode === "TEST" ? "Main Net" : "Test Net"}</p>
                         </Button>
                     </Link>
                     <Button
