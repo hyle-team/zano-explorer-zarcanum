@@ -1,13 +1,14 @@
-import { NET_MODE } from "../../../config/config";
 import Info from "../../../interfaces/state/Info";
 import VisibilityInfo from "../../../interfaces/state/VisibilityInfo";
 import Utils from "../../../utils/utils";
 import styles from "./StatsPanel.module.scss";
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, ReactNode, useContext } from "react";
 import { socket } from "../../../utils/socket";
 import BurnImg from "../../../assets/images/UI/flame_ico.svg";
+import { Store } from "@/store/store-reducer";
 
 function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo: Info | null, noStats?: boolean }) {
+    const { state } = useContext(Store);
     const { visibilityInfo, fetchedInfo } = props;
 
     const [info, setInfo] = useState<Info | null>(fetchedInfo);
@@ -36,7 +37,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
     const powDiff = Utils.formatNumber(info?.pow_difficulty, 0) || "...";
     const coinsEmitted = Utils.toShiftedNumber(info?.total_coins, 12) || "...";
     const transactionsString = Utils.formatNumber(transactions, 0) || "...";
-    const hashrate = Utils.toShiftedNumber(info?.current_network_hashrate_350, NET_MODE === "TEST" ? 0 : 9, 2) || "...";
+    const hashrate = Utils.toShiftedNumber(info?.current_network_hashrate_350, state.netMode === "TEST" ? 0 : 9, 2) || "...";
 
     const stackedCoins = Utils.toShiftedNumber(visibilityInfo?.amount.toString(), 12) || "...";
     const percentage = visibilityInfo?.percentage || "...";
@@ -125,7 +126,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
     return (
         <>
             <div className={styles["blockchain__info__main"]}>
-                {NET_MODE === "MAIN" && !props.noStats && <InfoTop/>}
+                {state.netMode === "MAIN" && !props.noStats && <InfoTop/>}
                 <div className={styles["info__main__bottom"]}>
                     <BottomItem title="Height">
                         <p className={styles["item__text__large"]}>{infoHeight}</p>
@@ -162,7 +163,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
             </div>
 
             <div className={styles["info__main__mobile"]}>
-                {NET_MODE === "MAIN" && <InfoTop/>}
+                {state.netMode === "MAIN" && <InfoTop/>}
                 <div className={styles["info__main__bottom"]}>
                     <BottomItem title="Height">
                         <p className={styles["item__text__large"]}>{infoHeight}</p>

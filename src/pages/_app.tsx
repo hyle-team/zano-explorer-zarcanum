@@ -1,9 +1,15 @@
+import { StoreProvider } from '@/store/store-reducer';
 import './index.scss';
-import { default as NextApp } from 'next/app';
+import { AppProps, default as NextApp } from 'next/app';
 import Head from 'next/head';
+import NetMode from '@/interfaces/common/NetMode';
 
-function App(data: any) {
-    const { Component, pageProps } = data;
+interface AppCustomProps extends AppProps {
+    netMode: NetMode;
+}
+
+function App(data: AppCustomProps) {
+    const { Component, pageProps, netMode } = data;
     return (
         <>
             <Head>
@@ -24,9 +30,18 @@ function App(data: any) {
                 <meta property="twitter:description" content="Zano is an open-source cryptocurrency and ecosystem with enterprise-grade privacy, security, and scalability"/>
                 <meta property="twitter:image" content="social-banner.png"/>
             </Head>
-            <Component {...pageProps} />
+            <StoreProvider initial={{ netMode: netMode === "TEST" ? "TEST" : "MAIN" }}>
+                <Component {...pageProps} />
+            </StoreProvider>
         </>
     );
 }
+
+App.getInitialProps = async () => {
+    console.log('APP INITIAL PROPS', process.env);
+    return {
+        netMode: process.env.NET_MODE === "MAIN" ? "MAIN" : "TEST" as NetMode,
+    }
+};
 
 export default App;

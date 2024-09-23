@@ -3,10 +3,12 @@ import LogoImg from "../../../assets/images/UI/logo.svg";
 import BurgerImg from "../../../assets/images/UI/burger.svg";
 import HeaderProps from "./Header.props";
 import Button from "../../UI/Button/Button";
-import { NET_MODE } from "../../../config/config";
 import Link from "next/link";
+import { useContext } from "react";
+import { Store } from "@/store/store-reducer";
 
 function Header(props: HeaderProps) {
+    const { state } = useContext(Store);
     const { page, burgerOpened, setBurgerOpened } = props;
 
     function Nav({ className }: { className?: string }) {
@@ -30,7 +32,7 @@ function Header(props: HeaderProps) {
                 >
                     Aliases
                 </Link>
-                {/* {NET_MODE === "TEST" ?
+                {/* {state.netMode === "TEST" ?
                     <Link 
                         className={page === "Assets" ? "selected" : undefined} 
                         to="/assets"
@@ -59,7 +61,7 @@ function Header(props: HeaderProps) {
                 >
                     API
                 </Link>
-                {NET_MODE === "MAIN" &&
+                {state.netMode === "MAIN" &&
                     <p>
                         Governance
                     </p>
@@ -83,12 +85,12 @@ function Header(props: HeaderProps) {
 
                 <div className={styles["header__top__right"]}>
                     <Link
-                        href={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
+                        href={state.netMode === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
                         target="_blank"
                         rel="noreferrer"
                     >
                         <Button>
-                            <p>Switch to {NET_MODE === "TEST" ? "Main Net" : "Test Net"}</p>
+                            <p>Switch to {state.netMode === "TEST" ? "Main Net" : "Test Net"}</p>
                         </Button>
                     </Link>
                     <Button
