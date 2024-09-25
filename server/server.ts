@@ -428,7 +428,7 @@ const requestsLimiter = rateLimit({
 
                 console.timeEnd('AvgBlockSize');
 
-                res.status(200).json(result);
+                res.send(result);
             } else if (chart === 'AvgTransPerBlock') {
                 const result = await Chart.findAll({
                     attributes: [
@@ -449,7 +449,7 @@ const requestsLimiter = rateLimit({
                     },
                     raw: true,
                 });
-                res.json(result);
+                res.send(result);
             } else if (chart === 'hashRate') {
                 console.time('hashRate');
                 const result = await Chart.findAll({
@@ -476,7 +476,7 @@ const requestsLimiter = rateLimit({
                 });
 
                 console.timeEnd('hashRate');
-                res.json(result);
+                res.send(result);
             } else if (chart === 'pos-difficulty') {
                 const result = await Chart.findAll({
                     attributes: [
@@ -527,7 +527,7 @@ const requestsLimiter = rateLimit({
                 console.log('pos-difficulty', result1.length, result.length);
                 
 
-                res.json({
+                res.send({
                     aggregated: result,
                     detailed: result1,
                 });
@@ -578,7 +578,7 @@ const requestsLimiter = rateLimit({
                     raw: true,
                 });
 
-                res.json({
+                res.send({
                     aggregated: result,
                     detailed: result1,
                 });
@@ -602,7 +602,7 @@ const requestsLimiter = rateLimit({
                     },
                     raw: true,
                 });
-                res.json(result);
+                res.send(result);
             } else {
                 res.status(400).json({ error: 'Invalid chart type' });
             }
