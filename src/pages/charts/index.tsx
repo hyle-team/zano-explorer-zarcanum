@@ -29,7 +29,9 @@ function Charts() {
 
     useEffect(() => {
         async function fetchCharts() {
-            setLoaded(false);
+            if (loaded) {
+                return;
+            }
 
             const titles = [
                 "avg-block-size",
@@ -68,7 +70,7 @@ function Charts() {
         }
 
         fetchCharts();
-    }, []);
+    }, [loaded]);
 
     function Chart(props: { title: string, requestTitle: string }) {
         const {
