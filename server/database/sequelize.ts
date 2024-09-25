@@ -7,7 +7,7 @@ const sequelize = new Sequelize({
     username: process.env.PGUSER,
     port: parseInt(process.env.PGPORT || "5432", 10),
     database: process.env.PGDATABASE,
-    logging: false
+    logging: console.log
 });
 
 export default sequelize;
