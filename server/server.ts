@@ -388,244 +388,207 @@ const requestsLimiter = rateLimit({
 
 
     app.get(
-        '/api/get_chart/:chart/:period',
+        '/api/get_chart/:chart/:offset',
         async (req, res) => {
-          const { chart } = req.params;
-      
-          if (!chart) {
-            return res.status(400).json({ error: 'Invalid parameters' });
-          }
-      
-          const currentTime = Math.round(Date.now() / 1000);
-          const period = currentTime - 24 * 3600; // 24 hours ago
-          const period2 = currentTime - 48 * 3600; // 48 hours ago
-      
-          if (chart === 'all') {
-            // First query
-            const arrayAll = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from "actual_timestamp")::BIGINT'
-                  ),
-                  'at',
-                ],
-                [literal('"block_cumulative_size"::REAL'), 'bcs'],
-                [literal('"tr_count"::REAL'), 'trc'],
-                [literal('"difficulty"::REAL'), 'd'],
-                [col('type'), 't'],
-              ],
-              where: {
-                actual_timestamp: {
-                  [Op.gt]: new Date(period * 1000), // Convert to milliseconds
-                },
-              },
-              order: [[literal('"at"'), 'ASC']],
-            });
-      
-            // Second query
-            const rows0 = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from date_trunc(\'day\', "actual_timestamp"))::BIGINT'
-                  ),
-                  'at',
-                ],
-                [literal('SUM("tr_count"::REAL)'), 'sum_trc'],
-              ],
-              group: ['at'],
-              order: [[literal('"at"'), 'ASC']],
-            });
-      
-            // Third query
-            const rows1 = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from "actual_timestamp")::BIGINT'
-                  ),
-                  'at',
-                ],
-                [literal('"difficulty120"::REAL'), 'd120'],
-                [literal('"hashrate100"::REAL'), 'h100'],
-                [literal('"hashrate400"::REAL'), 'h400'],
-              ],
-              where: {
-                type: '1',
-                actual_timestamp: {
-                  [Op.gt]: new Date(period2 * 1000),
-                },
-              },
-              order: [[literal('"at"'), 'ASC']],
-            });
-      
-            const arrayAllJson = arrayAll.map((record) => record.toJSON());
-            const rows0Json = rows0.map((record) => record.toJSON());
-            const rows1Json = rows1.map((record) => record.toJSON());
-      
-            const resultArray = [...arrayAllJson];
-            resultArray[0] = rows0Json;
-            resultArray[1] = rows1Json;
-      
-            res.json(resultArray);
-          } else if (chart === 'AvgBlockSize') {
-            const result = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                  ),
-                  'at',
-                ],
-                [fn('avg', literal('"block_cumulative_size"::REAL')), 'bcs'],
-              ],
-              group: ['at'],
-              order: [[literal('"at"'), 'ASC']],
-            });
-            res.json(result.map((record) => record.toJSON()));
-          } else if (chart === 'AvgTransPerBlock') {
-            const result = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                  ),
-                  'at',
-                ],
-                [fn('avg', literal('"tr_count"::REAL')), 'trc'],
-              ],
-              group: ['at'],
-              order: [[literal('"at"'), 'ASC']],
-            });
-            res.json(result.map((record) => record.toJSON()));
-          } else if (chart === 'hashRate') {
-            const result = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                  ),
-                  'at',
-                ],
-                [fn('avg', literal('"difficulty120"::REAL')), 'd120'],
-                [fn('avg', literal('"hashrate100"::REAL')), 'h100'],
-                [fn('avg', literal('"hashrate400"::REAL')), 'h400'],
-              ],
-              where: {
-                type: '1',
-              },
-              group: ['at'],
-              order: [[literal('"at"'), 'ASC']],
-            });
-            res.json(result.map((record) => record.toJSON()));
-          } else if (chart === 'pos-difficulty') {
-            const result = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                  ),
-                  'at',
-                ],
-                [
-                  literal(
-                    `CASE WHEN (MAX("difficulty"::NUMERIC) - AVG("difficulty"::NUMERIC)) > (AVG("difficulty"::NUMERIC) - MIN("difficulty"::NUMERIC)) THEN MAX("difficulty"::NUMERIC) ELSE MIN("difficulty"::NUMERIC) END`
-                  ),
-                  'd',
-                ],
-              ],
-              where: {
-                type: '0',
-              },
-              group: ['at'],
-              order: [[literal('"at"'), 'ASC']],
-            });
-      
-            const result1 = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from "actual_timestamp")::BIGINT'
-                  ),
-                  'at',
-                ],
-                [literal('"difficulty"::REAL'), 'd'],
-              ],
-              where: {
-                type: '0',
-              },
-              order: [[literal('"at"'), 'ASC']],
-            });
-      
-            res.json({
-              aggregated: result.map((record) => record.toJSON()),
-              detailed: result1.map((record) => record.toJSON()),
-            });
-          } else if (chart === 'pow-difficulty') {
-            const result = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                  ),
-                  'at',
-                ],
-                [
-                  literal(
-                    `CASE WHEN (MAX("difficulty"::NUMERIC) - AVG("difficulty"::NUMERIC)) > (AVG("difficulty"::NUMERIC) - MIN("difficulty"::NUMERIC)) THEN MAX("difficulty"::NUMERIC) ELSE MIN("difficulty"::NUMERIC) END`
-                  ),
-                  'd',
-                ],
-              ],
-              where: {
-                type: '1',
-              },
-              group: ['at'],
-              order: [[literal('"at"'), 'ASC']],
-            });
-      
-            const result1 = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from "actual_timestamp")::BIGINT'
-                  ),
-                  'at',
-                ],
-                [literal('"difficulty"::REAL'), 'd'],
-              ],
-              where: {
-                type: '1',
-              },
-              order: [[literal('"at"'), 'ASC']],
-            });
-      
-            res.json({
-              aggregated: result.map((record) => record.toJSON()),
-              detailed: result1.map((record) => record.toJSON()),
-            });
-          } else if (chart === 'ConfirmTransactPerDay') {
-            const result = await Chart.findAll({
-              attributes: [
-                [
-                  literal(
-                    'extract(epoch from date_trunc(\'day\', "actual_timestamp"))::BIGINT'
-                  ),
-                  'at',
-                ],
-                [literal('SUM("tr_count"::REAL)'), 'sum_trc'],
-              ],
-              group: ['at'],
-              order: [[literal('"at"'), 'ASC']],
-            });
-            res.json(result.map((record) => record.toJSON()));
-          } else {
-            res.status(400).json({ error: 'Invalid chart type' });
-          }
+            const { chart, offset } = req.params;
+
+            const offsetDate = new Date(parseInt(offset, 10));
+
+            if (!chart) {
+                return res.status(400).json({ error: 'Invalid parameters' });
+            }
+
+            // const currentTime = Math.round(Date.now() / 1000);
+            //   const period = currentTime - 24 * 3600; // 24 hours ago
+            //   const period2 = currentTime - 48 * 3600; // 48 hours ago
+
+            if (chart === 'AvgBlockSize') {
+                const result = await Chart.findAll({
+                    attributes: [
+                        [
+                            literal(
+                                'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                            ),
+                            'at',
+                        ],
+                        [fn('avg', literal('"block_cumulative_size"::REAL')), 'bcs'],
+                    ],
+                    group: ['at'],
+                    order: [[literal('"at"'), 'ASC']],
+                    where: {
+                        actual_timestamp: {
+                            [Op.gt]: offsetDate,
+                        },
+                    }
+                });
+                res.json(result.map((record) => record.toJSON()));
+            } else if (chart === 'AvgTransPerBlock') {
+                const result = await Chart.findAll({
+                    attributes: [
+                        [
+                            literal(
+                                'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                            ),
+                            'at',
+                        ],
+                        [fn('avg', literal('"tr_count"::REAL')), 'trc'],
+                    ],
+                    group: ['at'],
+                    order: [[literal('"at"'), 'ASC']],
+                    where: {
+                        actual_timestamp: {
+                            [Op.gt]: offsetDate,
+                        },
+                    }
+                });
+                res.json(result.map((record) => record.toJSON()));
+            } else if (chart === 'hashRate') {
+                const result = await Chart.findAll({
+                    attributes: [
+                        [
+                            literal(
+                                'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                            ),
+                            'at',
+                        ],
+                        [fn('avg', literal('"difficulty120"::REAL')), 'd120'],
+                        [fn('avg', literal('"hashrate100"::REAL')), 'h100'],
+                        [fn('avg', literal('"hashrate400"::REAL')), 'h400'],
+                    ],
+                    where: {
+                        type: '1',
+                        actual_timestamp: {
+                            [Op.gt]: offsetDate,
+                        },
+                    },
+                    group: ['at'],
+                    order: [[literal('"at"'), 'ASC']],
+                });
+                res.json(result.map((record) => record.toJSON()));
+            } else if (chart === 'pos-difficulty') {
+                const result = await Chart.findAll({
+                    attributes: [
+                        [
+                            literal(
+                                'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                            ),
+                            'at',
+                        ],
+                        [
+                            literal(
+                                `CASE WHEN (MAX("difficulty"::NUMERIC) - AVG("difficulty"::NUMERIC)) > (AVG("difficulty"::NUMERIC) - MIN("difficulty"::NUMERIC)) THEN MAX("difficulty"::NUMERIC) ELSE MIN("difficulty"::NUMERIC) END`
+                            ),
+                            'd',
+                        ],
+                    ],
+                    where: {
+                        type: '0',
+                        actual_timestamp: {
+                            [Op.gt]: offsetDate,
+                        },
+                    },
+                    group: ['at'],
+                    order: [[literal('"at"'), 'ASC']],
+                });
+
+                const result1 = await Chart.findAll({
+                    attributes: [
+                        [
+                            literal(
+                                'extract(epoch from "actual_timestamp")::BIGINT'
+                            ),
+                            'at',
+                        ],
+                        [literal('"difficulty"::REAL'), 'd'],
+                    ],
+                    where: {
+                        type: '0',
+                        actual_timestamp: {
+                            [Op.gt]: offsetDate,
+                        },
+                    },
+                    order: [[literal('"at"'), 'ASC']],
+                });
+
+                res.json({
+                    aggregated: result.map((record) => record.toJSON()),
+                    detailed: result1.map((record) => record.toJSON()),
+                });
+            } else if (chart === 'pow-difficulty') {
+                const result = await Chart.findAll({
+                    attributes: [
+                        [
+                            literal(
+                                'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                            ),
+                            'at',
+                        ],
+                        [
+                            literal(
+                                `CASE WHEN (MAX("difficulty"::NUMERIC) - AVG("difficulty"::NUMERIC)) > (AVG("difficulty"::NUMERIC) - MIN("difficulty"::NUMERIC)) THEN MAX("difficulty"::NUMERIC) ELSE MIN("difficulty"::NUMERIC) END`
+                            ),
+                            'd',
+                        ],
+                    ],
+                    where: {
+                        type: '1',
+                        actual_timestamp: {
+                            [Op.gt]: offsetDate,
+                        },
+                    },
+                    group: ['at'],
+                    order: [[literal('"at"'), 'ASC']],
+                });
+
+                const result1 = await Chart.findAll({
+                    attributes: [
+                        [
+                            literal(
+                                'extract(epoch from "actual_timestamp")::BIGINT'
+                            ),
+                            'at',
+                        ],
+                        [literal('"difficulty"::REAL'), 'd'],
+                    ],
+                    where: {
+                        type: '1',
+                        actual_timestamp: {
+                            [Op.gt]: offsetDate,
+                        },
+                    },
+                    order: [[literal('"at"'), 'ASC']],
+                });
+
+                res.json({
+                    aggregated: result.map((record) => record.toJSON()),
+                    detailed: result1.map((record) => record.toJSON()),
+                });
+            } else if (chart === 'ConfirmTransactPerDay') {
+                const result = await Chart.findAll({
+                    attributes: [
+                        [
+                            literal(
+                                'extract(epoch from date_trunc(\'day\', "actual_timestamp"))::BIGINT'
+                            ),
+                            'at',
+                        ],
+                        [literal('SUM("tr_count"::REAL)'), 'sum_trc'],
+                    ],
+                    group: ['at'],
+                    order: [[literal('"at"'), 'ASC']],
+                    where: {
+                        actual_timestamp: {
+                            [Op.gt]: offsetDate,
+                        },
+                    }
+                });
+                res.json(result.map((record) => record.toJSON()));
+            } else {
+                res.status(400).json({ error: 'Invalid chart type' });
+            }
         }
-      );
-      
+    );
+
 
     app.get(
         "/api/get_tx_by_keyimage/:id",

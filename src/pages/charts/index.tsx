@@ -41,10 +41,10 @@ function Charts() {
             ];
 
             const chartPeriod = 7 * 24 * 60 * 60 * 1e3;
-            const now = +new Date();
+            const offset = +new Date(1680695278000) - chartPeriod;
     
             await Promise.all(titles.map(async title => {
-                const result = await Utils.fetchChartInfo(title);
+                const result = await Utils.fetchChartInfo(title, offset);
                 if (title === "hash-rate") {
                     console.log("hash-rate", result);
                 }
@@ -55,7 +55,7 @@ function Charts() {
                 setChartsSeries(prev => ({ 
                     ...prev, 
                     [title]: result.map(
-                        series => series.filter(e => e.x > now - chartPeriod)
+                        series => series.filter(e => e.x > offset - chartPeriod)
                     ) 
                 }))
             }));
@@ -73,7 +73,7 @@ function Charts() {
         } = props;
 
         return (
-            <Link href={"/charts/" + requestTitle} className={styles["charts__chart__wrapper"]}>
+            <Link href={"/chart/" + requestTitle} className={styles["charts__chart__wrapper"]}>
                 <div className={styles["charts__chart__title"]}>
                     <p>{title}</p>
                 </div>

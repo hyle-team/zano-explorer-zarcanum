@@ -72,7 +72,7 @@ function ChartPage() {
         async function fetchChart() {
             if (!chartId) return;
             setLoading(true);
-            const result = await Utils.fetchChartInfo(chartId);
+            const result = await Utils.fetchChartInfo(chartId, 0);
             setLoading(false);
             if (!result) return;
             setChartSeries(result);
