@@ -403,6 +403,9 @@ const requestsLimiter = rateLimit({
             //   const period2 = currentTime - 48 * 3600; // 48 hours ago
 
             if (chart === 'AvgBlockSize') {
+
+                console.time('AvgBlockSize');
+
                 const result = await Chart.findAll({
                     attributes: [
                         [
@@ -421,7 +424,11 @@ const requestsLimiter = rateLimit({
                         },
                     }
                 });
-                res.json(result.map((record) => record.toJSON()));
+                const json = result.map((record) => record.toJSON());
+
+                console.timeEnd('AvgBlockSize');
+
+                res.json(json);
             } else if (chart === 'AvgTransPerBlock') {
                 const result = await Chart.findAll({
                     attributes: [
@@ -465,8 +472,11 @@ const requestsLimiter = rateLimit({
                     group: ['at'],
                     order: [[literal('"at"'), 'ASC']],
                 });
+
+                const json = result.map((record) => record.toJSON());
+
                 console.timeEnd('hashRate');
-                res.json(result.map((record) => record.toJSON()));
+                res.json(json);
             } else if (chart === 'pos-difficulty') {
                 const result = await Chart.findAll({
                     attributes: [
