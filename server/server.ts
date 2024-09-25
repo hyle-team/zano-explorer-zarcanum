@@ -407,7 +407,7 @@ const requestsLimiter = rateLimit({
                         'at',
                     ],
                     [fn('avg', literal('"block_cumulative_size"::REAL')), 'bcs'],
-                    [fn('MAX', col('height')), 'height'], // Use MAX to aggregate height
+                    [fn('MAX', col('actual_timestamp')), 'actual_timestamp'],
                 ],
                 group: ['at'],
                 order: [[literal('"at"'), 'ASC']],
@@ -419,7 +419,11 @@ const requestsLimiter = rateLimit({
                 raw: true,
             });
     
+            console.log(offsetDate);
             console.log(result.length);
+            console.log(result[0]);
+            
+            
             res.send(result);
     
         } else if (chart === 'AvgTransPerBlock') {
