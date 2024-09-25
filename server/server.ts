@@ -422,13 +422,13 @@ const requestsLimiter = rateLimit({
                         actual_timestamp: {
                             [Op.gt]: offsetDate,
                         },
-                    }
+                    },
+                    raw: true,
                 });
-                const json = result.map((record) => record.toJSON());
 
                 console.timeEnd('AvgBlockSize');
 
-                res.json(json);
+                res.status(200).json(result);
             } else if (chart === 'AvgTransPerBlock') {
                 const result = await Chart.findAll({
                     attributes: [
@@ -446,9 +446,10 @@ const requestsLimiter = rateLimit({
                         actual_timestamp: {
                             [Op.gt]: offsetDate,
                         },
-                    }
+                    },
+                    raw: true,
                 });
-                res.json(result.map((record) => record.toJSON()));
+                res.json(result);
             } else if (chart === 'hashRate') {
                 console.time('hashRate');
                 const result = await Chart.findAll({
@@ -471,12 +472,11 @@ const requestsLimiter = rateLimit({
                     },
                     group: ['at'],
                     order: [[literal('"at"'), 'ASC']],
+                    raw: true,
                 });
 
-                const json = result.map((record) => record.toJSON());
-
                 console.timeEnd('hashRate');
-                res.json(json);
+                res.json(result);
             } else if (chart === 'pos-difficulty') {
                 const result = await Chart.findAll({
                     attributes: [
@@ -501,6 +501,7 @@ const requestsLimiter = rateLimit({
                     },
                     group: ['at'],
                     order: [[literal('"at"'), 'ASC']],
+                    raw: true,
                 });
 
                 const result1 = await Chart.findAll({
@@ -520,11 +521,15 @@ const requestsLimiter = rateLimit({
                         },
                     },
                     order: [[literal('"at"'), 'ASC']],
+                    raw: true,
                 });
 
+                console.log('pos-difficulty', result1.length + result.length);
+                
+
                 res.json({
-                    aggregated: result.map((record) => record.toJSON()),
-                    detailed: result1.map((record) => record.toJSON()),
+                    aggregated: result,
+                    detailed: result1,
                 });
             } else if (chart === 'pow-difficulty') {
                 const result = await Chart.findAll({
@@ -550,6 +555,7 @@ const requestsLimiter = rateLimit({
                     },
                     group: ['at'],
                     order: [[literal('"at"'), 'ASC']],
+                    raw: true,
                 });
 
                 const result1 = await Chart.findAll({
@@ -569,11 +575,12 @@ const requestsLimiter = rateLimit({
                         },
                     },
                     order: [[literal('"at"'), 'ASC']],
+                    raw: true,
                 });
 
                 res.json({
-                    aggregated: result.map((record) => record.toJSON()),
-                    detailed: result1.map((record) => record.toJSON()),
+                    aggregated: result,
+                    detailed: result1,
                 });
             } else if (chart === 'ConfirmTransactPerDay') {
                 const result = await Chart.findAll({
@@ -592,9 +599,10 @@ const requestsLimiter = rateLimit({
                         actual_timestamp: {
                             [Op.gt]: offsetDate,
                         },
-                    }
+                    },
+                    raw: true,
                 });
-                res.json(result.map((record) => record.toJSON()));
+                res.json(result);
             } else {
                 res.status(400).json({ error: 'Invalid chart type' });
             }
