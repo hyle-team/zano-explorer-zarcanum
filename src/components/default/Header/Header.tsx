@@ -52,12 +52,12 @@ function Header(props: HeaderProps) {
                 >
                     Assets
                 </Link>
-                <Link
+                {/* <Link
                     className={page === "Charts" ? "selected" : undefined}
                     href="/charts"
                 >
                     Charts
-                </Link>
+                </Link> */}
                 <Link
                     className={page === "API" ? "selected" : undefined}
                     href="/zano_api"

@@ -19,7 +19,7 @@ module.exports = {
         
         console.log('Processing chart', i);
         const { actual_timestamp } = chart;
-        const newTimestamp = +new Date(actual_timestamp) * 1000;
+        const newTimestamp = +new Date(actual_timestamp) * 1000 * 1000;
 
         await queryInterface.sequelize.query(
           `
