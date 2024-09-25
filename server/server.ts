@@ -407,9 +407,9 @@ const requestsLimiter = rateLimit({
                         'at',
                     ],
                     [fn('avg', literal('"block_cumulative_size"::REAL')), 'bcs'],
-                    [fn('MAX', col('actual_timestamp')), 'actual_timestamp'],
+                    [fn('MIN', col('actual_timestamp')), 'actual_timestamp'],
                 ],
-                group: ['at'],
+                group: ['at', 'actual_timestamp'],
                 order: [[literal('"at"'), 'ASC']],
                 where: {
                     actual_timestamp: {
@@ -422,7 +422,7 @@ const requestsLimiter = rateLimit({
             console.log(offsetDate);
             console.log(result.length);
             console.log(result[0]);
-            
+
             
             res.send(result);
     
