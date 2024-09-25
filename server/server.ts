@@ -391,7 +391,7 @@ const requestsLimiter = rateLimit({
     app.get('/api/get_chart/:chart/:offset', async (req, res) => {
         const { chart, offset } = req.params;
         const offsetDate = new Date(parseInt(offset, 10));
-    
+
         const charts = await Chart.findAll({
             attributes: ['actual_timestamp'],
             raw: true,
@@ -402,10 +402,10 @@ const requestsLimiter = rateLimit({
         if (!chart) {
             return res.status(400).json({ error: 'Invalid parameters' });
         }
-    
+
         if (chart === 'AvgBlockSize') {
             console.log('loading AvgBlockSize');
-    
+
             const result = await Chart.findAll({
                 attributes: [
                     [
@@ -425,9 +425,9 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-            
+
             res.send(result);
-    
+
         } else if (chart === 'AvgTransPerBlock') {
             const result = await Chart.findAll({
                 attributes: [
@@ -449,7 +449,7 @@ const requestsLimiter = rateLimit({
                 raw: true,
             });
             res.send(result);
-    
+
         } else if (chart === 'hashRate') {
             console.time('hashRate');
             const result = await Chart.findAll({
@@ -476,7 +476,7 @@ const requestsLimiter = rateLimit({
             });
             console.timeEnd('hashRate');
             res.send(result);
-    
+
         } else if (chart === 'pos-difficulty') {
             // Aggregated data at 3600-second intervals
             const result = await Chart.findAll({
@@ -504,7 +504,7 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-    
+
             // Detailed data at 3600-second intervals using AVG
             const result1 = await Chart.findAll({
                 attributes: [
@@ -526,13 +526,13 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-    
+
             console.log('pos-difficulty', result1.length, result.length);
             res.send({
                 aggregated: result,
                 detailed: result1,
             });
-    
+
         } else if (chart === 'pow-difficulty') {
             // Aggregated data at 3600-second intervals
             const result = await Chart.findAll({
@@ -560,7 +560,7 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-    
+
             // Detailed data at 3600-second intervals using AVG
             const result1 = await Chart.findAll({
                 attributes: [
@@ -582,12 +582,12 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-    
+
             res.send({
                 aggregated: result,
                 detailed: result1,
             });
-    
+
         } else if (chart === 'ConfirmTransactPerDay') {
             // Group by day (24-hour intervals)
             const result = await Chart.findAll({
@@ -610,13 +610,70 @@ const requestsLimiter = rateLimit({
                 raw: true,
             });
             res.send(result);
-    
+
         } else {
             res.status(400).json({ error: 'Invalid chart type' });
         }
     });
-    
 
+    app.get(
+        '/api/get_tx_details/:tx_hash',
+        exceptionHandler(async (req, res) => {
+            try {
+                const tx_hash = req.params.tx_hash.toLowerCase();
+
+                if (tx_hash) {
+                    // Fetching transaction details with associated block information using Sequelize
+                    const transaction = await Transaction.findOne({
+                        where: { tx_id: tx_hash },
+                    });
+
+
+                    const transactionBlock = await Block.findOne({
+                        where: { height: transaction?.keeper_block },
+                    }).catch(() => null);
+
+                    if (transaction && transactionBlock) {
+                        const response = {
+                            ...transaction.toJSON(),
+                            block_hash: transactionBlock?.tx_id,
+                            block_timestamp: transactionBlock?.timestamp,
+                            last_block: lastBlock.height,
+                        };
+
+                        res.json(response);
+                    } else {
+                        const response = await get_tx_details(tx_hash);
+                        const data = response.data;
+
+                        if (data?.result?.tx_info) {
+                            if (data.result.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
+                                data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);
+                            }
+
+                            if (data.result.tx_info.outs && typeof data.result.tx_info.outs === 'object') {
+                                data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
+                            }
+
+                            res.json(data.result.tx_info);
+                        } else {
+                            res.status(500).json({
+                                message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
+                            });
+                        }
+                    }
+                } else {
+                    res.status(500).json({
+                        message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+
+                res.status(500).json({ error: error.message });
+            }
+        })
+    );
 
     app.get(
         "/api/get_tx_by_keyimage/:id",
