@@ -403,6 +403,8 @@ const requestsLimiter = rateLimit({
             //   const period2 = currentTime - 48 * 3600; // 48 hours ago
 
             if (chart === 'AvgBlockSize') {
+                console.log('loading AvgBlockSize');
+                
 
                 const result = await Chart.findAll({
                     attributes: [
