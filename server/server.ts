@@ -24,6 +24,7 @@ import { ITransaction } from "./schemes/Transaction";
 import BigNumber from "bignumber.js";
 import next from "next";
 import { rateLimit } from 'express-rate-limit';
+import fs from "fs";
 // @ts-ignore
 const __dirname = import.meta.dirname;
 const dev = process.env.NODE_ENV !== 'production';
@@ -407,9 +408,8 @@ const requestsLimiter = rateLimit({
                         'at',
                     ],
                     [fn('avg', literal('"block_cumulative_size"::REAL')), 'bcs'],
-                    [fn('MIN', col('actual_timestamp')), 'actual_timestamp'],
                 ],
-                group: ['at', 'actual_timestamp'],
+                group: ['at'],
                 order: [[literal('"at"'), 'ASC']],
                 where: {
                     actual_timestamp: {
@@ -423,6 +423,9 @@ const requestsLimiter = rateLimit({
             console.log(result.length);
             console.log(result[0]);
 
+            fs.writeFile('chart.json', JSON.stringify(result), (err) => {
+                console.log(err);
+            });
             
             res.send(result);
     
