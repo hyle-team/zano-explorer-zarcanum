@@ -415,6 +415,7 @@ const requestsLimiter = rateLimit({
                             'at',
                         ],
                         [fn('avg', literal('"block_cumulative_size"::REAL')), 'bcs'],
+                        "height",
                     ],
                     group: ['at'],
                     order: [[literal('"at"'), 'ASC']],
@@ -425,6 +426,10 @@ const requestsLimiter = rateLimit({
                     },
                     raw: true,
                 });
+
+
+                console.log(result.length);
+                
 
                 console.timeEnd('AvgBlockSize');
 
@@ -503,6 +508,7 @@ const requestsLimiter = rateLimit({
                     order: [[literal('"at"'), 'ASC']],
                     raw: true,
                 });
+                
 
                 const result1 = await Chart.findAll({
                     attributes: [
