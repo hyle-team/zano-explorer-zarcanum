@@ -524,7 +524,7 @@ const requestsLimiter = rateLimit({
                     raw: true,
                 });
 
-                console.log('pos-difficulty', result1.length + result.length);
+                console.log('pos-difficulty', result1.length, result.length);
                 
 
                 res.json({
