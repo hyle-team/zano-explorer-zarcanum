@@ -1219,6 +1219,7 @@ const requestsLimiter = rateLimit({
                     if (blockInserts.length > 0) {
                         await Block.bulkCreate(blockInserts, {
                             transaction,
+                            ignoreDuplicates: true
                         });
                     }
 
@@ -1232,6 +1233,7 @@ const requestsLimiter = rateLimit({
                     if (chartInserts.length > 0) {
                         await Chart.bulkCreate(chartInserts, {
                             transaction,
+                            ignoreDuplicates: true
                         });
                     }
 
@@ -1461,7 +1463,7 @@ const requestsLimiter = rateLimit({
                                     // Insert the new transactions into the pool
                                     if (txInserts.length > 0) {
                                         await sequelize.transaction(async (transaction) => {
-                                            await Pool.bulkCreate(txInserts, { transaction });
+                                            await Pool.bulkCreate(txInserts, { transaction, ignoreDuplicates: true });
                                         });
                                     }
                                 }

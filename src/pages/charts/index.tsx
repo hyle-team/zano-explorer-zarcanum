@@ -41,7 +41,7 @@ function Charts() {
             ];
 
             const chartPeriod = 7 * 24 * 60 * 60 * 1e3;
-            const offset = +new Date(1680695278000) - chartPeriod;
+            const offset = +new Date() - chartPeriod;
     
             await Promise.all(titles.map(async title => {
                 const result = await Utils.fetchChartInfo(title, offset);
