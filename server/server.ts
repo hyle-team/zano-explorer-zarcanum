@@ -17,7 +17,7 @@ import Block, { IBlock } from "./schemes/Block";
 import Alias from "./schemes/Alias";
 import Chart, { IChart } from "./schemes/Chart";
 import { get_all_pool_tx_list, get_alt_blocks_details, get_blocks_details, get_info, get_out_info, get_pool_txs_details, get_tx_details } from "./utils/zanod";
-import { Op } from "sequelize";
+import { col, fn, literal, Op } from "sequelize";
 import Pool from "./schemes/Pool";
 import Asset, { IAsset } from "./schemes/Asset";
 import { ITransaction } from "./schemes/Transaction";
@@ -38,10 +38,10 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
 
 const requestsLimiter = rateLimit({
-	windowMs: 10 * 1000,
-	limit: 1,
-	standardHeaders: 'draft-7',
-	legacyHeaders: false,
+    windowMs: 10 * 1000,
+    limit: 1,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
 });
 
 (async () => {
@@ -95,8 +95,8 @@ const requestsLimiter = rateLimit({
             url: config.api,
             data: {
                 method: 'getinfo',
-                params: { 
-                    "address": address, 
+                params: {
+                    "address": address,
                     "viewkey": viewkey,
                     "blocks_limit": limit
                 }
@@ -338,12 +338,12 @@ const requestsLimiter = rateLimit({
     }
 
     app.get(
-        '/api/get_assets_count', 
+        '/api/get_assets_count',
         exceptionHandler(async (req, res) => {
             const whitelistedAssets = await fetchWhitelistedAssets();
             const whitelistedAssetsAmount = whitelistedAssets.length + 1;
 
-            const assetsAmount =  await Asset.count();
+            const assetsAmount = await Asset.count();
 
             return res.json({ assetsAmount, whitelistedAssetsAmount });
         }),
@@ -384,256 +384,248 @@ const requestsLimiter = rateLimit({
         count?: number;
         d?: number;
     }
-    
+
 
 
     app.get(
         '/api/get_chart/:chart/:period',
-        exceptionHandler(async (req, res) => {
-            const { chart } = req.params;
-            const now = Math.round(new Date().getTime() / 1000);
-            const period24HoursAgo = now - 24 * 3600;
-            const period48HoursAgo = now - 48 * 3600;
-
-            try {
-                if (chart === 'all') {
-                    // Fetch all raw chart data for the 'all' case
-                    const arrayAll = await Chart.findAll({
-                        attributes: ['actual_timestamp', 'block_cumulative_size', 'tr_count', 'difficulty', 'type'],
-                        where: {
-                            actual_timestamp: {
-                                [Op.gt]: period24HoursAgo,
-                            },
-                        },
-                        order: [['actual_timestamp', 'DESC']],
-                    });
-
-                    // Fetch raw data to calculate dailySum
-                    const dailyData = await Chart.findAll({
-                        attributes: ['actual_timestamp', 'tr_count'],
-                        order: [['actual_timestamp', 'ASC']],
-                    });
-
-                    // Manually calculate the sum of transactions per day
-                    const dailySum: Record<number, AggregatedData> = dailyData.reduce((acc, row) => {
-                        const day = new Date(row.actual_timestamp).setHours(0, 0, 0, 0);
-                        if (!acc[day]) {
-                            acc[day] = { at: day, sum_trc: 0 };
-                        }
-                        acc[day].sum_trc += parseFloat(row.tr_count.toString());
-                        return acc;
-                    }, {});
-
-                    // Fetch raw data for hash rate calculations
-                    const hashRateData = await Chart.findAll({
-                        attributes: ['actual_timestamp', 'difficulty120', 'hashrate100', 'hashrate400'],
-                        where: {
-                            type: "1",
-                            actual_timestamp: {
-                                [Op.gt]: period48HoursAgo,
-                            },
-                        },
-                        order: [['actual_timestamp', 'DESC']],
-                    });
-
-                    res.json({
-                        data: arrayAll,
-                        dailySum: Object.values(dailySum) as AggregatedData[],
-                        hashRateData,
-                    });
-                } else if (chart === 'AvgBlockSize') {
-                    const blockSizeData = await Chart.findAll({
-                        attributes: ['actual_timestamp', 'block_cumulative_size'],
-                        order: [['actual_timestamp', 'ASC']],
-                    });
-
-                    // Manually calculate average block size per hour
-                    const blockSizePerHour = blockSizeData.reduce((acc, row) => {
-                        const hour = new Date(row.actual_timestamp).setMinutes(0, 0, 0);
-                        if (!acc[hour]) {
-                            acc[hour] = { at: hour, totalSize: 0, count: 0 };
-                        }
-                        acc[hour].totalSize += parseFloat(row.block_cumulative_size);
-                        acc[hour].count++;
-                        return acc;
-                    }, {}) as Record<number, AggregatedData>;
-
-                    const result = Object.values(blockSizePerHour).map(hourData => ({
-                        at: hourData.at,
-                        bcs: (hourData?.totalSize || 0) / (hourData.count || 1),
-                    })) as AggregatedData[];
-
-                    res.json(result);
-                } else if (chart === 'AvgTransPerBlock') {
-                    const transData = await Chart.findAll({
-                        attributes: ['actual_timestamp', 'tr_count'],
-                        order: [['actual_timestamp', 'ASC']],
-                    });
-
-                    // Manually calculate average transactions per block per hour
-                    const transPerHour = transData.reduce((acc, row) => {
-                        const hour = new Date(row.actual_timestamp).setMinutes(0, 0, 0);
-                        if (!acc[hour]) {
-                            acc[hour] = { at: hour, totalTrans: 0, count: 0 };
-                        }
-                        acc[hour].totalTrans += parseFloat(row.tr_count.toString());
-                        acc[hour].count++;
-                        return acc;
-                    }, {}) as Record<number, AggregatedData>;
-
-                    const result = Object.values(transPerHour).map(hourData => ({
-                        at: hourData.at,
-                        trc: (hourData.totalTrans || 0) / (hourData.count || 1),
-                    }));
-
-                    res.json(result);
-                } else if (chart === 'hashRate') {
-                    const hashRateData = await Chart.findAll({
-                        attributes: ['actual_timestamp', 'difficulty120', 'hashrate100', 'hashrate400'],
-                        where: { type: "1" },
-                        order: [['actual_timestamp', 'ASC']],
-                    });
-
-                    // Manually calculate average hash rates per hour
-                    const hashRatePerHour = hashRateData.reduce((acc, row) => {
-                        const hour = new Date(row.actual_timestamp).setMinutes(0, 0, 0);
-                        if (!acc[hour]) {
-                            acc[hour] = { at: hour, totalD120: 0, totalH100: 0, totalH400: 0, count: 0 };
-                        }
-                        acc[hour].totalD120 += parseFloat(row.difficulty120 || "");
-                        acc[hour].totalH100 += parseFloat(row.hashrate100 || "");
-                        acc[hour].totalH400 += parseFloat(row.hashrate400 || "");
-                        acc[hour].count++;
-                        return acc;
-                    }, {}) as Record<number, AggregatedData>;
-
-                    const result = Object.values(hashRatePerHour).map(hourData => ({
-                        at: hourData.at,
-                        d120: (hourData.totalD120 || 0) / (hourData.count || 1),
-                        h100: (hourData.totalH100 || 0) / (hourData.count || 1),
-                        h400: (hourData.totalH400 || 0) / (hourData.count || 1),
-                    })) as AggregatedData[];
-
-                    res.json(result);
-                } else if (chart === 'pos-difficulty' || chart === 'pow-difficulty') {
-                    const type = (chart === 'pos-difficulty' ? 0 : 1).toString();
-                    const difficultyData = await Chart.findAll({
-                        attributes: ['actual_timestamp', 'difficulty'],
-                        where: { type },
-                        order: [['actual_timestamp', 'ASC']],
-                    });
-
-                    // Manually calculate the max/min/avg difficulty logic per hour
-                    const difficultyPerHour = difficultyData.reduce((acc, row) => {
-                        const hour = new Date(row.actual_timestamp).setMinutes(0, 0, 0);
-                        if (!acc[hour]) {
-                            acc[hour] = { at: hour, maxDiff: parseFloat(row.difficulty), minDiff: parseFloat(row.difficulty), sumDiff: 0, count: 0 };
-                        }
-                        const diff = parseFloat(row.difficulty);
-                        acc[hour].maxDiff = Math.max(acc[hour].maxDiff, diff);
-                        acc[hour].minDiff = Math.min(acc[hour].minDiff, diff);
-                        acc[hour].sumDiff += diff;
-                        acc[hour].count++;
-                        return acc;
-                    }, {}) as Record<number, AggregatedData>;
-
-                    const aggregatedResult = Object.values(difficultyPerHour).map(hourData => ({
-                        at: hourData.at,
-                        d:  (hourData.maxDiff || 0 - (hourData.sumDiff || 0 / (hourData.count || 1))) 
-                            > 
-                            ((hourData.sumDiff || 0 / (hourData.count || 1)) - (hourData.minDiff || 0)) ? hourData.maxDiff : hourData.minDiff,
-                    }));
-
-                    const detailedResult = difficultyData;
-
-                    res.json({
-                        aggregated: aggregatedResult,
-                        detailed: detailedResult,
-                    });
-                } else if (chart === 'ConfirmTransactPerDay') {
-                    const transData = await Chart.findAll({
-                        attributes: ['actual_timestamp', 'tr_count'],
-                        order: [['actual_timestamp', 'ASC']],
-                    });
-
-                    // Manually calculate the sum of confirmed transactions per day
-                    const transPerDay = transData.reduce((acc, row) => {
-                        const day = new Date(row.actual_timestamp).setHours(0, 0, 0, 0);
-                        if (!acc[day]) {
-                            acc[day] = { at: day, sum_trc: 0 };
-                        }
-                        acc[day].sum_trc += parseFloat(row.tr_count.toString());
-                        return acc;
-                    }, {});
-
-                    res.json(Object.values(transPerDay));
-                }
-            } catch (error) {
-                console.log(error);
-                
-                res.status(500).json({ error: error.message });
-            }
-        })
-    );
-
-    app.get(
-        '/api/get_tx_details/:tx_hash',
-        exceptionHandler(async (req, res) => {
-            try {
-                const tx_hash = req.params.tx_hash.toLowerCase();
-
-                if (tx_hash) {
-                    // Fetching transaction details with associated block information using Sequelize
-                    const transaction = await Transaction.findOne({
-                        where: { tx_id: tx_hash },
-                    });
-
-
-                    const transactionBlock = await Block.findOne({
-                        where: { height: transaction?.keeper_block },
-                    }).catch(() => null);
-
-                    if (transaction && transactionBlock) {
-                        const response = {
-                            ...transaction.toJSON(),
-                            block_hash: transactionBlock?.tx_id,
-                            block_timestamp: transactionBlock?.timestamp,
-                            last_block: lastBlock.height,
-                        };
-
-                        res.json(response);
-                    } else {
-                        const response = await get_tx_details(tx_hash);
-                        const data = response.data;
-
-                        if (data?.result?.tx_info) {
-                            if (data.result.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
-                                data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);
-                            }
-
-                            if (data.result.tx_info.outs && typeof data.result.tx_info.outs === 'object') {
-                                data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
-                            }
-
-                            res.json(data.result.tx_info);
-                        } else {
-                            res.status(500).json({
-                                message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
-                            });
-                        }
-                    }
-                } else {
-                    res.status(500).json({
-                        message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
-                    });
-                }
-            } catch (error) {
-                console.log(error);
-
-                res.status(500).json({ error: error.message });
-            }
-        })
-    );
+        async (req, res) => {
+          const { chart } = req.params;
+      
+          if (!chart) {
+            return res.status(400).json({ error: 'Invalid parameters' });
+          }
+      
+          const currentTime = Math.round(Date.now() / 1000);
+          const period = currentTime - 24 * 3600; // 24 hours ago
+          const period2 = currentTime - 48 * 3600; // 48 hours ago
+      
+          if (chart === 'all') {
+            // First query
+            const arrayAll = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from "actual_timestamp")::BIGINT'
+                  ),
+                  'at',
+                ],
+                [literal('"block_cumulative_size"::REAL'), 'bcs'],
+                [literal('"tr_count"::REAL'), 'trc'],
+                [literal('"difficulty"::REAL'), 'd'],
+                [col('type'), 't'],
+              ],
+              where: {
+                actual_timestamp: {
+                  [Op.gt]: new Date(period * 1000), // Convert to milliseconds
+                },
+              },
+              order: [[literal('"at"'), 'ASC']],
+            });
+      
+            // Second query
+            const rows0 = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from date_trunc(\'day\', "actual_timestamp"))::BIGINT'
+                  ),
+                  'at',
+                ],
+                [literal('SUM("tr_count"::REAL)'), 'sum_trc'],
+              ],
+              group: ['at'],
+              order: [[literal('"at"'), 'ASC']],
+            });
+      
+            // Third query
+            const rows1 = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from "actual_timestamp")::BIGINT'
+                  ),
+                  'at',
+                ],
+                [literal('"difficulty120"::REAL'), 'd120'],
+                [literal('"hashrate100"::REAL'), 'h100'],
+                [literal('"hashrate400"::REAL'), 'h400'],
+              ],
+              where: {
+                type: '1',
+                actual_timestamp: {
+                  [Op.gt]: new Date(period2 * 1000),
+                },
+              },
+              order: [[literal('"at"'), 'ASC']],
+            });
+      
+            const arrayAllJson = arrayAll.map((record) => record.toJSON());
+            const rows0Json = rows0.map((record) => record.toJSON());
+            const rows1Json = rows1.map((record) => record.toJSON());
+      
+            const resultArray = [...arrayAllJson];
+            resultArray[0] = rows0Json;
+            resultArray[1] = rows1Json;
+      
+            res.json(resultArray);
+          } else if (chart === 'AvgBlockSize') {
+            const result = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                  ),
+                  'at',
+                ],
+                [fn('avg', literal('"block_cumulative_size"::REAL')), 'bcs'],
+              ],
+              group: ['at'],
+              order: [[literal('"at"'), 'ASC']],
+            });
+            res.json(result.map((record) => record.toJSON()));
+          } else if (chart === 'AvgTransPerBlock') {
+            const result = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                  ),
+                  'at',
+                ],
+                [fn('avg', literal('"tr_count"::REAL')), 'trc'],
+              ],
+              group: ['at'],
+              order: [[literal('"at"'), 'ASC']],
+            });
+            res.json(result.map((record) => record.toJSON()));
+          } else if (chart === 'hashRate') {
+            const result = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                  ),
+                  'at',
+                ],
+                [fn('avg', literal('"difficulty120"::REAL')), 'd120'],
+                [fn('avg', literal('"hashrate100"::REAL')), 'h100'],
+                [fn('avg', literal('"hashrate400"::REAL')), 'h400'],
+              ],
+              where: {
+                type: '1',
+              },
+              group: ['at'],
+              order: [[literal('"at"'), 'ASC']],
+            });
+            res.json(result.map((record) => record.toJSON()));
+          } else if (chart === 'pos-difficulty') {
+            const result = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                  ),
+                  'at',
+                ],
+                [
+                  literal(
+                    `CASE WHEN (MAX("difficulty"::NUMERIC) - AVG("difficulty"::NUMERIC)) > (AVG("difficulty"::NUMERIC) - MIN("difficulty"::NUMERIC)) THEN MAX("difficulty"::NUMERIC) ELSE MIN("difficulty"::NUMERIC) END`
+                  ),
+                  'd',
+                ],
+              ],
+              where: {
+                type: '0',
+              },
+              group: ['at'],
+              order: [[literal('"at"'), 'ASC']],
+            });
+      
+            const result1 = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from "actual_timestamp")::BIGINT'
+                  ),
+                  'at',
+                ],
+                [literal('"difficulty"::REAL'), 'd'],
+              ],
+              where: {
+                type: '0',
+              },
+              order: [[literal('"at"'), 'ASC']],
+            });
+      
+            res.json({
+              aggregated: result.map((record) => record.toJSON()),
+              detailed: result1.map((record) => record.toJSON()),
+            });
+          } else if (chart === 'pow-difficulty') {
+            const result = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
+                  ),
+                  'at',
+                ],
+                [
+                  literal(
+                    `CASE WHEN (MAX("difficulty"::NUMERIC) - AVG("difficulty"::NUMERIC)) > (AVG("difficulty"::NUMERIC) - MIN("difficulty"::NUMERIC)) THEN MAX("difficulty"::NUMERIC) ELSE MIN("difficulty"::NUMERIC) END`
+                  ),
+                  'd',
+                ],
+              ],
+              where: {
+                type: '1',
+              },
+              group: ['at'],
+              order: [[literal('"at"'), 'ASC']],
+            });
+      
+            const result1 = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from "actual_timestamp")::BIGINT'
+                  ),
+                  'at',
+                ],
+                [literal('"difficulty"::REAL'), 'd'],
+              ],
+              where: {
+                type: '1',
+              },
+              order: [[literal('"at"'), 'ASC']],
+            });
+      
+            res.json({
+              aggregated: result.map((record) => record.toJSON()),
+              detailed: result1.map((record) => record.toJSON()),
+            });
+          } else if (chart === 'ConfirmTransactPerDay') {
+            const result = await Chart.findAll({
+              attributes: [
+                [
+                  literal(
+                    'extract(epoch from date_trunc(\'day\', "actual_timestamp"))::BIGINT'
+                  ),
+                  'at',
+                ],
+                [literal('SUM("tr_count"::REAL)'), 'sum_trc'],
+              ],
+              group: ['at'],
+              order: [[literal('"at"'), 'ASC']],
+            });
+            res.json(result.map((record) => record.toJSON()));
+          } else {
+            res.status(400).json({ error: 'Invalid chart type' });
+          }
+        }
+      );
+      
 
     app.get(
         "/api/get_tx_by_keyimage/:id",
@@ -1126,10 +1118,10 @@ const requestsLimiter = rateLimit({
                     if (bl.tr_out === undefined) bl.tr_out = [];
 
                     let localTr: any;
-                    
+
                     while (!!(localTr = bl.transactions_details.splice(0, 1)[0])) {
                         let response = await get_tx_details(localTr.id);
-                        
+
                         let tx_info = response.data.result.tx_info;
 
                         for (let item of tx_info.extra) {
@@ -1194,7 +1186,7 @@ const requestsLimiter = rateLimit({
 
                 chartInserts.push({
                     height: bl.height,
-                    actual_timestamp: bl.actual_timestamp,
+                    actual_timestamp: new Date(bl.actual_timestamp * 1000),
                     block_cumulative_size: bl.block_cumulative_size,
                     cumulative_diff_precise: bl.cumulative_diff_precise,
                     difficulty: bl.difficulty,
@@ -1566,10 +1558,10 @@ const requestsLimiter = rateLimit({
                 txs.forEach(tx => {
                     zanoBurnedBig = zanoBurnedBig.plus(new BigNumber(tx.fee));
                 });
-                
+
 
                 console.log('ZANO BURNED: ', zanoBurnedBig.toString());
-                
+
 
                 const zanoBurned = zanoBurnedBig.div(new BigNumber(10).pow(12)).toNumber();
 

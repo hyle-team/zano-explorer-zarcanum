@@ -120,7 +120,7 @@ class Utils {
 
         if (chartId === "difficulty-pow" || chartId === "difficulty-pos") {
             const dataDetailed = result.detailed;
-
+            
             if (!dataDetailed || typeof dataDetailed !== "object") return;
 
             return [

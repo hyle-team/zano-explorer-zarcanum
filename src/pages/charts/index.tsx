@@ -23,6 +23,7 @@ function Charts() {
             "confirm-trans-per-day": undefined
         }
     );
+    
 
     const [loaded, setLoaded] = useState(false);
 
@@ -40,11 +41,17 @@ function Charts() {
             ];
 
             const chartPeriod = 7 * 24 * 60 * 60 * 1e3;
-            const now = Date.now();
+            const now = +new Date();
     
             await Promise.all(titles.map(async title => {
                 const result = await Utils.fetchChartInfo(title);
+                if (title === "hash-rate") {
+                    console.log("hash-rate", result);
+                }
+                console.log(result);
+                
                 if (!result) return;
+
                 setChartsSeries(prev => ({ 
                     ...prev, 
                     [title]: result.map(
