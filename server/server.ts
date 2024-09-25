@@ -443,6 +443,7 @@ const requestsLimiter = rateLimit({
                 });
                 res.json(result.map((record) => record.toJSON()));
             } else if (chart === 'hashRate') {
+                console.time('hashRate');
                 const result = await Chart.findAll({
                     attributes: [
                         [
@@ -464,6 +465,7 @@ const requestsLimiter = rateLimit({
                     group: ['at'],
                     order: [[literal('"at"'), 'ASC']],
                 });
+                console.timeEnd('hashRate');
                 res.json(result.map((record) => record.toJSON()));
             } else if (chart === 'pos-difficulty') {
                 const result = await Chart.findAll({
