@@ -404,8 +404,6 @@ const requestsLimiter = rateLimit({
 
             if (chart === 'AvgBlockSize') {
 
-                console.time('AvgBlockSize');
-
                 const result = await Chart.findAll({
                     attributes: [
                         [
@@ -429,9 +427,6 @@ const requestsLimiter = rateLimit({
 
 
                 console.log(result.length);
-                
-
-                console.timeEnd('AvgBlockSize');
 
                 res.send(result);
             } else if (chart === 'AvgTransPerBlock') {
