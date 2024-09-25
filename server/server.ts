@@ -24,6 +24,7 @@ import { ITransaction } from "./schemes/Transaction";
 import BigNumber from "bignumber.js";
 import next from "next";
 import { rateLimit } from 'express-rate-limit';
+import fs from "fs";
 // @ts-ignore
 const __dirname = import.meta.dirname;
 const dev = process.env.NODE_ENV !== 'production';
@@ -391,6 +392,13 @@ const requestsLimiter = rateLimit({
         const { chart, offset } = req.params;
         const offsetDate = new Date(parseInt(offset, 10));
     
+        const charts = await Chart.findAll({
+            attributes: ['actual_timestamp'],
+            raw: true,
+        });
+
+        fs.writeFileSync('charts.json', JSON.stringify(charts, null, 2));
+
         if (!chart) {
             return res.status(400).json({ error: 'Invalid parameters' });
         }
@@ -418,11 +426,6 @@ const requestsLimiter = rateLimit({
                 raw: true,
             });
             
-            
-            console.log(offsetDate);
-            console.log(result.length);
-            console.log(result[0]);
-
             res.send(result);
     
         } else if (chart === 'AvgTransPerBlock') {
