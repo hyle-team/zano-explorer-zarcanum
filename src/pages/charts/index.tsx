@@ -43,22 +43,26 @@ function Charts() {
             const chartPeriod = 7 * 24 * 60 * 60 * 1e3;
             const offset = +new Date() - chartPeriod;
     
-            await Promise.all(titles.map(async title => {
-                const result = await Utils.fetchChartInfo(title, offset);
-                if (title === "hash-rate") {
-                    console.log("hash-rate", result);
-                }
-                console.log(result);
-                
-                if (!result) return;
+            const results: { title: string, data: ChartSeriesElem[][] }[] = [];
 
-                setChartsSeries(prev => ({ 
-                    ...prev, 
-                    [title]: result.map(
+            for (const title of titles) {
+                const result = await Utils.fetchChartInfo(title, offset);
+                console.log('data loaded:', title);
+                
+                if (!result) continue;
+
+                results.push({
+                    title: title,
+                    data: result.map(
                         series => series.filter(e => e.x > offset - chartPeriod)
-                    ) 
-                }))
-            }));
+                    )
+                });
+            }
+
+            setChartsSeries(prev => ({ 
+                ...prev, 
+                ...Object.fromEntries(results.map(e => [e.title, e.data] as [string, ChartSeriesElem[][]] ))
+            }))
                 
             setLoaded(true);
         }
