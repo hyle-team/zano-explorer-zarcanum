@@ -20,7 +20,7 @@ class Block extends Model {
     declare prev_id: string;
     declare summary_reward: string;
     declare this_block_fee_median: string;
-    declare timestamp: Date;
+    declare timestamp: BigInt;
     declare total_fee: string;
     declare total_txs_size: string;
     declare tr_count: string;
@@ -56,7 +56,7 @@ Block.init(
         prev_id: { type: DataTypes.STRING, allowNull: true },
         summary_reward: { type: DataTypes.TEXT, allowNull: true },
         this_block_fee_median: { type: DataTypes.TEXT, allowNull: true },
-        timestamp: { type: DataTypes.DATE, allowNull: true },
+        timestamp: { type: DataTypes.BIGINT, allowNull: true },
         total_fee: { type: DataTypes.TEXT, allowNull: true },
         total_txs_size: { type: DataTypes.TEXT, allowNull: true },
         tr_count: { type: DataTypes.TEXT, allowNull: true },

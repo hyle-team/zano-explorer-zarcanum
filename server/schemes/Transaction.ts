@@ -13,7 +13,7 @@ class Transaction extends Model {
     declare ins: string;
     declare outs: string;
     declare pub_key: string;
-    declare timestamp: Date;
+    declare timestamp: BigInt;
     declare attachments: string;
 
     
@@ -36,7 +36,7 @@ Transaction.init(
         ins: { type: DataTypes.TEXT, allowNull: true },
         outs: { type: DataTypes.TEXT, allowNull: true },
         pub_key: { type: DataTypes.TEXT, allowNull: true },
-        timestamp: { type: DataTypes.DATE, allowNull: true },
+        timestamp: { type: DataTypes.BIGINT, allowNull: true },
         attachments: { type: DataTypes.TEXT, allowNull: true }
     },
     {

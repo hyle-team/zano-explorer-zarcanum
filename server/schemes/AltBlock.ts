@@ -4,7 +4,7 @@ import sequelize from "../database/sequelize";
 class AltBlock extends Model {
     declare readonly id: number;
     declare height: number;
-    declare timestamp: Date;
+    declare timestamp: BigInt;
     declare actual_timestamp: BigInt;
     declare size: BigInt;
     declare hash: string;
@@ -33,7 +33,7 @@ AltBlock.init(
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
         height: { type: DataTypes.INTEGER, allowNull: false },
-        timestamp: { type: DataTypes.DATE, allowNull: false },
+        timestamp: { type: DataTypes.BIGINT, allowNull: false },
         actual_timestamp: { type: DataTypes.BIGINT, allowNull: true },
         size: { type: DataTypes.BIGINT, allowNull: true },
         hash: { type: DataTypes.STRING, allowNull: true },

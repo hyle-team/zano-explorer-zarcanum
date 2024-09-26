@@ -6,7 +6,7 @@ class Pool extends Model {
     declare blob_size: number;
     declare fee: number;
     declare tx_id: string;
-    declare timestamp: Date;
+    declare timestamp: BigInt;
     
     declare readonly createdAt: Date;
     declare readonly updatedAt: Date;
@@ -18,7 +18,7 @@ Pool.init(
         blob_size: { type: DataTypes.INTEGER, allowNull: true },
         fee: { type: DataTypes.DOUBLE, allowNull: true },
         tx_id: { type: DataTypes.STRING, allowNull: true },
-        timestamp: { type: DataTypes.DATE, allowNull: true }
+        timestamp: { type: DataTypes.BIGINT, allowNull: true }
     },
     {
         sequelize,
