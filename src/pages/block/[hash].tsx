@@ -154,7 +154,7 @@ function Block(props: BlockProps) {
                             </tr>
                             <tr>
                                 <td>Timestamp (UTC):</td>
-                                <td>{blockInfo?.timestamp ? Utils.formatTimestampUTC(+new Date(blockInfo?.timestamp)) : "-"}</td>
+                                <td>{blockInfo?.timestamp ? Utils.formatTimestampUTC(+new Date(parseInt(blockInfo?.timestamp, 10))) : "-"}</td>
                             </tr>
                             <tr>
                                 <td>ID</td>

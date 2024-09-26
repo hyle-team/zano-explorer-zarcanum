@@ -1,7 +1,7 @@
 interface BlockInfo {
     type: "PoS" | "PoW";
-    timestamp?: Date;
-    actualTimestamp?: BigInt;
+    timestamp?: string;
+    actualTimestamp?: string;
     difficulty: string;
     minerTextInfo?: string;
     cummulativeDiffAdjusted?: string;

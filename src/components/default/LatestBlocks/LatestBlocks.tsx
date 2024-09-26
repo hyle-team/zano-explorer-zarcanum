@@ -88,6 +88,8 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
     const tableHeaders = [ "HEIGHT", "TIMESTAMP (UTC)", "AGE", "SIZE", "TRANSACTIONS", "HASH" ];
 
     const tableElements = blocks.map(e => {
+        console.log(e);
+        
         const hash = e.hash;
         const hashLink = hash ? "/block/" + hash : "/";
         return [

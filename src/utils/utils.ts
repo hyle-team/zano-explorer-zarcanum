@@ -81,10 +81,12 @@ class Utils {
     static transformToBlocks(result: any, reverse: boolean = false, hashField: boolean = false): Block[] {
         if (result.sucess === false) return [];
         if (!(result instanceof Array)) return [];
+        console.log(result);
+        
         return (reverse ? result.reverse() : result).map((e: any) => ({
             height: e.height,
             type: e.type === '0' ? "PoS" : "PoW",
-            timestamp: +new Date(e.timestamp),
+            timestamp: +new Date(parseInt(e.timestamp, 10)),
             size: e.total_txs_size,
             transactions: e.tr_count,
             hash: !hashField ? e.tx_id : e.hash
