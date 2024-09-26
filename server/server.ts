@@ -1538,12 +1538,17 @@ const requestsLimiter = rateLimit({
                                 // Fetch details of the new transactions
                                 let response = await get_pool_txs_details(new_ids);
                                 if (response.data.result && response.data.result.txs) {
+
+                                    const existingTransactions = await Pool.findAll({
+                                        attributes: ['tx_id']
+                                    });
+
                                     const txInserts = response.data.result.txs.map(tx => ({
                                         blob_size: tx.blob_size,
                                         fee: tx.fee,
                                         tx_id: tx.id,
                                         timestamp: tx.timestamp * 1e3,
-                                    }));
+                                    })).filter(tx => !existingTransactions.map(e => e.tx_id).includes(tx.tx_id));
 
                                     // Insert the new transactions into the pool
                                     if (txInserts.length > 0) {
