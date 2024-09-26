@@ -5,7 +5,7 @@ import Transaction from "./Transaction";
 class Block extends Model {
     declare readonly id: number;
     declare height: number;
-    declare actual_timestamp: Date;
+    declare actual_timestamp: BigInt;
     declare base_reward: string;
     declare blob: string;
     declare block_cumulative_size: string;
@@ -41,7 +41,7 @@ Block.init(
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
         height: { type: DataTypes.INTEGER, allowNull: false, unique: true },
-        actual_timestamp: { type: DataTypes.DATE, allowNull: true },
+        actual_timestamp: { type: DataTypes.BIGINT, allowNull: true },
         base_reward: { type: DataTypes.TEXT, allowNull: true },
         blob: { type: DataTypes.STRING, allowNull: true },
         block_cumulative_size: { type: DataTypes.TEXT, allowNull: true },

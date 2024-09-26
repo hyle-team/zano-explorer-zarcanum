@@ -390,7 +390,7 @@ const requestsLimiter = rateLimit({
 
     app.get('/api/get_chart/:chart/:offset', async (req, res) => {
         const { chart, offset } = req.params;
-        const offsetDate = new Date(parseInt(offset, 10));
+        const offsetDate = parseInt(offset, 10);
 
         const charts = await Chart.findAll({
             attributes: ['actual_timestamp'],
@@ -1234,7 +1234,7 @@ const requestsLimiter = rateLimit({
 
                 chartInserts.push({
                     height: bl.height,
-                    actual_timestamp: new Date(bl.actual_timestamp * 1000),
+                    actual_timestamp: bl.actual_timestamp,
                     block_cumulative_size: bl.block_cumulative_size,
                     cumulative_diff_precise: bl.cumulative_diff_precise,
                     difficulty: bl.difficulty,

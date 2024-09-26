@@ -4,7 +4,7 @@ import sequelize from "../database/sequelize";
 class Chart extends Model {
     declare readonly id: number;
     declare height: number;
-    declare actual_timestamp: Date;
+    declare actual_timestamp: BigInt;
     declare block_cumulative_size: string;
     declare cumulative_diff_precise: string;
     declare difficulty: string;
@@ -25,7 +25,7 @@ Chart.init(
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
         height: { type: DataTypes.INTEGER, allowNull: false },
-        actual_timestamp: { type: DataTypes.DATE, allowNull: true },
+        actual_timestamp: { type: DataTypes.BIGINT, allowNull: true },
         block_cumulative_size: { type: DataTypes.TEXT, allowNull: true },
         cumulative_diff_precise: { type: DataTypes.TEXT, allowNull: true },
         difficulty: { type: DataTypes.TEXT, allowNull: true },

@@ -162,7 +162,7 @@ function Block(props: BlockProps) {
                             </tr>
                             <tr>
                                 <td>Actual Timestamp (UTC):</td>
-                                <td>{blockInfo?.actualTimestamp ? Utils.formatTimestampUTC(+new Date(blockInfo?.actualTimestamp)) : "-"}</td>
+                                <td>{blockInfo?.actualTimestamp ? Utils.formatTimestampUTC(parseInt(blockInfo?.actualTimestamp.toString(), 10)) : "-"}</td>
                             </tr>
                             <tr>
                                 <td>Difficulty:</td>
