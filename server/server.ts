@@ -176,7 +176,7 @@ const requestsLimiter = rateLimit({
             const count = parseInt(req.params.count, 10);
             const searchText = req.query.search || '';
 
-            if (!searchText) {
+            if (!searchText || typeof searchText !== 'string') {
                 // No searchText, fetch all assets with pagination
                 const assets = await Asset.findAll({
                     order: [['id', 'ASC']],
@@ -212,7 +212,10 @@ const requestsLimiter = rateLimit({
             } else {
                 // If no matching records found, fetch by asset_id
                 const assets = await Asset.findAll({
-                    where: { asset_id: searchText },
+                    where: Sequelize.where(
+                        Sequelize.fn('LOWER', Sequelize.col('asset_id')),
+                        searchText.toLowerCase()
+                    ),
                     limit: count,
                     offset: offset
                 });
