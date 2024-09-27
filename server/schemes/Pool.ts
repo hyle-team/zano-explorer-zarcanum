@@ -23,7 +23,12 @@ Pool.init(
     {
         sequelize,
         modelName: "pool",
-        timestamps: true
+        timestamps: true,
+        indexes: [
+            {
+                fields: ['tx_id'],
+            },
+        ],
     }
 );
 

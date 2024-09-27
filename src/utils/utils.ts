@@ -112,15 +112,15 @@ class Utils {
         }
     }
 
-    static async fetchChartInfo(chartId: string): Promise<ChartSeriesElem[][] | undefined> {
+    static async fetchChartInfo(chartId: string, offset: number): Promise<ChartSeriesElem[][] | undefined> {
         if (!(chartId && chartRequestNames[chartId])) return;
-        const result = await Fetch.getChartData(chartId);
+        const result = await Fetch.getChartData(chartId, offset);
         if (!result) return;
         if (result.success === false) return;
 
         if (chartId === "difficulty-pow" || chartId === "difficulty-pos") {
             const dataDetailed = result.detailed;
-
+            
             if (!dataDetailed || typeof dataDetailed !== "object") return;
 
             return [

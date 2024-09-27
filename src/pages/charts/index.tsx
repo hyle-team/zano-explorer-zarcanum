@@ -23,12 +23,15 @@ function Charts() {
             "confirm-trans-per-day": undefined
         }
     );
+    
 
     const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
         async function fetchCharts() {
-            setLoaded(false);
+            if (loaded) {
+                return;
+            }
 
             const titles = [
                 "avg-block-size",
@@ -40,24 +43,34 @@ function Charts() {
             ];
 
             const chartPeriod = 7 * 24 * 60 * 60 * 1e3;
-            const now = Date.now();
+            const offset = +new Date() - chartPeriod;
     
-            await Promise.all(titles.map(async title => {
-                const result = await Utils.fetchChartInfo(title);
-                if (!result) return;
-                setChartsSeries(prev => ({ 
-                    ...prev, 
-                    [title]: result.map(
-                        series => series.filter(e => e.x > now - chartPeriod)
-                    ) 
-                }))
-            }));
+            const results: { title: string, data: ChartSeriesElem[][] }[] = [];
+
+            for (const title of titles) {
+                const result = await Utils.fetchChartInfo(title, offset);
+                console.log('data loaded:', title);
+                
+                if (!result) continue;
+
+                results.push({
+                    title: title,
+                    data: result.map(
+                        series => series.filter(e => e.x > offset - chartPeriod)
+                    )
+                });
+            }
+
+            setChartsSeries(prev => ({ 
+                ...prev, 
+                ...Object.fromEntries(results.map(e => [e.title, e.data] as [string, ChartSeriesElem[][]] ))
+            }))
                 
             setLoaded(true);
         }
 
         fetchCharts();
-    }, []);
+    }, [loaded]);
 
     function Chart(props: { title: string, requestTitle: string }) {
         const {
@@ -66,7 +79,7 @@ function Charts() {
         } = props;
 
         return (
-            <Link href={"/charts/" + requestTitle} className={styles["charts__chart__wrapper"]}>
+            <Link href={"/chart/" + requestTitle} className={styles["charts__chart__wrapper"]}>
                 <div className={styles["charts__chart__title"]}>
                     <p>{title}</p>
                 </div>

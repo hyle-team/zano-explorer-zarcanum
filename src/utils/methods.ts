@@ -59,10 +59,10 @@ class Fetch {
         return await fetch(this.proxyPath + `/search_by_id/${id}`).then(res => res.json());
     }
 
-    static async getChartData(chartId: string) {
+    static async getChartData(chartId: string, offset: number) {
         const chartRequestName = chartRequestNames[chartId];
         if (!chartRequestName) return undefined;
-        return await fetch(this.proxyPath + `/get_chart/${chartRequestName}/all`).then(res => res.json());
+        return await fetch(this.proxyPath + `/get_chart/${chartRequestName}/${offset}`).then(res => res.json());
     }
 
     static async getWhitelistedAssets(offset: number, count: number, searchText: string) {
