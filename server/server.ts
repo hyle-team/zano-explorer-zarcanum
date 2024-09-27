@@ -17,7 +17,7 @@ import Block, { IBlock } from "./schemes/Block";
 import Alias from "./schemes/Alias";
 import Chart, { IChart } from "./schemes/Chart";
 import { get_all_pool_tx_list, get_alt_blocks_details, get_blocks_details, get_info, get_out_info, get_pool_txs_details, get_tx_details } from "./utils/zanod";
-import { col, fn, literal, Op } from "sequelize";
+import { fn, literal, Op, Sequelize } from "sequelize";
 import Pool from "./schemes/Pool";
 import Asset, { IAsset } from "./schemes/Asset";
 import { ITransaction } from "./schemes/Transaction";
@@ -302,9 +302,15 @@ const requestsLimiter = rateLimit({
 
             if (searchTerm !== 'all') {
                 whereClause[Op.or] = [
-                    { alias: { [Op.like]: `%${searchTerm}%` } },
-                    { address: { [Op.like]: `%${searchTerm}%` } },
-                    { comment: { [Op.like]: `%${searchTerm}%` } },
+                    Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('alias')), {
+                        [Op.like]: `%${searchTerm.toLowerCase()}%`
+                    }),
+                    Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('address')), {
+                        [Op.like]: `%${searchTerm.toLowerCase()}%`
+                    }),
+                    Sequelize.where(Sequelize.fn('LOWER', Sequelize.col('comment')), {
+                        [Op.like]: `%${searchTerm.toLowerCase()}%`
+                    }),
                 ];
             }
 
