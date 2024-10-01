@@ -403,8 +403,6 @@ const requestsLimiter = rateLimit({
             raw: true,
         });
 
-        fs.writeFileSync('charts.json', JSON.stringify(charts, null, 2));
-
         if (!chart) {
             return res.status(400).json({ error: 'Invalid parameters' });
         }

@@ -25,14 +25,14 @@ Asset.init(
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
         asset_id: { type: DataTypes.STRING, allowNull: true },
-        logo: { type: DataTypes.STRING, allowNull: true },
-        price_url: { type: DataTypes.STRING, allowNull: true },
-        ticker: { type: DataTypes.STRING, allowNull: true },
-        full_name: { type: DataTypes.STRING, allowNull: true },
-        total_max_supply: { type: DataTypes.STRING, allowNull: true },
-        current_supply: { type: DataTypes.STRING, allowNull: true },
+        logo: { type: DataTypes.TEXT, allowNull: true },
+        price_url: { type: DataTypes.TEXT, allowNull: true },
+        ticker: { type: DataTypes.TEXT, allowNull: true },
+        full_name: { type: DataTypes.TEXT, allowNull: true },
+        total_max_supply: { type: DataTypes.TEXT, allowNull: true },
+        current_supply: { type: DataTypes.TEXT, allowNull: true },
         decimal_point: { type: DataTypes.INTEGER, allowNull: true },
-        meta_info: { type: DataTypes.STRING, allowNull: true },
+        meta_info: { type: DataTypes.TEXT, allowNull: true },
         price: { type: DataTypes.INTEGER, allowNull: true }
     },
     {
