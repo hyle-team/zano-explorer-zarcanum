@@ -32,6 +32,10 @@ module.exports = {
       type: Sequelize.TEXT,
       allowNull: true,
     });
+    await queryInterface.changeColumn('assets', 'meta_info', {
+      type: Sequelize.TEXT,
+      allowNull: true,
+    });
   },
 
   down: async (queryInterface, Sequelize) => {
@@ -61,6 +65,11 @@ module.exports = {
     });
 
     await queryInterface.changeColumn('assets', 'current_supply', {
+      type: Sequelize.STRING,
+      allowNull: true,
+    });
+
+    await queryInterface.changeColumn('assets', 'meta_info', {
       type: Sequelize.STRING,
       allowNull: true,
     });
