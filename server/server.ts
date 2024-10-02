@@ -574,6 +574,10 @@ const requestsLimiter = rateLimit({
             });
     
         } else if (chart === 'ConfirmTransactPerDay') {
+
+            const offsetDateStartOfDay = new Date(offsetDate);
+            offsetDateStartOfDay.setHours(0, 0, 0, 0);
+
             // Group by day (86400-second intervals)
             const result = await Chart.findAll({
                 attributes: [
@@ -587,7 +591,7 @@ const requestsLimiter = rateLimit({
                 order: [[literal('"at"'), 'ASC']],
                 where: {
                     actual_timestamp: {
-                        [Op.gt]: offsetDate - 86400/2
+                        [Op.gt]: +offsetDateStartOfDay / 1000,
                     },
                 },
                 raw: true,
