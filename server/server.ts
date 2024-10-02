@@ -503,7 +503,7 @@ const requestsLimiter = rateLimit({
                         literal('"actual_timestamp" - ("actual_timestamp" % 3600)'),
                         'at',
                     ],
-                    [fn('avg', literal('"difficulty"::REAL')), 'd'],
+                    [fn('avg', literal('"difficulty"::NUMERIC')), 'd'],
                 ],
                 group: ['at'],
                 order: [[literal('"at"'), 'ASC']],
