@@ -72,14 +72,16 @@ function Charts() {
         fetchCharts();
     }, [loaded]);
 
-    function Chart(props: { title: string, requestTitle: string }) {
+    function Chart(props: { title: string, requestTitle: string, disabled?: boolean }) {
         const {
             title,
             requestTitle
         } = props;
 
         return (
-            <Link href={"/chart/" + requestTitle} className={styles["charts__chart__wrapper"]}>
+            <Link href={"/chart/" + requestTitle} className={styles["charts__chart__wrapper"]} style={
+                props.disabled ? { pointerEvents: "none", opacity: 0.3 } : {}
+            }>
                 <div className={styles["charts__chart__title"]}>
                     <p>{title}</p>
                 </div>
@@ -157,15 +159,11 @@ function Charts() {
                         title="Average Number Of Transactions Per Block"
                         requestTitle="avg-trans-per-block"
                     />
-                    <div style={{
-                        pointerEvents: "none",
-                        opacity: 0.4
-                    }}>
-                        <Chart 
-                            title="Hash Rate (inactive)" 
-                            requestTitle="hash-rate"
-                        />
-                    </div>
+                    <Chart 
+                        title="Hash Rate (inactive)" 
+                        requestTitle="hash-rate"
+                        disabled={true}
+                    />
                     <Chart 
                         title="PoW Difficulty" 
                         requestTitle="difficulty-pow"
