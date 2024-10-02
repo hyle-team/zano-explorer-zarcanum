@@ -396,7 +396,7 @@ const requestsLimiter = rateLimit({
 
     app.get('/api/get_chart/:chart/:offset', async (req, res) => {
         const { chart, offset } = req.params;
-        const offsetDate = parseInt(offset, 10);
+        const offsetDate = parseInt(offset, 10) / 1000;
     
         if (!chart) {
             return res.status(400).json({ error: 'Invalid parameters' });
