@@ -78,8 +78,8 @@ function TransactionPool({
     }
 
     const tableElements = poolElements.map((element) => ([
-        timestampToLocalDate(new Date(element.timestamp).getTime()),
-        timeAgo(new Date(element.timestamp).getTime()),
+        timestampToLocalDate(new Date(parseInt(element.timestamp, 10)).getTime()),
+        timeAgo(new Date(parseInt(element.timestamp, 10)).getTime()),
         element.blob_size + " bytes",
         parseInt(element.fee, 10)/10**12,
         <AliasText href={`/transaction/${element.tx_id}`}>{element.tx_id}</AliasText>
