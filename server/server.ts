@@ -578,7 +578,7 @@ const requestsLimiter = rateLimit({
             const result = await Chart.findAll({
                 attributes: [
                     [
-                        literal('"actual_timestamp" - ("actual_timestamp" % 17280)'),
+                        literal('"actual_timestamp" - ("actual_timestamp" % 86400)'),
                         'at',
                     ],
                     [fn('sum', literal('"tr_count"::REAL')), 'sum_trc'],
@@ -587,7 +587,7 @@ const requestsLimiter = rateLimit({
                 order: [[literal('"at"'), 'ASC']],
                 where: {
                     actual_timestamp: {
-                        [Op.gt]: offsetDate,
+                        [Op.gt]: offsetDate - 86400/2
                     },
                 },
                 raw: true,
