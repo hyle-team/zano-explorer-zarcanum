@@ -397,25 +397,18 @@ const requestsLimiter = rateLimit({
     app.get('/api/get_chart/:chart/:offset', async (req, res) => {
         const { chart, offset } = req.params;
         const offsetDate = parseInt(offset, 10);
-
-        const charts = await Chart.findAll({
-            attributes: ['actual_timestamp'],
-            raw: true,
-        });
-
+    
         if (!chart) {
             return res.status(400).json({ error: 'Invalid parameters' });
         }
-
+    
         if (chart === 'AvgBlockSize') {
             console.log('loading AvgBlockSize');
-
+    
             const result = await Chart.findAll({
                 attributes: [
                     [
-                        literal(
-                            'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                        ),
+                        literal('"actual_timestamp" - ("actual_timestamp" % 3600)'),
                         'at',
                     ],
                     [fn('avg', literal('"block_cumulative_size"::REAL')), 'bcs'],
@@ -429,16 +422,14 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-
+    
             res.send(result);
-
+    
         } else if (chart === 'AvgTransPerBlock') {
             const result = await Chart.findAll({
                 attributes: [
                     [
-                        literal(
-                            'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                        ),
+                        literal('"actual_timestamp" - ("actual_timestamp" % 3600)'),
                         'at',
                     ],
                     [fn('avg', literal('"tr_count"::REAL')), 'trc'],
@@ -453,15 +444,13 @@ const requestsLimiter = rateLimit({
                 raw: true,
             });
             res.send(result);
-
+    
         } else if (chart === 'hashRate') {
             console.time('hashRate');
             const result = await Chart.findAll({
                 attributes: [
                     [
-                        literal(
-                            'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                        ),
+                        literal('"actual_timestamp" - ("actual_timestamp" % 3600)'),
                         'at',
                     ],
                     [fn('avg', literal('"difficulty120"::REAL')), 'd120'],
@@ -480,15 +469,13 @@ const requestsLimiter = rateLimit({
             });
             console.timeEnd('hashRate');
             res.send(result);
-
+    
         } else if (chart === 'pos-difficulty') {
             // Aggregated data at 3600-second intervals
             const result = await Chart.findAll({
                 attributes: [
                     [
-                        literal(
-                            'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                        ),
+                        literal('"actual_timestamp" - ("actual_timestamp" % 3600)'),
                         'at',
                     ],
                     [
@@ -508,14 +495,12 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-
+    
             // Detailed data at 3600-second intervals using AVG
             const result1 = await Chart.findAll({
                 attributes: [
                     [
-                        literal(
-                            'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                        ),
+                        literal('"actual_timestamp" - ("actual_timestamp" % 3600)'),
                         'at',
                     ],
                     [fn('avg', literal('"difficulty"::REAL')), 'd'],
@@ -530,21 +515,19 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-
+    
             console.log('pos-difficulty', result1.length, result.length);
             res.send({
                 aggregated: result,
                 detailed: result1,
             });
-
+    
         } else if (chart === 'pow-difficulty') {
             // Aggregated data at 3600-second intervals
             const result = await Chart.findAll({
                 attributes: [
                     [
-                        literal(
-                            'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                        ),
+                        literal('"actual_timestamp" - ("actual_timestamp" % 3600)'),
                         'at',
                     ],
                     [
@@ -564,14 +547,12 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-
+    
             // Detailed data at 3600-second intervals using AVG
             const result1 = await Chart.findAll({
                 attributes: [
                     [
-                        literal(
-                            'extract(epoch from date_trunc(\'hour\', "actual_timestamp"))::BIGINT'
-                        ),
+                        literal('"actual_timestamp" - ("actual_timestamp" % 3600)'),
                         'at',
                     ],
                     [fn('avg', literal('"difficulty"::REAL')), 'd'],
@@ -586,20 +567,18 @@ const requestsLimiter = rateLimit({
                 },
                 raw: true,
             });
-
+    
             res.send({
                 aggregated: result,
                 detailed: result1,
             });
-
+    
         } else if (chart === 'ConfirmTransactPerDay') {
-            // Group by day (24-hour intervals)
+            // Group by day (86400-second intervals)
             const result = await Chart.findAll({
                 attributes: [
                     [
-                        literal(
-                            'extract(epoch from date_trunc(\'day\', "actual_timestamp"))::BIGINT'
-                        ),
+                        literal('"actual_timestamp" - ("actual_timestamp" % 86400)'),
                         'at',
                     ],
                     [fn('sum', literal('"tr_count"::REAL')), 'sum_trc'],
@@ -614,11 +593,12 @@ const requestsLimiter = rateLimit({
                 raw: true,
             });
             res.send(result);
-
+    
         } else {
             res.status(400).json({ error: 'Invalid chart type' });
         }
     });
+    
 
     app.get(
         '/api/get_tx_details/:tx_hash',
