@@ -157,10 +157,15 @@ function Charts() {
                         title="Average Number Of Transactions Per Block"
                         requestTitle="avg-trans-per-block"
                     />
-                    <Chart 
-                        title="Hash Rate" 
-                        requestTitle="hash-rate"
-                    />
+                    <div style={{
+                        pointerEvents: "none",
+                        opacity: 0.4
+                    }}>
+                        <Chart 
+                            title="Hash Rate (inactive)" 
+                            requestTitle="hash-rate"
+                        />
+                    </div>
                     <Chart 
                         title="PoW Difficulty" 
                         requestTitle="difficulty-pow"

@@ -57,11 +57,7 @@ function InfoTopPanel(props: InfoTopPanelProps) {
 
     async function onBackClick(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
         event.preventDefault();
-        if (document.referrer) {
-            router.back();
-        } else {
-            router.push("/");
-        }
+        router.back();
     }
     return (
         <div 
