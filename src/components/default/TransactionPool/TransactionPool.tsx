@@ -4,6 +4,7 @@ import Button from "@/components/UI/Button/Button";
 import Table from "@/components/default/Table/Table";
 import AliasText from "@/components/default/AliasText/AliasText";
 import { socket } from "@/utils/socket";
+import Utils from "@/utils/utils";
 
 export interface PoolElement {
     blob_size: string,
@@ -78,7 +79,7 @@ function TransactionPool({
     }
 
     const tableElements = poolElements.map((element) => ([
-        timestampToLocalDate(new Date(parseInt(element.timestamp, 10)).getTime()),
+        Utils.formatTimestampUTC(+new Date(parseInt(element.timestamp, 10)).getTime()),
         timeAgo(new Date(parseInt(element.timestamp, 10)).getTime()),
         element.blob_size + " bytes",
         parseInt(element.fee, 10)/10**12,
