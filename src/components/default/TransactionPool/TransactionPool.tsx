@@ -79,7 +79,7 @@ function TransactionPool({
     }
 
     const tableElements = poolElements.map((element) => ([
-        Utils.formatTimestampUTC(+new Date(parseInt(element.timestamp, 10)).getTime()),
+        Utils.formatTimestampUTC(+new Date(parseInt(element.timestamp, 10) / 1000).getTime()),
         timeAgo(new Date(parseInt(element.timestamp, 10)).getTime()),
         element.blob_size + " bytes",
         parseInt(element.fee, 10)/10**12,
