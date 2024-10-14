@@ -22,13 +22,13 @@ function App(data: AppCustomProps) {
                 <meta property="og:url" content="https://explorer.zano.org/"/>
                 <meta property="og:title" content="Block explorer (Zarcanum)"/>
                 <meta property="og:description" content="Zano is an open-source cryptocurrency and ecosystem with enterprise-grade privacy, security, and scalability"/>
-                <meta property="og:image" content="social-banner.png"/>
+                <meta property="og:image" content={netMode === "MAIN" ? "social-banner.png" : "social-banner-testnet.png"}/>
 
                 <meta property="twitter:card" content="summary_large_image"/>
                 <meta property="twitter:url" content="https://explorer.zano.org/"/>
                 <meta property="twitter:title" content="Block explorer (Zarcanum)"/>
                 <meta property="twitter:description" content="Zano is an open-source cryptocurrency and ecosystem with enterprise-grade privacy, security, and scalability"/>
-                <meta property="twitter:image" content="social-banner.png"/>
+                <meta property="twitter:image" content={netMode === "MAIN" ? "social-banner.png" : "social-banner-testnet.png"}/>
             </Head>
             <StoreProvider initial={{ netMode: netMode === "TEST" ? "TEST" : "MAIN" }}>
                 <Component {...pageProps} />
