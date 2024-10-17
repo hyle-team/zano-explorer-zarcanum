@@ -650,6 +650,10 @@ const requestsLimiter = rateLimit({
                                 where: { tx_id: data.result?.tx_info?.keeper_block?.toString() },
                             });
 
+
+                            console.log(blockInfo, data.result?.tx_info?.keeper_block?.toString());
+                            
+
                             res.json({
                                 ...data.result.tx_info, 
                                 ...(blockInfo || {}),
