@@ -653,6 +653,7 @@ const requestsLimiter = rateLimit({
                             res.json({
                                 ...data.result.tx_info, 
                                 ...(blockInfo?.toJSON() || {}),
+                                last_block: lastBlock.height,
                             });
                         } else {
                             res.status(500).json({
