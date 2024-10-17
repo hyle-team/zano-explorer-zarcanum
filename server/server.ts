@@ -621,9 +621,6 @@ const requestsLimiter = rateLimit({
                         where: { height: transaction?.keeper_block },
                     }).catch(() => null);
 
-                    console.log('transactionBlock', transactionBlock);
-                    console.log('transaction', transaction);
-                    
                     
 
                     if (transaction && transactionBlock) {
@@ -637,8 +634,6 @@ const requestsLimiter = rateLimit({
                         res.json(response);
                     } else {
                         const response = await get_tx_details(tx_hash);
-
-                        console.log('response', response.data);
                         
                         const data = response.data;
 
@@ -651,7 +646,14 @@ const requestsLimiter = rateLimit({
                                 data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
                             }
 
-                            res.json(data.result.tx_info);
+                            const blockInfo = await Block.findOne({
+                                where: { tx_id: data.result.tx_info.keeper_block },
+                            });
+
+                            res.json({
+                                ...data.result.tx_info, 
+                                ...(blockInfo || {}),
+                            });
                         } else {
                             res.status(500).json({
                                 message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
