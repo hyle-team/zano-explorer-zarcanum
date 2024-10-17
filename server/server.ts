@@ -637,6 +637,9 @@ const requestsLimiter = rateLimit({
                         res.json(response);
                     } else {
                         const response = await get_tx_details(tx_hash);
+
+                        console.log('response', response.data);
+                        
                         const data = response.data;
 
                         if (data?.result?.tx_info) {
