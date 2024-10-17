@@ -1351,6 +1351,9 @@ const requestsLimiter = rateLimit({
 
     const syncBlocks = async () => {
         try {
+
+            await syncPrevBlocksTnxKeepers(lastBlock.height);
+
             let count = (blockInfo?.height || 0) - lastBlock.height + 1;
             if (count > 100) {
                 count = 100;
@@ -1409,6 +1412,39 @@ const requestsLimiter = rateLimit({
             state.now_blocks_sync = false;
         }
     };
+
+    const syncPrevBlocksTnxKeepers = async (syncedHeight: number) => {
+
+        async function syncTnxKeepers(blocks: any[]) {
+            for (const block of blocks) {
+                
+                const txs = block.transactions_details;
+
+                for (const tx of txs) {
+                    let response = await get_tx_details(tx.id);
+                    const tx_info = response.data.result.tx_info;
+
+                    await Transaction.update({
+                        keeper_block: tx_info.keeper_block,
+                    }, {
+                        where: {
+                            tx_id: tx_info.id
+                        }
+                    });
+                }
+            }
+        }
+
+        const count = 10;
+        let response = await get_blocks_details(syncedHeight - count, count);
+
+
+        let localBlocks = response.data?.result?.blocks || [];
+
+        if (localBlocks.length) {
+            await syncTnxKeepers(localBlocks);
+        }
+    }
 
 
 
