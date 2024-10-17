@@ -621,6 +621,11 @@ const requestsLimiter = rateLimit({
                         where: { height: transaction?.keeper_block },
                     }).catch(() => null);
 
+                    console.log('transactionBlock', transactionBlock);
+                    console.log('transaction', transaction);
+                    
+                    
+
                     if (transaction && transactionBlock) {
                         const response = {
                             ...transaction.toJSON(),
