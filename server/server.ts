@@ -1839,7 +1839,7 @@ const requestsLimiter = rateLimit({
             const amountPerIteration = 100;
 
             while (true) {
-                const newAssets = await fetchAssets(iterator + 1, iterator + amountPerIteration);
+                const newAssets = await fetchAssets(iterator, amountPerIteration);
                 if (!newAssets.length) break;
                 assets.push(...newAssets);
                 iterator += amountPerIteration;
@@ -1889,10 +1889,13 @@ const requestsLimiter = rateLimit({
                 }
             }
 
+            const addedAssetsIds = new Set<string>();
+
             // Insert new assets
             for (const asset of assets) {
                 const foundAsset = assetsRows.find(e => e.asset_id === asset.asset_id);
-                if (!foundAsset && asset.asset_id) {
+
+                if (!foundAsset && !addedAssetsIds.has(asset.asset_id) && asset.asset_id) {
                     const {
                         asset_id,
                         logo,
@@ -1918,6 +1921,8 @@ const requestsLimiter = rateLimit({
                         meta_info: meta_info || "",
                         price
                     });
+
+                    addedAssetsIds.add(asset_id);
                 }
             }
         } catch (error) {
