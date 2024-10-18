@@ -85,7 +85,7 @@ function Header(props: HeaderProps) {
 
                 <div className={styles["header__top__right"]}>
                     <Link
-                        href={netMode === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
+                        href={netMode === "TEST" ? "https://explorer.zano.org/" : "https://testnet.explorer.zano.org/"}
                         target="_blank"
                         rel="noreferrer"
                     >
