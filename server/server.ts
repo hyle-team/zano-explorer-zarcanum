@@ -1352,7 +1352,7 @@ const requestsLimiter = rateLimit({
     const syncBlocks = async () => {
         try {
 
-            await syncPrevBlocksTnxKeepers(lastBlock.height);
+            // await syncPrevBlocksTnxKeepers(lastBlock.height);
 
             let count = (blockInfo?.height || 0) - lastBlock.height + 1;
             if (count > 100) {
