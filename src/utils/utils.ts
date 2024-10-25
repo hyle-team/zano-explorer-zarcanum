@@ -192,7 +192,7 @@ class Utils {
             amount: Utils.toShiftedNumber(result.amount || "0", 12),
             fee: Utils.toShiftedNumber(result.fee || "0", 12),
             size: result.blob_size || "0",
-            confirmations: parseInt(result.last_block, 10) - parseInt(result.keeper_block, 10),
+            confirmations: parseInt(result.keeper_block, 10) > 0 ? parseInt(result.last_block, 10) - parseInt(result.keeper_block, 10) : 0,
             publicKey: result.pub_key || "-",
             mixin: "-",
             extraItems: [],
