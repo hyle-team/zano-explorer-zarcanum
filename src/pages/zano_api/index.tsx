@@ -84,6 +84,12 @@ function API() {
             example: "https://explorer.zano.org/api/get_tx_details/{:tx_hash}",
             json: examples.get_tx_details
         },
+        {
+            title: "Request outs of recent blocks",
+            method: { text: "find_outs_in_recent_blocks", link: "https://docs.zano.org/reference/#find_outs_in_recent_blocks" },
+            example: "https://explorer.zano.org/api/find_outs_in_recent_blocks?address={address}&viewkey={viewkey}&limit={limit}",
+            json: examples.find_outs_in_recent_blocks
+        }
     ]
 
     const [burgerOpened, setBurgerOpened] = useState(false);

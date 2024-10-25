@@ -703,6 +703,22 @@ const examples = {
                 timestamp: 1558427116
             }
         }
+    },
+    find_outs_in_recent_blocks: {
+        "id": 0,
+        "jsonrpc": "2.0",
+        "result": {
+            "blockchain_top_block_height": 2555000,
+            "blocks_limit": 5,
+            "outputs": [{
+                "amount": 1000000000000,
+                "asset_id": "cc4e69455e63f4a581257382191de6856c2156630b3fba0db4bdd73ffcfb36b6",
+                "output_tx_index": 2,
+                "tx_block_height": 2555000,
+                "tx_id": "a6e8da986858e6825fce7a192097e6afae4e889cabe853a9c29b964985b23da8"
+            }],
+            "status": "OK"
+        }
     }
 }
 
