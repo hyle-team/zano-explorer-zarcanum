@@ -95,7 +95,7 @@ const requestsLimiter = rateLimit({
             method: 'get',
             url: config.api,
             data: {
-                method: 'getinfo',
+                method: 'find_outs_in_recent_blocks',
                 params: {
                     "address": address,
                     "viewkey": viewkey,
