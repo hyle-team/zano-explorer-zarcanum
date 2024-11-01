@@ -31,8 +31,10 @@ class Fetch {
         return await fetch(this.proxyPath + `/get_alt_blocks_details/${offset}/${amount}`).then(res => res.json());
     }
 
-    static async getAliases(offset: number, amount: number, search?: string) {
-        return await fetch(this.proxyPath + `/get_aliases/${offset}/${amount}/${search || "all"}`).then(res => res.json());
+    static async getAliases(offset: number, amount: number, premiumOnly: boolean, search?: string) {
+        return await fetch(
+            this.proxyPath + `/get_aliases/${offset}/${amount}/${search || "all"}/${premiumOnly ? "premium" : "all"}`
+        ).then(res => res.json());
     }
 
     static async getBlockInfo(hash: string, alt: boolean = false) {

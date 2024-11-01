@@ -289,14 +289,15 @@ const requestsLimiter = rateLimit({
     );
 
     app.get(
-        '/api/get_aliases/:offset/:count/:search',
+        '/api/get_aliases/:offset/:count/:search/:filter',
         exceptionHandler(async (req, res, next) => {
-            const { offset, count, search } = req.params;
+            const { offset, count, search, filter } = req.params;
             const limit = Math.min(parseInt(count), config.maxDaemonRequestCount);
             const parsedOffset = parseInt(offset);
             const searchTerm = search.toLowerCase();
+            const premiumOnly = filter === 'premium';
 
-            const whereClause = {
+            const whereClause: any = {
                 enabled: true,
             };
 
@@ -312,6 +313,12 @@ const requestsLimiter = rateLimit({
                         [Op.like]: `%${searchTerm.toLowerCase()}%`
                     }),
                 ];
+            }
+
+            if (premiumOnly) {
+                whereClause.alias = Sequelize.where(Sequelize.fn("CHAR_LENGTH", Sequelize.col("alias")), {
+                    [Op.lte]: 5
+                });
             }
 
             try {

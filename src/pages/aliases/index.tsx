@@ -1,5 +1,5 @@
 import styles from "@/styles/Aliases.module.scss";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Header from "../../components/default/Header/Header";
 import InfoTopPanel from "../../components/default/InfoTopPanel/InfoTopPanel";
 import Table from "../../components/default/Table/Table";
@@ -9,6 +9,8 @@ import CrownImg from "../../assets/images/UI/crown.svg";
 import CommonStatsPanel from "../../components/UI/CommonStatsPanel/CommonStatsPanel";
 import { GetServerSideProps } from "next";
 import { AliasesPageProps, getAliases } from "@/utils/ssr";
+import Switch from "@/components/UI/Switch/Switch";
+import { nanoid } from "nanoid";
 
 export const DEFAULT_ITEMS_ON_PAGE = "20";
 
@@ -27,11 +29,25 @@ function Aliases(props: AliasesPageProps) {
         aliasesAmount: props.aliasesAmount,
         premiumAliasesAmount: props.premiumAliasesAmount
     });
+    const [isPremiumOnly, setIsPremiumOnly] = useState(false);
+
+    const fetchIdRef = useRef<string>(nanoid());
 
     const fetchAliases = useCallback(async () => {
         const currentPage = parseInt(page, 10) || 0;
         const itemsAmount = parseInt(itemsOnPage, 10) || 0;
-        const result = await Fetch.getAliases((currentPage - 1) * itemsAmount, itemsAmount, searchState || undefined);
+
+        const newFetchId = nanoid();
+        fetchIdRef.current = newFetchId;
+
+        const result = await Fetch.getAliases(
+            (currentPage - 1) * itemsAmount,
+            itemsAmount,
+            isPremiumOnly,
+            searchState || undefined,
+        );
+
+        if (newFetchId !== fetchIdRef.current) return;
 
         if (result.sucess === false) return;
         if (!(result instanceof Array)) return;
@@ -41,7 +57,11 @@ function Aliases(props: AliasesPageProps) {
                 address: e.address || ""
             }))
         );
-    }, [itemsOnPage, page, searchState]);
+    }, [itemsOnPage, page, searchState, isPremiumOnly]);
+
+    useEffect(() => {
+        setPage("1");
+    }, [isPremiumOnly, searchState]);
 
     useEffect(() => {
         fetchAliases();
@@ -100,11 +120,21 @@ function Aliases(props: AliasesPageProps) {
             <InfoTopPanel 
                 burgerOpened={burgerOpened} 
                 title="Aliases" 
+                contentNotHiding
+                inputDefaultClosed
                 inputParams={{ 
                     placeholder: "name / address / comment",
                     state: searchState,
                     setState: setSearchState
                 }}
+                content={
+                    <Switch
+                        firstTitle="Premium"
+                        secondTitle="All Aliases"
+                        isFirstSelected={isPremiumOnly}
+                        setIsFirstSelected={setIsPremiumOnly}
+                    />
+                }
             />
             <CommonStatsPanel pairs={statsPanelData} className={styles["aliases__stats"]} />
             <div className={`${styles["aliases__table"]} custom-scroll`}>

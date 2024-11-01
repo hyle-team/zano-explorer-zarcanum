@@ -204,7 +204,7 @@ export async function getAliases() {
     const premiumAliasesAmount = countRes?.premiumAliasesAmount as number;
 
     const itemsAmount = parseInt(DEFAULT_ITEMS_ON_PAGE, 10) || 0;
-    const aliasesResp = await Fetch.getAliases(0, itemsAmount, undefined);
+    const aliasesResp = await Fetch.getAliases(0, itemsAmount, false);
 
 
     return {
