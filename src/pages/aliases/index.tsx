@@ -73,7 +73,7 @@ function Aliases(props: AliasesPageProps) {
                 <div className={styles["short_alias"]}>
                     {alias}
                     <div className={styles["short_alias__crown"]}>
-                        <img src={CrownImg} alt="" />
+                        <CrownImg />
                     </div>
                 </div>
             </div>
