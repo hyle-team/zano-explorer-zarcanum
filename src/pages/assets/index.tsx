@@ -19,7 +19,7 @@ import Utils from "@/utils/utils";
 import { ZANO_ID } from "@/utils/constants";
 
 
-export const DEFAULT_ASSETS_ON_PAGE = "10";
+export const DEFAULT_ASSETS_ON_PAGE = "20";
 
 const AssetPopupBottom = memo(({ assetId }: { assetId?: string }) => {
 
