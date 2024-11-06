@@ -1,5 +1,5 @@
-import "./Table.scss";
-import { ReactComponent as ArrowImg } from "../../../assets/images/UI/arrow.svg";
+import styles from "./Table.module.scss";
+import ArrowImg from "../../../assets/images/UI/arrow.svg";
 import { nanoid } from "nanoid";
 import Input from "../../UI/Input/Input";
 import TableProps from "./Table.props";
@@ -42,7 +42,7 @@ function Table(props: TableProps) {
 
     return (
         <div className={className}>
-            <table className={"table " + (!textWrap ? "table__text_nowrap" : "")}>
+            <table className={`${styles.table} ${!textWrap ? styles["table__text_nowrap"] : ""}`}>
                 <thead>
                     <tr>
                         {
@@ -69,12 +69,12 @@ function Table(props: TableProps) {
                 </tbody>
             </table>
             {pagination && 
-                <div className="table__pagination">
-                    <div className="table__pagination__pages">
+                <div className={styles["table__pagination"]}>
+                    <div className={styles["table__pagination__pages"]}>
                         <p>Pages: </p>
                         <div>
                             <button 
-                                className={page === "1" ? "disabled" : undefined}
+                                className={page === "1" ? styles.disabled : undefined}
                                 onClick={() => changePage(-1)}
                             >
                                 <ArrowImg />
@@ -92,7 +92,7 @@ function Table(props: TableProps) {
                         />
                     </div>
                     {pagesTotal && <p>Pages total: {pagesTotal}</p>}
-                    <div className="table__pagination__blocks">
+                    <div className={styles["table__pagination__blocks"]}>
                         <div>
                             <p>Items on page: </p>
                             <Input 

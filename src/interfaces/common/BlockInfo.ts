@@ -1,7 +1,7 @@
 interface BlockInfo {
     type: "PoS" | "PoW";
-    timestamp?: number;
-    actualTimestamp?: number;
+    timestamp?: string;
+    actualTimestamp?: string;
     difficulty: string;
     minerTextInfo?: string;
     cummulativeDiffAdjusted?: string;
@@ -21,7 +21,7 @@ interface BlockInfo {
     seed?: string;
     alreadyGeneratedCoins?: string;
     object_in_json?: string;
-    id?: string;
+    tx_id?: string;
     prev_id?: string;
     major_version?: string;
     minor_version?: string;

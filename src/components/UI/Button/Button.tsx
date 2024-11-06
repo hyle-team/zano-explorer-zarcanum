@@ -1,4 +1,4 @@
-import "./Button.scss";
+import styles from "./Button.module.scss";
 
 interface ButtonProps extends React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
     wrapper?: boolean
@@ -9,7 +9,7 @@ function Button(props: ButtonProps) {
 
     return (
         <button 
-            className={`button ${wrapper ? "button__wrapper" : ""} ${className || ""}`}
+            className={`${styles.button} ${wrapper ? styles["button__wrapper"] : ""} ${className || ""}`}
             {...restProps}
         >
             {children}

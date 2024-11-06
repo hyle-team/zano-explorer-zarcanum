@@ -1,16 +1,17 @@
-import { NET_MODE } from "../../../config/config";
 import Info from "../../../interfaces/state/Info";
 import VisibilityInfo from "../../../interfaces/state/VisibilityInfo";
-import Fetch from "../../../utils/methods";
 import Utils from "../../../utils/utils";
-import "./StatsPanel.scss";
-import { useState, useEffect } from "react";
+import styles from "./StatsPanel.module.scss";
+import { useState, useEffect, ReactNode, useContext } from "react";
 import { socket } from "../../../utils/socket";
+import BurnImg from "../../../assets/images/UI/flame_ico.svg";
+import { Store } from "@/store/store-reducer";
 
-function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: boolean }) {
-    const { visibilityInfo } = props;
+function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo: Info | null, noStats?: boolean }) {
+    const { state } = useContext(Store);
+    const { visibilityInfo, fetchedInfo } = props;
 
-    const [info, setInfo] = useState<Info | null>(null);
+    const [info, setInfo] = useState<Info | null>(fetchedInfo);
     useEffect(() => {
         socket.on("get_info", (data) => {
             try {
@@ -29,7 +30,6 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
         };
     }, []);
 
-
     const transactions = info ? info.height + info.tx_count : undefined;
 
     const infoHeight = Utils.formatNumber(info?.height, 0) || "...";
@@ -37,31 +37,40 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
     const powDiff = Utils.formatNumber(info?.pow_difficulty, 0) || "...";
     const coinsEmitted = Utils.toShiftedNumber(info?.total_coins, 12) || "...";
     const transactionsString = Utils.formatNumber(transactions, 0) || "...";
-    const hashrate = Utils.toShiftedNumber(info?.current_network_hashrate_350, NET_MODE === "TEST" ? 0 : 9, 3) || "...";
+    const hashrate = Utils.toShiftedNumber(info?.current_network_hashrate_350, state.netMode === "TEST" ? 0 : 9, 2) || "...";
 
     const stackedCoins = Utils.toShiftedNumber(visibilityInfo?.amount.toString(), 12) || "...";
     const percentage = visibilityInfo?.percentage || "...";
     const APY = visibilityInfo?.apy ? parseFloat((visibilityInfo?.apy || 0).toFixed(4)) : "...";
     const devFund = Utils.toShiftedNumber(visibilityInfo?.balance.toString(), 12) || "...";
+    const zanoBurned = visibilityInfo?.zano_burned ?? "...";
+    const posValue = visibilityInfo?.pos_value
+        ? Utils.formatNumber(visibilityInfo?.pos_value, 2) || "..."
+        : "...";
 
-    function TopItem(props: { title: string, amount: string, percent?: string, customCurrency?: boolean }) {
+    function TopItem(props: { title: string, amount: string | ReactNode, percent?: string, customCurrency?: boolean }) {
         const { title, amount, percent, customCurrency } = props;
 
+        const isAmountString = typeof amount === "string";
+        
         return (
-            <div className="main__top__item">
+            <div className={styles["main__top__item"]}>
                 <div>
-                    <p className="main__top__item__header">{title}</p>
+                    <p className={styles["main__top__item__header"]}>{title}</p>
                 </div>
-                <div className="item__value">
-                    <p>{amount + (!customCurrency ? " ZANO" : "")}</p>
+                <div className={styles["item__value"]}>
+                    {isAmountString 
+                        ? <p>{amount + (!customCurrency ? " ZANO" : "")}</p> 
+                        : amount
+                    }
                     {percent &&
-                        <div>
+                        <div className={styles["item__precent"]}>
                             <div>
                                 <p>
                                     {percent + "%"}
                                 </p>
                             </div>
-                            <p className="item__precent__label">from total supply</p>
+                            <p className={styles["item__precent__label"]}>from total supply</p>
                         </div>
                     }
                 </div>
@@ -69,16 +78,15 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
         )
     }
 
-
-    function BottomItem(props: { title: string, children: React.ReactNode }) {
-        const { title, children } = props;
+    function BottomItem(props: { title: string, children: React.ReactNode, style?: React.CSSProperties }) {
+        const { title, children, style } = props;
 
         return (
-            <div className="main__bottom__item">
+            <div className={styles["main__bottom__item"]} style={style}>
                 <div>
                     <p>{title}</p>
                 </div>
-                <div className="bottom__item__value">
+                <div className={styles["bottom__item__value"]}>
                     {children}
                 </div>
             </div>
@@ -87,35 +95,44 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
 
     function InfoTop() {
         return (
-            <div className="info__main__top">
-            <TopItem 
-                title="Staked Coins (est)" 
-                amount={stackedCoins}
-                percent={percentage}
-            />
-            <TopItem 
-                title="Dev Fund" 
-                amount={devFund}
-            />
-            <TopItem 
-                title="Real Time APY" 
-                amount={`${APY}%`}
-                customCurrency={true}
-            />
-        </div>
+            <div className={styles["info__main__top"]}>
+                <TopItem 
+                    title="Staked Coins (est)" 
+                    amount={stackedCoins}
+                    percent={percentage}
+                />
+                <TopItem 
+                    title="Dev Fund" 
+                    amount={devFund}
+                />
+                <TopItem 
+                    title="Real Time APY" 
+                    amount={`${APY}%`}
+                    customCurrency={true}
+                />
+                <TopItem 
+                    title="Zano Burned" 
+                    amount={
+                        <div className={styles["item__value__burn"]}>
+                            <BurnImg />
+                            <p>{zanoBurned} ZANO</p>
+                        </div>
+                    }
+                />
+            </div>
         );
     }
 
     return (
         <>
-            <div className="blockchain__info__main">
-                {NET_MODE === "MAIN" && !props.noStats && <InfoTop/>}
-                <div className="info__main__bottom">
+            <div className={styles["blockchain__info__main"]}>
+                {state.netMode === "MAIN" && !props.noStats && <InfoTop/>}
+                <div className={styles["info__main__bottom"]}>
                     <BottomItem title="Height">
-                        <p className="item__text__large">{infoHeight}</p>
+                        <p className={styles["item__text__large"]}>{infoHeight}</p>
                     </BottomItem>
                     <BottomItem title="Difficulty">
-                        <div className="item__difficulty">
+                        <div className={styles["item__difficulty"]}>
                             <div>
                                 <p>PoS: {posDiff}</p>
                             </div>
@@ -126,27 +143,33 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                         </div>
                     </BottomItem>
                     <BottomItem title="Coins Emitted">
-                        <p className="item__text__small">{coinsEmitted}</p>
+                        <p className={styles["item__text__small"]}>{coinsEmitted}</p>
                     </BottomItem>
                     <BottomItem title="Transactions">
-                        <p className="item__text__large">{transactionsString}</p>
+                        <p className={styles["item__text__large"]}>{transactionsString}</p>
                     </BottomItem>
-                    <BottomItem title="Hash Rate (aprox):">
-                        <p className="item__text__large">{hashrate} GH/sec</p>
+                    <BottomItem title="Hash Rate (approx):">
+                        <div className={styles["item__difficulty"]}>
+                            <div>
+                                <p>PoS: {posValue} block/day</p>
+                            </div>
+                        
+                            <div>
+                                <p>PoW: {hashrate} GH/sec</p>
+                            </div>
+                        </div>
                     </BottomItem>
                 </div>
             </div>
 
-
-            
-            <div className="info__main__mobile">
-                {NET_MODE === "MAIN" && <InfoTop/>}
-                <div className="info__main__bottom">
+            <div className={styles["info__main__mobile"]}>
+                {state.netMode === "MAIN" && <InfoTop/>}
+                <div className={styles["info__main__bottom"]}>
                     <BottomItem title="Height">
-                        <p className="item__text__large">{infoHeight}</p>
+                        <p className={styles["item__text__large"]}>{infoHeight}</p>
                     </BottomItem>
                     <BottomItem title="Difficulty">
-                        <div className="item__difficulty">
+                        <div className={styles["item__difficulty"]}>
                             <div>
                                 <p>PoS: {posDiff}</p>
                             </div>
@@ -157,13 +180,21 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, noStats?: b
                         </div>
                     </BottomItem>
                     <BottomItem title="Coins Emitted">
-                        <p className="item__text__small">{coinsEmitted}</p>
+                        <p className={styles["item__text__small"]}>{coinsEmitted}</p>
                     </BottomItem>
                     <BottomItem title="Transactions">
-                        <p className="item__text__large">{transactionsString}</p>
+                        <p className={styles["item__text__large"]}>{transactionsString}</p>
                     </BottomItem>
-                    <BottomItem title="Hash Rate (aprox):">
-                        <p className="item__text__large">{hashrate} GH/sec</p>
+                    <BottomItem title="Hash Rate (approx):">
+                        <div className={styles["item__difficulty"]}>
+                            <div>
+                                <p>PoS: {posValue} block/day</p>
+                            </div>
+                        
+                            <div>
+                                <p>PoW: {hashrate} GH/sec</p>
+                            </div>
+                        </div>
                     </BottomItem>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import Button from "../Button/Button";
-import "./Switch.scss";
+import styles from "./Switch.module.scss";
 import { Dispatch, SetStateAction } from "react";
 
 interface SwitchProps {
@@ -16,17 +16,17 @@ export default function Switch({
     setIsFirstSelected
 }: SwitchProps) {
     return (
-        <div className="switch">
+        <div className={styles["switch"]}>
             <Button 
                 wrapper
-                className={`switch__item ${isFirstSelected ? "switch__item_selected" : ""}`}
+                className={`${styles["switch__item"]} ${isFirstSelected ? styles["switch__item_selected"] : ""}`}
                 onClick={() => setIsFirstSelected(true)}
             >
                 <p>{firstTitle}</p>
             </Button>
             <Button
                 wrapper
-                className={`switch__item ${!isFirstSelected ? "switch__item_selected" : ""}`}
+                className={`${styles["switch__item"]} ${!isFirstSelected ? styles["switch__item_selected"] : ""}`}
                 onClick={() => setIsFirstSelected(false)}
             >
                 <p>{secondTitle}</p>

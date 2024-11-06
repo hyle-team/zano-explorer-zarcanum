@@ -1,5 +1,7 @@
 import { chartRequestNames } from "./constants";
 
+const PORT = process.env.SERVER_PORT;
+
 async function postFetch(path: string, body: Object) {
     return await fetch("/api/user/set-theme", {
         method: "POST",
@@ -11,7 +13,7 @@ async function postFetch(path: string, body: Object) {
 }
 
 class Fetch {
-    static readonly proxyPath = "/api";
+    static readonly proxyPath = typeof window === "undefined" ? `http://localhost:${PORT}/api` : "/api";
 
     static async getInfo() {
         return await fetch(this.proxyPath + "/get_info").then(res => res.json());
@@ -29,8 +31,10 @@ class Fetch {
         return await fetch(this.proxyPath + `/get_alt_blocks_details/${offset}/${amount}`).then(res => res.json());
     }
 
-    static async getAliases(offset: number, amount: number, search?: string) {
-        return await fetch(this.proxyPath + `/get_aliases/${offset}/${amount}/${search || "all"}`).then(res => res.json());
+    static async getAliases(offset: number, amount: number, premiumOnly: boolean, search?: string) {
+        return await fetch(
+            this.proxyPath + `/get_aliases/${offset}/${amount}/${search || "all"}/${premiumOnly ? "premium" : "all"}`
+        ).then(res => res.json());
     }
 
     static async getBlockInfo(hash: string, alt: boolean = false) {
@@ -42,7 +46,7 @@ class Fetch {
         if (result.success === false) return null;
         if (!(result instanceof Array)) return null;
 
-        const hash = result[0]?.id;
+        const hash = result[0]?.tx_id;
 
         if (typeof hash !== "string") return "";
 
@@ -57,10 +61,10 @@ class Fetch {
         return await fetch(this.proxyPath + `/search_by_id/${id}`).then(res => res.json());
     }
 
-    static async getChartData(chartId: string) {
+    static async getChartData(chartId: string, offset: number) {
         const chartRequestName = chartRequestNames[chartId];
         if (!chartRequestName) return undefined;
-        return await fetch(this.proxyPath + `/get_chart/${chartRequestName}/all`).then(res => res.json());
+        return await fetch(this.proxyPath + `/get_chart/${chartRequestName}/${offset}`).then(res => res.json());
     }
 
     static async getWhitelistedAssets(offset: number, count: number, searchText: string) {
@@ -85,6 +89,18 @@ class Fetch {
 
     static async getAssetDetails(assetId: string) {
         return await fetch(this.proxyPath + "/get_asset_details/" + assetId + "/").then(res => res.json());
+    }
+
+    static async getAssetsCount() {
+        return await fetch(this.proxyPath + "/get_assets_count").then(res => res.json());
+    }
+
+    static async getAliasesCount() {
+        return await fetch(this.proxyPath + "/get_aliases_count").then(res => res.json());
+    }
+
+    static async getTxPoolInfo(count: number) {
+        return await fetch(this.proxyPath + `/get_tx_pool_details/${encodeURIComponent(count)}`).then(res => res.json());
     }
 }
 

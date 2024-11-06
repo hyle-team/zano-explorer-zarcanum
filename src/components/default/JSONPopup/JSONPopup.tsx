@@ -1,9 +1,9 @@
-import "./JSONPopup.scss";
+import styles from "./JSONPopup.module.scss";
 import Popup from "../Popup/Popup";
 import JSONPopupProps from "./JSONPopup.props";
 import JsonViewStyled from "../../UI/JsonViewStyled/JsonViewStyled";
 import Button from "../../UI/Button/Button";
-import { ReactComponent as CrossImg } from "../../../assets/images/UI/cross.svg";
+import CrossImg from "../../../assets/images/UI/cross.svg";
 
 const JSONPopup = (props: JSONPopupProps) => {
     const {
@@ -23,9 +23,9 @@ const JSONPopup = (props: JSONPopupProps) => {
 
     function PopupContent({ close }: { close: () => void }) {
         return (
-            <div className="json_popup__content">
+            <div className={styles["json_popup__content"]}>
                 {!hideJson && 
-                    <div className="json_popup__content__json">
+                    <div className={styles["json_popup__content__json"]}>
                         <JsonViewStyled 
                             data={json} 
                         />
@@ -34,7 +34,7 @@ const JSONPopup = (props: JSONPopupProps) => {
                 <Button
                     wrapper
                     onClick={close}
-                    className="json_popup__close_btn"
+                    className={styles["json_popup__close_btn"]}
                 >
                     <CrossImg />
                 </Button>

@@ -1,64 +1,70 @@
-import "./Header.scss";
-import { ReactComponent as LogoImg } from "../../../assets/images/UI/logo.svg";
-import { ReactComponent as BurgerImg } from "../../../assets/images/UI/burger.svg";
+import styles from "./Header.module.scss";
+import LogoImg from "../../../assets/images/UI/zano_logo.svg";
+import LogoMainnetImg from "../../../assets/images/UI/zano_logo_mainnet.svg";
+import BurgerImg from "../../../assets/images/UI/burger.svg";
 import HeaderProps from "./Header.props";
 import Button from "../../UI/Button/Button";
-import { NET_MODE } from "../../../config/config";
+import Link from "next/link";
+import { useContext } from "react";
+import { Store } from "@/store/store-reducer";
 
 function Header(props: HeaderProps) {
+    const { state } = useContext(Store);
     const { page, burgerOpened, setBurgerOpened } = props;
+
+    const { netMode } = state;
 
     function Nav({ className }: { className?: string }) {
         return (
             <nav className={className}>
-                <a
+                <Link
                     className={page === "Blockchain" ? "selected" : undefined}
                     href="/"
                 >
                     Blockchain
-                </a>
-                <a
+                </Link>
+                <Link
                     className={page === "Alt-blocks" ? "selected" : undefined}
                     href="/alt-blocks"
                 >
                     Alt-blocks
-                </a>
-                <a
+                </Link>
+                <Link
                     className={page === "Aliases" ? "selected" : undefined}
                     href="/aliases"
                 >
                     Aliases
-                </a>
-                {/* {NET_MODE === "TEST" ?
-                    <a 
+                </Link>
+                {/* {netMode === "TEST" ?
+                    <Link 
                         className={page === "Assets" ? "selected" : undefined} 
-                        href="/assets"
+                        to="/assets"
                     >
                         Assets
-                    </a> :
+                    </Link> :
                     <p>
                         Assets
                     </p>
                 } */}
-                <a
+                <Link
                     className={page === "Assets" ? "selected" : undefined}
                     href="/assets"
                 >
                     Assets
-                </a>
-                <a
+                </Link>
+                <Link
                     className={page === "Charts" ? "selected" : undefined}
                     href="/charts"
                 >
                     Charts
-                </a>
-                <a
+                </Link>
+                <Link
                     className={page === "API" ? "selected" : undefined}
                     href="/zano_api"
                 >
                     API
-                </a>
-                {NET_MODE === "MAIN" &&
+                </Link>
+                {netMode === "MAIN" &&
                     <p>
                         Governance
                     </p>
@@ -68,37 +74,34 @@ function Header(props: HeaderProps) {
     }
 
     return (
-        <header className="header">
-            <div className="header__top">
-                <div className="header__top__main">
-                    <a href="/">
-                        <div className="header__logo">
-                            <LogoImg />
-                            <p>ZANO</p>
-                        </div>
-                    </a>
+        <header className={styles["header"]}>
+            <div className={styles["header__top"]}>
+                <div className={styles["header__top__main"]}>
+                    <Link href="/">
+                        {netMode === "TEST" ? <LogoImg /> : <LogoMainnetImg />}
+                    </Link>
                     <Nav />
                 </div>
 
-                <div className="header__top__right">
-                    <a
-                        href={NET_MODE === "TEST" ? "https://explorer.zano.org/" : "https://testnet-explorer.zano.org/"}
+                <div className={styles["header__top__right"]}>
+                    <Link
+                        href={netMode === "TEST" ? "https://explorer.zano.org/" : "https://testnet.explorer.zano.org/"}
                         target="_blank"
                         rel="noreferrer"
                     >
                         <Button>
-                            <p>Switch to {NET_MODE === "TEST" ? "Main Net" : "Test Net"}</p>
+                            <p>Switch to {netMode === "TEST" ? "Main Net" : "Test Net"}</p>
                         </Button>
-                    </a>
+                    </Link>
                     <Button
                         onClick={() => setBurgerOpened(!burgerOpened)}
-                        className="header__burger__button"
+                        className={styles["header__burger__button"]}
                     >
                         <BurgerImg />
                     </Button>
                 </div>
             </div>
-            {burgerOpened && <Nav className="header__nav__mobile" />}
+            {burgerOpened && <Nav className={styles["header__nav__mobile"]} />}
         </header>
     )
 }
