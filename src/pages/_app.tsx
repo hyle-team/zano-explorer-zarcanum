@@ -3,6 +3,7 @@ import './index.scss';
 import { AppProps, default as NextApp } from 'next/app';
 import Head from 'next/head';
 import NetMode from '@/interfaces/common/NetMode';
+import Layout from './Layout';
 
 interface AppCustomProps extends AppProps {
     netMode: NetMode;
@@ -31,7 +32,9 @@ function App(data: AppCustomProps) {
                 <meta property="twitter:image" content={netMode === "MAIN" ? "social-banner.png" : "social-banner-testnet.png"}/>
             </Head>
             <StoreProvider initial={{ netMode: netMode === "TEST" ? "TEST" : "MAIN" }}>
-                <Component {...pageProps} />
+                <Layout>
+                    <Component {...pageProps} />
+                </Layout>
             </StoreProvider>
         </>
     );
