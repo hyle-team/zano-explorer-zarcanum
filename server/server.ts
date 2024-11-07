@@ -120,7 +120,22 @@ const requestsLimiter = rateLimit({
             })
             res.json(response.data)
         })
-    )
+    );
+
+    app.get('/api/get_asset_supply', exceptionHandler(async (req, res) => { 
+        const response = await axios({
+            method: 'get',
+            url: config.api,
+            data: {
+                method: 'get_asset_info',
+                params: {
+                    asset_id: req.query.asset_id || ""
+                }
+            },
+        });
+
+        res.json(response?.data?.result?.asset_descriptor?.current_supply || "Error fetching supply");
+    }));
 
     app.get(
         '/api/get_total_coins',
