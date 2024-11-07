@@ -37,6 +37,12 @@ function API() {
             json: examples.get_total_coins
         },
         { 
+            title: "Request asset's current supply", 
+            method: { text: "get_asset_supply"}, 
+            example: "https://explorer.zano.org/api/get_asset_supply?asset_id={:asset_id}",
+            json: examples.get_total_coins
+        },
+        { 
             title: "Request blocks (offset and count)", 
             method: { text: "get_blocks_details", link: "https://docs.zano.org/reference/#get_blocks_details" }, 
             example: "https://explorer.zano.org/api/get_blocks_details/{:offset}/{:count}",
