@@ -116,12 +116,8 @@ const examples = {
         white_peerlist_size: 118,
         lastBlock: 18434
     },
-    get_total_coins: {
-        total_coins: 15285792000000000
-    },
-    get_asset_supply: {
-        total_coins: 15285792000000000
-    },
+    get_total_coins: 15285792000000000,
+    get_asset_supply: 15285792000000000,
     get_all_pool_tx_list: {
         id: 0,
         jsonrpc: '2.0',
