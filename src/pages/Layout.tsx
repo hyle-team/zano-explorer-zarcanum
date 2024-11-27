@@ -1,5 +1,5 @@
-import Footer from "@/components/default/Footer/Footer";
-
+// import Footer from "@/components/default/Footer/Footer";
+import { Footer } from "zano_ui"
 
 export default function Layout({children}: { children: React.ReactNode }) {
     return (
