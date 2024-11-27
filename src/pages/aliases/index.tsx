@@ -6,6 +6,7 @@ import Table from "../../components/default/Table/Table";
 import Alias from "../../interfaces/state/Alias";
 import Fetch from "../../utils/methods";
 import CrownImg from "../../assets/images/UI/crown.svg";
+import ConnectionImg from "../../assets/images/UI/connection.svg";
 import CommonStatsPanel from "../../components/UI/CommonStatsPanel/CommonStatsPanel";
 import { GetServerSideProps } from "next";
 import { AliasesPageProps, getAliases } from "@/utils/ssr";
@@ -47,6 +48,8 @@ function Aliases(props: AliasesPageProps) {
             searchState || undefined,
         );
 
+        console.log(result)
+
         if (newFetchId !== fetchIdRef.current) return;
 
         if (result.sucess === false) return;
@@ -54,7 +57,8 @@ function Aliases(props: AliasesPageProps) {
         setAliases(
             result.map((e: any) => ({
                 alias: e.alias || "",
-                address: e.address || ""
+                address: e.address || "",
+                hasMatrixConnection: e.hasMatrixConnection || false
             }))
         );
     }, [itemsOnPage, page, searchState, isPremiumOnly]);
@@ -87,21 +91,52 @@ function Aliases(props: AliasesPageProps) {
 
     const tableHeaders = [ "NAME", "ADDRESS" ];
 
-    function ShortAlias({ alias }: { alias: string }) {
+    function Alias({ alias, hasMatrixConnection }: { alias: string, hasMatrixConnection: boolean }) {
+        
         return (
-            <div>
+            alias.length < 5 
+            ?
+            <div className={styles["alias_wrapper"]}>
+                <>
                 <div className={styles["short_alias"]}>
                     {alias}
                     <div className={styles["short_alias__crown"]}>
                         <CrownImg />
                     </div>
                 </div>
+                {hasMatrixConnection && <ConnectionIcon/>}
+                </>
+            </div> 
+            :
+            <div className={styles["alias_wrapper"]}>
+                <>
+                {alias}
+                {hasMatrixConnection && <ConnectionIcon/>}                
+                </>
             </div>
         );
     }
 
+    function ConnectionIcon(){
+        const [hovered, setHovered] = useState(false);
+
+        return (
+        <div className={styles["connection_icon"]} onMouseEnter={ () => setHovered(true)}
+            onMouseLeave={ ()=> setHovered(false)}
+        >   <>
+            <ConnectionImg/>
+            {hovered && <div className={styles["connection_icon__tooltip"]}>
+            <p>Matrix Connection</p>
+                <div className={styles["connection_icon__tooltip__arrow"]}>
+                </div>
+            </div>}
+            </>
+        </div>
+        )
+    }
+
     const tableElements = aliases.map(e => [
-        e.alias.length > 5 ? e.alias : <ShortAlias alias={e.alias} />,
+        <Alias alias={e.alias} hasMatrixConnection={e.hasMatrixConnection}/>,
         e.address
     ]);
 

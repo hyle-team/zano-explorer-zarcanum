@@ -1,4 +1,33 @@
 .aliases {
+    .alias_wrapper {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .connection_icon {
+        cursor: pointer;
+        position: relative;
+        .connection_icon__tooltip {
+            position: absolute;
+            height: 40px;
+            width: 144px;
+            background-color: #11316B;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: translateX(-65px) translateY(10px);
+            z-index: 1;
+            .connection_icon__tooltip__arrow {
+                z-index: 1;
+                position: absolute;
+                top:0px;
+                transform: rotate(45deg) translateY(-5px);
+                height: 10px;
+                width: 10px;
+                background-color: #11316B;
+            }
+        }
+    }
     .short_alias {
         background-color: red;
         float: left;
