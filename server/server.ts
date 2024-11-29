@@ -349,7 +349,7 @@ const requestsLimiter = rateLimit({
                         const hasMatrixConnectionResp = await axios({
                             method: "get",
                             url: config.matrix_api_url + "/check-address",
-                            params: { address: "123" },
+                            params: { address: aliasRow.address },
                             transformResponse: [(data) => JSON.parse(data)],
                         });
                         const hasMatrixConnection = hasMatrixConnectionResp?.data?.userRegistered || false;
