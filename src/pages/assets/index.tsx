@@ -180,7 +180,15 @@ function Assets(props: AssetsPageProps) {
 
             if (newFetchId !== fetchIdRef.current) return;
 
-            const resultAssets = result;
+            const resultAssets = await Promise.all(result.map( async (asset:any) => {
+                const assetPriceRateResponse = await Fetch.getAssetPriceRate(asset.asset_id);
+                const zanoPrice = await Utils.getZanoPrice();
+                if (assetPriceRateResponse.success && assetPriceRateResponse.priceRate && zanoPrice) {
+                    asset.price = (assetPriceRateResponse.priceRate * zanoPrice).toFixed(2);
+                }
+                return asset
+            }))
+
             if (!resultAssets || !(resultAssets instanceof Array)) return;
 
             fetchZanoPrice(resultAssets);
@@ -196,7 +204,7 @@ function Assets(props: AssetsPageProps) {
     }
 
     const tableHeaders = [ "NAME", "TICKER", "ASSET ID", "PRICE (POWERED BY COINGECKO)" ];
-
+    
     const tableElements = assets.map(e => [
         e?.full_name || "",
         e?.ticker || "",

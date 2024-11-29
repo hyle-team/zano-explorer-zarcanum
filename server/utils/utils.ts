@@ -14,7 +14,8 @@ export const config = {
         "enabled_during_sync": process.env.WEBSOCKET_ENABLED_DURING_SYNC === "true"
     },
     "enableVisibilityInfo": process.env.ENABLE_VISIBILITY_INFO === "true",
-    "maxDaemonRequestCount": parseInt(process.env.MAX_DAEMON_REQUEST_COUNT || "", 10) || 1000
+    "maxDaemonRequestCount": parseInt(process.env.MAX_DAEMON_REQUEST_COUNT || "", 10) || 1000,
+    "trade_api_url": process.env.TRADE_API_URL
 }
 
 export function log(msg: string) {

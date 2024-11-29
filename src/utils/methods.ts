@@ -102,6 +102,10 @@ class Fetch {
     static async getTxPoolInfo(count: number) {
         return await fetch(this.proxyPath + `/get_tx_pool_details/${encodeURIComponent(count)}`).then(res => res.json());
     }
+
+    static async getAssetPriceRate(assetId: string){
+        return await fetch(this.proxyPath + `/get_asset_price_rate/?assetId=${assetId}`).then(res => res.json())
+    }
 }
 
 export default Fetch;

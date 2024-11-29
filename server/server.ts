@@ -1145,7 +1145,27 @@ const requestsLimiter = rateLimit({
         } else {
             return res.json({ success: true, asset: dbAsset });
         }
-    }));
+    })
+);
+
+    app.get('/api/get_asset_price_rate', exceptionHandler(async (req, res) => {
+        const { assetId } = req.query;
+        if (!assetId) {
+            return res.json({ success: false, data: "Asset id not provided" });
+        }
+        const assetPriceResponse = await axios({
+            method: 'get',
+            url: config.trade_api_url + '/dex/get-asset-price-rate',
+            params: { assetId },
+        });
+
+        if (assetPriceResponse.data.success) {
+            return res.json({ success: true, priceRate: assetPriceResponse.data.priceRate });
+        } else {
+            return res.json({ success: false, data: "Asset not found" })
+        }
+
+    }))
 
 
     io.on('connection', async (socket) => {
