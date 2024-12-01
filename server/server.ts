@@ -343,23 +343,27 @@ const requestsLimiter = rateLimit({
                     limit,
                     offset: parsedOffset,
                 });
-
-                const aliases = await Promise.all(aliasesRow.map(async (aliasRow) => {
-                    try {
-                        const hasMatrixConnectionResp = await axios({
-                            method: "get",
-                            url: config.matrix_api_url + "/check-address",
-                            params: { address: aliasRow.address },
-                            transformResponse: [(data) => JSON.parse(data)],
-                        });
-                        const hasMatrixConnection = hasMatrixConnectionResp?.data?.userRegistered || false;
-                        aliasRow.dataValues.hasMatrixConnection = hasMatrixConnection;
-                        return aliasRow
-                    } catch(e) {
-                        console.error(e.message);
-                        return aliasRow
-                    }
-                }))
+                const aliasesAddresses = aliasesRow.map((aliasRow) => aliasRow.address);
+                let registeredAddresses: string[] = [];
+                try {
+                    const addressesHasMatrixConnectionResp = await axios({
+                        method: "post",
+                        url: config.matrix_api_url + "/check-address",
+                        data: {
+                            addresses: aliasesAddresses
+                        },
+                        transformResponse: [(data) => JSON.parse(data)],
+                    });
+                    registeredAddresses = addressesHasMatrixConnectionResp.data.registeredAdressess;     
+                } catch (e) {
+                    console.error(e)
+                }
+                const aliases = aliasesRow.map((aliasRow) => {
+                    const hasMatrixConnection = registeredAddresses.includes(aliasRow.address);
+                    aliasRow.dataValues.hasMatrixConnection = hasMatrixConnection;
+                    return aliasRow
+                })
+                
                 res.json(aliases.length > 0 ? aliases : []);
             } catch (error) {
                 next(error);
