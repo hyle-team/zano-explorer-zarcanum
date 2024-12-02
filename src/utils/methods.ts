@@ -42,6 +42,8 @@ class Fetch {
     }
 
     static async getHashByHeight(height: number): Promise<string | null> {
+        if (height === -1) return "";
+        
         const result = await this.getBlockDetails(height, 1);
         if (result.success === false) return null;
         if (!(result instanceof Array)) return null;

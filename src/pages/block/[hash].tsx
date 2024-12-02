@@ -62,7 +62,7 @@ function Block(props: BlockProps) {
 
     useEffect(() => {
         async function fetchHash() {
-            if (!height) return;
+            if (height === null) return;
             const prevHashFetched = await Fetch.getHashByHeight(height - 1);
             const nextHashFetched = await Fetch.getHashByHeight(height + 1);
             setPrevHash(prevHashFetched);
