@@ -839,7 +839,7 @@ const requestsLimiter = rateLimit({
                 const start = parseInt(req.params.start, 10);
                 const count = parseInt(req.params.count, 10);
 
-                if (start && count) {
+                if (!isNaN(start) && start >= 0 && count) {
                     const result = await getBlocksDetails({ start, count });
                     res.json(result);
                 } else {
