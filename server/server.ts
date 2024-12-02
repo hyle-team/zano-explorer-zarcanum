@@ -348,13 +348,14 @@ const requestsLimiter = rateLimit({
                 try {
                     const addressesHasMatrixConnectionResp = await axios({
                         method: "post",
-                        url: config.matrix_api_url + "/check-address",
+                        url: config.matrix_api_url + "/get-addresses",
                         data: {
                             addresses: aliasesAddresses
                         },
                         transformResponse: [(data) => JSON.parse(data)],
                     });
-                    registeredAddresses = addressesHasMatrixConnectionResp.data.registeredAdressess;     
+                    const addresses = addressesHasMatrixConnectionResp.data.addresses;
+                    registeredAddresses = addresses.filter((address) => address.registered === true).map(({address})=> address);  
                 } catch (e) {
                     console.error(e)
                 }
