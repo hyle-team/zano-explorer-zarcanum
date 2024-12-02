@@ -180,14 +180,22 @@ function Assets(props: AssetsPageProps) {
 
             if (newFetchId !== fetchIdRef.current) return;
 
-            const resultAssets = await Promise.all(result.map( async (asset:any) => {
-                const assetPriceRateResponse = await Fetch.getAssetPriceRate(asset.asset_id);
-                const zanoPrice = await Utils.getZanoPrice();
-                if (assetPriceRateResponse.success && assetPriceRateResponse.priceRate && zanoPrice) {
-                    asset.price = (assetPriceRateResponse.priceRate * zanoPrice).toFixed(2);
+            const assetsIds = result.map((asset: any) => asset.asset_id);
+
+            const assetsPriceRatesResponse = await Fetch.getAssetsPriceRates(assetsIds);
+
+            const assetsPriceRates = assetsPriceRatesResponse?.priceRates;
+
+            const zanoPrice = await Utils.getZanoPrice();
+
+            const resultAssets = result.map((resultAsset:any) => {
+                if (assetsPriceRatesResponse?.success && zanoPrice) {
+                    const targetAsset = assetsPriceRates.find((asset: any)=> asset.asset_id === resultAsset.asset_id);
+                    if (!targetAsset) return resultAsset;
+                    resultAsset.price = (targetAsset.rate * zanoPrice).toFixed(2);
                 }
-                return asset
-            }))
+                return resultAsset
+            })
 
             if (!resultAssets || !(resultAssets instanceof Array)) return;
 
