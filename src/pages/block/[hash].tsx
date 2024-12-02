@@ -56,8 +56,7 @@ function Block(props: BlockProps) {
         e.size + " bytes"
     ]);
 
-    const [height, setHeight] = useState<number | null>(props.blockData?.height || null);
-
+    const [height, setHeight] = useState<number | null>(props.blockData?.height ?? null);
     const [prevHash, setPrevHash] = useState<string | null>(null);
     const [nextHash, setNextHash] = useState<string | null>(null);
 

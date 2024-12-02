@@ -311,7 +311,7 @@ class Utils {
 
     
         return {
-            height: result.height || null,
+            height: result.height ?? null,
             transactionsDetails: (transactionsDetails instanceof Array) ? transactionsDetails.map(e => ({
                 hash: e?.tx_id || "",
                 fee: Utils.toShiftedNumber(e?.fee || "0", 12),
