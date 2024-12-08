@@ -194,7 +194,7 @@ export async function getBlock(context: GetServerSidePropsContext) {
 export interface AliasesPageProps {
     aliasesAmount?: number;
     premiumAliasesAmount?: number;
-    aliases: { alias: string, address: string }[];
+    aliases: { alias: string, address: string, hasMatrixConnection: boolean }[];
 }
 
 export async function getAliases() {
@@ -213,7 +213,8 @@ export async function getAliases() {
             premiumAliasesAmount,
             aliases: (aliasesResp || []).map((e: any) => ({
                 alias: e.alias || "" as string, 
-                address: e.address || "" as string
+                address: e.address || "" as string,
+                hasMatrixConnection: e.hasMatrixConnection || false as boolean
             }))
         },
     };
