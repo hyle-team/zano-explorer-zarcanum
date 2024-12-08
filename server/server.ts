@@ -337,13 +337,34 @@ const requestsLimiter = rateLimit({
             }
 
             try {
-                const aliases = await Alias.findAll({
+                const aliasesRow = await Alias.findAll({
                     where: whereClause,
                     order: [['block', 'DESC']],
                     limit,
                     offset: parsedOffset,
                 });
-
+                const aliasesAddresses = aliasesRow.map((aliasRow) => aliasRow.address);
+                let registeredAddresses: string[] = [];
+                try {
+                    const addressesHasMatrixConnectionResp = await axios({
+                        method: "post",
+                        url: config.matrix_api_url + "/get-addresses",
+                        data: {
+                            addresses: aliasesAddresses
+                        },
+                        transformResponse: [(data) => JSON.parse(data)],
+                    });
+                    const addresses = addressesHasMatrixConnectionResp.data.addresses;
+                    registeredAddresses = addresses.filter((address) => address.registered === true).map(({address})=> address);  
+                } catch (e) {
+                    console.error(e)
+                }
+                const aliases = aliasesRow.map((aliasRow) => {
+                    const hasMatrixConnection = registeredAddresses.includes(aliasRow.address);
+                    aliasRow.dataValues.hasMatrixConnection = hasMatrixConnection;
+                    return aliasRow
+                })
+                
                 res.json(aliases.length > 0 ? aliases : []);
             } catch (error) {
                 next(error);
