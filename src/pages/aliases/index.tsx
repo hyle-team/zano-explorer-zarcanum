@@ -94,7 +94,7 @@ function Aliases(props: AliasesPageProps) {
     function Alias({ alias, hasMatrixConnection }: { alias: string, hasMatrixConnection: boolean }) {
         
         return (
-            alias.length < 5 
+            alias.length <= 5 
             ?
             <div className={styles["alias_wrapper"]}>
                 <>
