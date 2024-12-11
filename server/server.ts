@@ -1166,7 +1166,58 @@ const requestsLimiter = rateLimit({
         } else {
             return res.json({ success: true, asset: dbAsset });
         }
-    }));
+    })
+);
+
+
+    app.post('/api/get_assets_price_rates', exceptionHandler(async (req, res) => {
+        const { assetsIds } = req.body;
+        if (!assetsIds) {
+            return res.json({ success: false, data: "Asset id not provided" });
+        }
+        const assetsPricesResponse = await axios({
+            method: 'post',
+            url: config.trade_api_url + '/dex/get-assets-price-rates',
+            data: { assetsIds },
+        });
+
+        const assetsPrices = assetsPricesResponse.data;
+
+        if (assetsPricesResponse?.data?.success) {
+            return res.json({ success: true, priceRates: assetsPrices.priceRates });
+        } else {
+            return res.json({ success: false, data: "Assets not found" })
+        }
+
+    }))
+
+    app.get('/api/get_matrix_addresses', exceptionHandler(async (req, res) => {
+        const {page, items} = req.query;
+
+        if (!page || !items) {
+            return res.status(200).send({
+                success: false,
+                data: "no page or items provided"
+            })
+        }
+
+        const matrixAddressesResponse = await fetch(`${config.matrix_api_url}/get-registered-addresses/?page=${page}&items=${items}`)
+        .then(res => res.json())
+        
+        const {addresses} = matrixAddressesResponse;
+
+        if (matrixAddressesResponse?.success && addresses) {
+            return res.status(200).send({
+                success: true,
+                addresses
+            })
+        } else {
+            return res.status(200).send({
+                success: false,
+            })
+        }
+    }))
+
 
 
     io.on('connection', async (socket) => {

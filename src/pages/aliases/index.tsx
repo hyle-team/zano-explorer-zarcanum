@@ -30,7 +30,11 @@ function Aliases(props: AliasesPageProps) {
         aliasesAmount: props.aliasesAmount,
         premiumAliasesAmount: props.premiumAliasesAmount
     });
-    const [isPremiumOnly, setIsPremiumOnly] = useState(false);
+    const [selectedTitleIdx, setSelectedTitleIdx] = useState(0);
+
+    const isPremiumOnly = selectedTitleIdx === 0;
+
+    const isInMatrix = selectedTitleIdx === 2;
 
     const fetchIdRef = useRef<string>(nanoid());
 
@@ -54,6 +58,7 @@ function Aliases(props: AliasesPageProps) {
 
         if (result.sucess === false) return;
         if (!(result instanceof Array)) return;
+        if (isInMatrix) return;
         setAliases(
             result.map((e: any) => ({
                 alias: e.alias || "",
@@ -63,9 +68,21 @@ function Aliases(props: AliasesPageProps) {
         );
     }, [itemsOnPage, page, searchState, isPremiumOnly]);
 
+    const fetchMatrixAliases = useCallback(async () => {
+        const result = await Fetch.getMatrixAddresses(page, itemsOnPage);
+        if(!result.success || !(result.addresses instanceof Array)) return;
+        setAliases(result.addresses);
+    },[itemsOnPage, page])
+
     useEffect(() => {
         setPage("1");
     }, [isPremiumOnly, searchState]);
+
+    useEffect(() => {
+        if (isInMatrix) {
+            fetchMatrixAliases();
+        }
+    }, [isInMatrix, fetchMatrixAliases])
 
     useEffect(() => {
         fetchAliases();
@@ -164,10 +181,9 @@ function Aliases(props: AliasesPageProps) {
                 }}
                 content={
                     <Switch
-                        firstTitle="Premium"
-                        secondTitle="All Aliases"
-                        isFirstSelected={isPremiumOnly}
-                        setIsFirstSelected={setIsPremiumOnly}
+                        titles={["Premium", "All Aliases", "In Matrix"]}
+                        selectedTitleIdx={selectedTitleIdx}
+                        setSelectedTitleIdx={setSelectedTitleIdx}
                     />
                 }
             />
