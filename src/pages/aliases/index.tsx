@@ -66,12 +66,15 @@ function Aliases(props: AliasesPageProps) {
                 hasMatrixConnection: e.hasMatrixConnection || false
             }))
         );
-    }, [itemsOnPage, page, searchState, isPremiumOnly]);
+    }, [itemsOnPage, page, searchState, isPremiumOnly, isInMatrix]);
 
     const fetchMatrixAliases = useCallback(async () => {
         const result = await Fetch.getMatrixAddresses(page, itemsOnPage);
         if(!result.success || !(result.addresses instanceof Array)) return;
-        setAliases(result.addresses);
+        const aliases = result.addresses.map((e :any)=>{
+            return {...e, hasMatrixConnection: true}
+        })
+        setAliases(aliases);
     },[itemsOnPage, page])
 
     useEffect(() => {
@@ -121,23 +124,25 @@ function Aliases(props: AliasesPageProps) {
                         <CrownImg />
                     </div>
                 </div>
-                {hasMatrixConnection && <ConnectionIcon/>}
+                {hasMatrixConnection && <ConnectionIcon alias={alias}/>}
                 </>
             </div> 
             :
             <div className={styles["alias_wrapper"]}>
                 <>
                 {alias}
-                {hasMatrixConnection && <ConnectionIcon/>}                
+                {hasMatrixConnection && <ConnectionIcon alias={alias}/>}                
                 </>
             </div>
         );
     }
 
-    function ConnectionIcon(){
+    function ConnectionIcon({alias}:{alias: string}){
         const [hovered, setHovered] = useState(false);
+        const link = `https://matrix.to/#/@${alias}:zano.org`
 
         return (
+        <a href={link}>
         <div className={styles["connection_icon"]} onMouseEnter={ () => setHovered(true)}
             onMouseLeave={ ()=> setHovered(false)}
         >   <>
@@ -149,6 +154,7 @@ function Aliases(props: AliasesPageProps) {
             </div>}
             </>
         </div>
+        </a>
         )
     }
 
