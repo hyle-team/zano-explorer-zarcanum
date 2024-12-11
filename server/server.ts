@@ -24,6 +24,8 @@ import { ITransaction } from "./schemes/Transaction";
 import BigNumber from "bignumber.js";
 import next from "next";
 import { rateLimit } from 'express-rate-limit';
+import bodyParser from 'body-parser';
+
 import fs from "fs";
 // @ts-ignore
 const __dirname = import.meta.dirname;
@@ -72,6 +74,8 @@ const requestsLimiter = rateLimit({
         next()
     })
     app.use(express.static(path.resolve(__dirname, "../build/")));
+
+    app.use(bodyParser.json());
 
     app.use([
         "/api/find_outs_in_recent_blocks"
@@ -1122,7 +1126,6 @@ const requestsLimiter = rateLimit({
         return res.json(responseData);
     }));
 
-
     app.get('/api/get_asset_details/:asset_id', exceptionHandler(async (req, res) => {
         const { asset_id } = req.params;
 
@@ -1166,7 +1169,31 @@ const requestsLimiter = rateLimit({
         } else {
             return res.json({ success: true, asset: dbAsset });
         }
-    }));
+    })
+);
+
+
+    app.post('/api/get_assets_price_rates', exceptionHandler(async (req, res) => {
+        const { assetsIds } = req.body;
+        if (!assetsIds) {
+            return res.json({ success: false, data: "Asset id not provided" });
+        }
+        const assetsPricesResponse = await axios({
+            method: 'post',
+            url: config.trade_api_url + '/dex/get-assets-price-rates',
+            data: { assetsIds },
+        });
+
+        const assetsPrices = assetsPricesResponse.data;
+
+        if (assetsPricesResponse?.data?.success) {
+            return res.json({ success: true, priceRates: assetsPrices.priceRates });
+        } else {
+            return res.json({ success: false, data: "Assets not found" })
+        }
+
+    }))
+
 
 
     io.on('connection', async (socket) => {

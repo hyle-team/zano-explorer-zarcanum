@@ -3,13 +3,13 @@ import { chartRequestNames } from "./constants";
 const PORT = process.env.SERVER_PORT;
 
 async function postFetch(path: string, body: Object) {
-    return await fetch("/api/user/set-theme", {
+    return await fetch(path, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(body)
-    }).then(res => res.json());
+    });
 }
 
 class Fetch {
@@ -103,6 +103,13 @@ class Fetch {
 
     static async getTxPoolInfo(count: number) {
         return await fetch(this.proxyPath + `/get_tx_pool_details/${encodeURIComponent(count)}`).then(res => res.json());
+    }
+
+    static async getAssetsPriceRates(assetsIds: string[]){
+        return await postFetch(
+            this.proxyPath + `/get_assets_price_rates`,
+            { assetsIds },
+        ).then(res => res.json());
     }
 }
 
