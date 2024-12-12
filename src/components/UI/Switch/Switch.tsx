@@ -3,34 +3,32 @@ import styles from "./Switch.module.scss";
 import { Dispatch, SetStateAction } from "react";
 
 interface SwitchProps {
-    firstTitle: string;
-    secondTitle: string;
-    isFirstSelected: boolean;
-    setIsFirstSelected: Dispatch<SetStateAction<boolean>>;
+    titles: string[];
+    selectedTitleIdx: number;
+    setSelectedTitleIdx: Dispatch<SetStateAction<number>>;
 }
 
 export default function Switch({
-    firstTitle,
-    secondTitle,
-    isFirstSelected,
-    setIsFirstSelected
+    titles,
+    selectedTitleIdx,
+    setSelectedTitleIdx
 }: SwitchProps) {
-    return (
-        <div className={styles["switch"]}>
+    return ( 
+        <div className={styles['switch']}>
+        {titles.map((title, idx) => {
+        
+            return (
             <Button 
+                key={idx}
                 wrapper
-                className={`${styles["switch__item"]} ${isFirstSelected ? styles["switch__item_selected"] : ""}`}
-                onClick={() => setIsFirstSelected(true)}
-            >
-                <p>{firstTitle}</p>
-            </Button>
-            <Button
-                wrapper
-                className={`${styles["switch__item"]} ${!isFirstSelected ? styles["switch__item_selected"] : ""}`}
-                onClick={() => setIsFirstSelected(false)}
-            >
-                <p>{secondTitle}</p>
-            </Button>
-        </div>
-    )
+                className={`${styles["switch__item"]} ${(idx === selectedTitleIdx) && styles["switch__item_selected"] }`}
+                onClick={() => setSelectedTitleIdx(idx)}
+        >
+                <p>{title}</p>
+        </Button> 
+        )
+        
+    })}
+    </div>
+    ) 
 }

@@ -1194,6 +1194,33 @@ const requestsLimiter = rateLimit({
 
     }))
 
+    app.get('/api/get_matrix_addresses', exceptionHandler(async (req, res) => {
+        const {page, items} = req.query;
+
+        if (!page || !items) {
+            return res.status(200).send({
+                success: false,
+                data: "no page or items provided"
+            })
+        }
+
+        const matrixAddressesResponse = await fetch(`${config.matrix_api_url}/get-registered-addresses/?page=${page}&items=${items}`)
+        .then(res => res.json())
+        
+        const {addresses} = matrixAddressesResponse;
+
+        if (matrixAddressesResponse?.success && addresses) {
+            return res.status(200).send({
+                success: true,
+                addresses
+            })
+        } else {
+            return res.status(200).send({
+                success: false,
+            })
+        }
+    }))
+
 
 
     io.on('connection', async (socket) => {

@@ -68,57 +68,59 @@ function Table(props: TableProps) {
                     
                 </tbody>
             </table>
-            {pagination && 
-                <div className={styles["table__pagination"]}>
-                    <div className={styles["table__pagination__pages"]}>
-                        <p>Pages: </p>
-                        <div>
-                            <button 
-                                className={page === "1" ? styles.disabled : undefined}
-                                onClick={() => changePage(-1)}
-                            >
-                                <ArrowImg />
-                            </button>
-                            <button
-                                onClick={() => changePage(1)}
-                            >
-                                <ArrowImg />
-                            </button>
-                        </div>
-                        <Input 
-                            type="text"
-                            value={page}
-                            onInput={(e) => onNumberInput(e, setPage)}
-                        />
-                    </div>
-                    {pagesTotal && <p>Pages total: {pagesTotal}</p>}
-                    <div className={styles["table__pagination__blocks"]}>
-                        <div>
-                            <p>Items on page: </p>
-                            <Input 
-                                type="text" 
-                                value={itemsOnPage} 
-                                onInput={(e) => onNumberInput(e, setItemsOnPage, 50)} 
-                            />
-                        </div>
-                        {!hidePaginationBlock &&
-                            <div>
-                                <p>Go to block: </p>
-                                <Input
-                                    type="text" 
-                                    placeholder="number" 
-                                    value={goToBlock} 
-                                    onInput={(e) => onNumberInput(e, setGoToBlock)} 
-                                    onEnterPress={goToBlockEnter}
-                                />
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-           
+                <Pagination pagination={pagination}/>
         </div>
     )
+
+    function Pagination ({pagination}:{pagination:boolean | undefined}) {
+        if (!pagination) return null
+        return   <div className={styles["table__pagination"]}>
+        <div className={styles["table__pagination__pages"]}>
+            <p>Pages: </p>
+            <div>
+                <button 
+                    className={page === "1" ? styles.disabled : undefined}
+                    onClick={() => changePage(-1)}
+                >
+                    <ArrowImg />
+                </button>
+                <button
+                    onClick={() => changePage(1)}
+                >
+                    <ArrowImg />
+                </button>
+            </div>
+            <Input 
+                type="text"
+                value={page}
+                onInput={(e) => onNumberInput(e, setPage)}
+            />
+        </div>
+        {pagesTotal && <p>Pages total: {pagesTotal}</p>}
+        <div className={styles["table__pagination__blocks"]}>
+            <div>
+                <p>Items on page: </p>
+                <Input 
+                    type="text" 
+                    value={itemsOnPage} 
+                    onInput={(e) => onNumberInput(e, setItemsOnPage, 50)} 
+                />
+            </div>
+            {!hidePaginationBlock &&
+                <div>
+                    <p>Go to block: </p>
+                    <Input
+                        type="text" 
+                        placeholder="number" 
+                        value={goToBlock} 
+                        onInput={(e) => onNumberInput(e, setGoToBlock)} 
+                        onEnterPress={goToBlockEnter}
+                    />
+                </div>
+            }
+        </div>
+    </div>
+    }
 }
 
 export default Table;

@@ -30,7 +30,11 @@ function Aliases(props: AliasesPageProps) {
         aliasesAmount: props.aliasesAmount,
         premiumAliasesAmount: props.premiumAliasesAmount
     });
-    const [isPremiumOnly, setIsPremiumOnly] = useState(false);
+    const [selectedTitleIdx, setSelectedTitleIdx] = useState(0);
+
+    const isPremiumOnly = selectedTitleIdx === 0;
+
+    const isInMatrix = selectedTitleIdx === 2;
 
     const fetchIdRef = useRef<string>(nanoid());
 
@@ -54,6 +58,7 @@ function Aliases(props: AliasesPageProps) {
 
         if (result.sucess === false) return;
         if (!(result instanceof Array)) return;
+        if (isInMatrix) return;
         setAliases(
             result.map((e: any) => ({
                 alias: e.alias || "",
@@ -61,11 +66,26 @@ function Aliases(props: AliasesPageProps) {
                 hasMatrixConnection: e.hasMatrixConnection || false
             }))
         );
-    }, [itemsOnPage, page, searchState, isPremiumOnly]);
+    }, [itemsOnPage, page, searchState, isPremiumOnly, isInMatrix]);
+
+    const fetchMatrixAliases = useCallback(async () => {
+        const result = await Fetch.getMatrixAddresses(page, itemsOnPage);
+        if(!result.success || !(result.addresses instanceof Array)) return;
+        const aliases = result.addresses.map((e :any)=>{
+            return {...e, hasMatrixConnection: true}
+        })
+        setAliases(aliases);
+    },[itemsOnPage, page])
 
     useEffect(() => {
         setPage("1");
     }, [isPremiumOnly, searchState]);
+
+    useEffect(() => {
+        if (isInMatrix) {
+            fetchMatrixAliases();
+        }
+    }, [isInMatrix, fetchMatrixAliases])
 
     useEffect(() => {
         fetchAliases();
@@ -104,23 +124,25 @@ function Aliases(props: AliasesPageProps) {
                         <CrownImg />
                     </div>
                 </div>
-                {hasMatrixConnection && <ConnectionIcon/>}
+                {hasMatrixConnection && <ConnectionIcon alias={alias}/>}
                 </>
             </div> 
             :
             <div className={styles["alias_wrapper"]}>
                 <>
                 {alias}
-                {hasMatrixConnection && <ConnectionIcon/>}                
+                {hasMatrixConnection && <ConnectionIcon alias={alias}/>}                
                 </>
             </div>
         );
     }
 
-    function ConnectionIcon(){
+    function ConnectionIcon({alias}:{alias: string}){
         const [hovered, setHovered] = useState(false);
+        const link = `https://matrix.to/#/@${alias}:zano.org`
 
         return (
+        <a href={link}>
         <div className={styles["connection_icon"]} onMouseEnter={ () => setHovered(true)}
             onMouseLeave={ ()=> setHovered(false)}
         >   <>
@@ -132,6 +154,7 @@ function Aliases(props: AliasesPageProps) {
             </div>}
             </>
         </div>
+        </a>
         )
     }
 
@@ -164,10 +187,9 @@ function Aliases(props: AliasesPageProps) {
                 }}
                 content={
                     <Switch
-                        firstTitle="Premium"
-                        secondTitle="All Aliases"
-                        isFirstSelected={isPremiumOnly}
-                        setIsFirstSelected={setIsPremiumOnly}
+                        titles={["Premium", "All Aliases", "In Matrix"]}
+                        selectedTitleIdx={selectedTitleIdx}
+                        setSelectedTitleIdx={setSelectedTitleIdx}
                     />
                 }
             />

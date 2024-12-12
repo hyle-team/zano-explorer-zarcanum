@@ -111,6 +111,10 @@ class Fetch {
             { assetsIds },
         ).then(res => res.json());
     }
+    
+    static async getMatrixAddresses(page: string, items:string){
+        return await fetch(this.proxyPath + `/get_matrix_addresses/?page=${page}&items=${items}`,).then((res) => res.json());
+    }
 }
 
 export default Fetch;

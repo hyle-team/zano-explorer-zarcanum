@@ -60,6 +60,8 @@ function Assets(props: AssetsPageProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
 
+    const [selectedTitleIdx, setSelectedTitleIdx] = useState(0);
+
     const [burgerOpened, setBurgerOpened] = useState(false);
 
     const [assets, setAssets] = useState<any[]>(props.assets);
@@ -72,7 +74,7 @@ function Assets(props: AssetsPageProps) {
     const [itemsOnPage, setItemsOnPage] = useState(DEFAULT_ASSETS_ON_PAGE);
     const [page, setPage] = useState("1");
 
-    const [isWhitelist, setIsWhitelist] = useState(true);
+    const isWhitelist = selectedTitleIdx === 0;
 
     const [inputState, setInputState] = useState("");
     const [initFetched, setInitFetched] = useState(false);
@@ -250,10 +252,9 @@ function Assets(props: AssetsPageProps) {
                 }}
                 content={
                     <Switch
-                        firstTitle="Whitelisted"
-                        secondTitle="All Assets"
-                        isFirstSelected={isWhitelist}
-                        setIsFirstSelected={setIsWhitelist}
+                        titles={["Whitelisted", "All Assets"]}
+                        selectedTitleIdx={selectedTitleIdx}
+                        setSelectedTitleIdx={setSelectedTitleIdx}
                     />
                 }
             />
