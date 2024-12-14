@@ -237,7 +237,7 @@ function Assets(props: AssetsPageProps) {
         e?.asset_id === ZANO_ID ? 
         <Link href="https://www.coingecko.com/en/coins/zano" target="_blank">Coingecko</Link>
         : 
-        <Link href={`https://trade.zano.org/dex/trading/pair/${e?.asset_id}/${ZANO_ID}`} target="_blank">Zano Trade</Link>
+        <Link href={`https://trade.zano.org/dex/trading/find-pair?first=${e?.asset_id}&second=${ZANO_ID}`} target="_blank">Zano Trade</Link>
     ]);
 
     const statsPanelData = [
