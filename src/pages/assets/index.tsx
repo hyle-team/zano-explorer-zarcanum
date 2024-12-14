@@ -233,7 +233,7 @@ function Assets(props: AssetsPageProps) {
             
         </div>,
         e?.price ? `${e?.price}$` : "No data",
-        e?.ticker.toLowerCase() === "zano" ? "Coingecko" : "Zano Trade" 
+        e?.asset_id === ZANO_ID ? "Coingecko" : "Zano Trade" 
     ]);
 
     const statsPanelData = [
