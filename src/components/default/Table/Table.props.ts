@@ -16,6 +16,7 @@ interface TableProps {
     columnsWidth?: number[];
     textWrap?: boolean;
     pagesTotal?: number;
+    isLoading?: boolean;
 }
 
 export default TableProps;

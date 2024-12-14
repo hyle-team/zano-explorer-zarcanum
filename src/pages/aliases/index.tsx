@@ -17,6 +17,7 @@ export const DEFAULT_ITEMS_ON_PAGE = "20";
 
 function Aliases(props: AliasesPageProps) {
     const [burgerOpened, setBurgerOpened] = useState(false);
+    const [isLoading, setLoading] = useState(false);
 
     const [aliases, setAliases] = useState<Alias[]>(props.aliases);
 
@@ -45,12 +46,14 @@ function Aliases(props: AliasesPageProps) {
         const newFetchId = nanoid();
         fetchIdRef.current = newFetchId;
 
+        setLoading(true);
         const result = await Fetch.getAliases(
             (currentPage - 1) * itemsAmount,
             itemsAmount,
             isPremiumOnly,
             searchState || undefined,
         );
+        setLoading(false)
 
         console.log(result)
 
@@ -196,6 +199,7 @@ function Aliases(props: AliasesPageProps) {
             <CommonStatsPanel pairs={statsPanelData} className={styles["aliases__stats"]} />
             <div className={`${styles["aliases__table"]} custom-scroll`}>
                 <Table 
+                    isLoading={isLoading}
                     headers={tableHeaders}
                     elements={tableElements}
                     pagination
