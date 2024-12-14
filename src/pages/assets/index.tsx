@@ -60,6 +60,8 @@ function Assets(props: AssetsPageProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
 
+    const [isLoading, setLoading] = useState(false);
+
     const [selectedTitleIdx, setSelectedTitleIdx] = useState(0);
 
     const [burgerOpened, setBurgerOpened] = useState(false);
@@ -103,6 +105,7 @@ function Assets(props: AssetsPageProps) {
 
     useEffect(() => {
         async function fetchAssetsStats() {
+            setLoading(true);
             const result = await Fetch.getAssetsCount();
             const assetsAmount = result?.assetsAmount;
             const whitelistedAssetsAmount = result?.whitelistedAssetsAmount;
@@ -116,6 +119,8 @@ function Assets(props: AssetsPageProps) {
                         ? whitelistedAssetsAmount 
                         : undefined
             })
+
+            setLoading(false)
         }
 
         fetchAssetsStats();
@@ -167,6 +172,7 @@ function Assets(props: AssetsPageProps) {
 
     useEffect(() => {
         async function fetchAssets() {
+            setLoading(true)
 
             const itemsOnPageInt = parseInt(itemsOnPage, 10) || 0;
             const pageInt = parseInt(page, 10) || 0;
@@ -202,6 +208,7 @@ function Assets(props: AssetsPageProps) {
             if (!resultAssets || !(resultAssets instanceof Array)) return;
 
             fetchZanoPrice(resultAssets);
+            setLoading(false)
         }
         
         fetchAssets();
@@ -213,7 +220,7 @@ function Assets(props: AssetsPageProps) {
         setPopupState(true);
     }
 
-    const tableHeaders = [ "NAME", "TICKER", "ASSET ID", "PRICE (POWERED BY COINGECKO)" ];
+    const tableHeaders = [ "NAME", "TICKER", "ASSET ID", "PRICE", "SOURCE" ];    
     
     const tableElements = assets.map(e => [
         e?.full_name || "",
@@ -225,7 +232,8 @@ function Assets(props: AssetsPageProps) {
             </AliasText>
             
         </div>,
-        e?.price ? `${e?.price}$` : "No data"
+        e?.price ? `${e?.price}$` : "No data",
+        e?.ticker.toLowerCase() === "zano" ? "Coingecko" : "Zano Trade" 
     ]);
 
     const statsPanelData = [
@@ -270,6 +278,7 @@ function Assets(props: AssetsPageProps) {
                     setItemsOnPage={setItemsOnPage}
                     page={page}
                     setPage={setPage}
+                    isLoading={isLoading}
                 />
             </div>
             {
