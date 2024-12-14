@@ -201,7 +201,7 @@ function Assets(props: AssetsPageProps) {
                 if (assetsPriceRatesResponse?.success && zanoPrice) {
                     const targetAsset = assetsPriceRates.find((asset: any)=> asset.asset_id === resultAsset.asset_id);
                     if (!targetAsset) return resultAsset;
-                    resultAsset.price = (targetAsset.rate * zanoPrice).toFixed(2);
+                    resultAsset.price = parseFloat((targetAsset.rate * zanoPrice).toFixed(6)).toString();
                 }
                 return resultAsset
             })
