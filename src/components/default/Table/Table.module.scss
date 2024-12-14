@@ -2,7 +2,7 @@
     width: 100%;
     border-collapse: collapse;
     border-spacing: 0;
-    overflow: hidden;
+    overflow-x: hidden;
 
     p, a {
         font-size: 13px;
@@ -115,4 +115,10 @@
             }
         }
     }
+}
+
+.preloader{
+    margin: 20px 0;
+    display: grid;
+    place-content: center;
 }

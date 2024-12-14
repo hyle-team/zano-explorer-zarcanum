@@ -3,6 +3,7 @@ import ArrowImg from "../../../assets/images/UI/arrow.svg";
 import { nanoid } from "nanoid";
 import Input from "../../UI/Input/Input";
 import TableProps from "./Table.props";
+import Preloader from "@/components/UI/Preloader/Preloader";
 
 function Table(props: TableProps) { 
     function onNumberInput(event: React.FormEvent<HTMLInputElement>, setState?: React.Dispatch<React.SetStateAction<string>>, max?: number) {
@@ -31,7 +32,8 @@ function Table(props: TableProps) {
         goToBlockEnter,
         columnsWidth,
         textWrap,
-        pagesTotal
+        pagesTotal,
+        isLoading = false
     } = props;
 
     function changePage(increase: number) {
@@ -42,7 +44,8 @@ function Table(props: TableProps) {
 
     return (
         <div className={className}>
-            <table className={`${styles.table} ${!textWrap ? styles["table__text_nowrap"] : ""}`}>
+            {!isLoading ? <>
+                <table className={`${styles.table} ${!textWrap ? styles["table__text_nowrap"] : ""}`}>
                 <thead>
                     <tr>
                         {
@@ -69,6 +72,10 @@ function Table(props: TableProps) {
                 </tbody>
             </table>
                 <Pagination pagination={pagination}/>
+            </> : <div className={styles.preloader}>
+                <Preloader/>
+                </div>}
+                
         </div>
     )
 
