@@ -17,6 +17,7 @@ import { GetServerSideProps } from "next";
 import { AssetsPageProps, getAssets } from "@/utils/ssr";
 import Utils from "@/utils/utils";
 import { ZANO_ID } from "@/utils/constants";
+import Link from "next/link";
 
 
 export const DEFAULT_ASSETS_ON_PAGE = "20";
@@ -233,7 +234,10 @@ function Assets(props: AssetsPageProps) {
             
         </div>,
         e?.price ? `${e?.price}$` : "No data",
-        e?.asset_id === ZANO_ID ? "Coingecko" : "Zano Trade" 
+        e?.asset_id === ZANO_ID ? 
+        <Link href="https://www.coingecko.com/en/coins/zano" target="_blank">Coingecko</Link>
+        : 
+        <Link href={`https://trade.zano.org/dex/trading/${e?.asset_id}`} target="_blank">Zano Trade</Link>
     ]);
 
     const statsPanelData = [
