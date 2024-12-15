@@ -52,15 +52,15 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
         const { title, amount, percent, customCurrency } = props;
 
         const isAmountString = typeof amount === "string";
-        
+
         return (
             <div className={styles["main__top__item"]}>
                 <div>
                     <p className={styles["main__top__item__header"]}>{title}</p>
                 </div>
                 <div className={styles["item__value"]}>
-                    {isAmountString 
-                        ? <p>{amount + (!customCurrency ? " ZANO" : "")}</p> 
+                    {isAmountString
+                        ? <p>{amount + (!customCurrency ? " ZANO" : "")}</p>
                         : amount
                     }
                     {percent &&
@@ -96,26 +96,29 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
     function InfoTop() {
         return (
             <div className={styles["info__main__top"]}>
-                <TopItem 
-                    title="Staked Coins (est)" 
+                <TopItem
+                    title="Staked Coins (est)"
                     amount={stackedCoins}
                     percent={percentage}
                 />
-                <TopItem 
-                    title="Dev Fund" 
+                <TopItem
+                    title="Dev Fund"
                     amount={devFund}
                 />
-                <TopItem 
-                    title="Real Time APY" 
+                <TopItem
+                    title="Real Time APY"
                     amount={`${APY}%`}
                     customCurrency={true}
                 />
-                <TopItem 
-                    title="Zano Burned" 
+                <TopItem
+                    title="Zano Burned"
                     amount={
                         <div className={styles["item__value__burn"]}>
                             <BurnImg />
-                            <p>{zanoBurned} ZANO</p>
+                            <div>
+                                <p>{zanoBurned}</p>
+                                <p>ZANO</p>
+                            </div>
                         </div>
                     }
                 />
@@ -126,7 +129,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
     return (
         <>
             <div className={styles["blockchain__info__main"]}>
-                {state.netMode === "MAIN" && !props.noStats && <InfoTop/>}
+                {state.netMode === "MAIN" && !props.noStats && <InfoTop />}
                 <div className={styles["info__main__bottom"]}>
                     <BottomItem title="Height">
                         <p className={styles["item__text__large"]}>{infoHeight}</p>
@@ -136,7 +139,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
                             <div>
                                 <p>PoS: {posDiff}</p>
                             </div>
-                        
+
                             <div>
                                 <p>PoW: {powDiff}</p>
                             </div>
@@ -153,7 +156,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
                             <div>
                                 <p>PoS: {posValue} block/day</p>
                             </div>
-                        
+
                             <div>
                                 <p>PoW: {hashrate} GH/sec</p>
                             </div>
@@ -163,7 +166,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
             </div>
 
             <div className={styles["info__main__mobile"]}>
-                {state.netMode === "MAIN" && <InfoTop/>}
+                {state.netMode === "MAIN" && <InfoTop />}
                 <div className={styles["info__main__bottom"]}>
                     <BottomItem title="Height">
                         <p className={styles["item__text__large"]}>{infoHeight}</p>
@@ -173,7 +176,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
                             <div>
                                 <p>PoS: {posDiff}</p>
                             </div>
-                        
+
                             <div>
                                 <p>PoW: {powDiff}</p>
                             </div>
@@ -190,7 +193,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
                             <div>
                                 <p>PoS: {posValue} block/day</p>
                             </div>
-                        
+
                             <div>
                                 <p>PoW: {hashrate} GH/sec</p>
                             </div>
