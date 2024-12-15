@@ -1,3 +1,5 @@
+import 'zano_ui/src/styles/variables.scss';
+
 import { StoreProvider } from '@/store/store-reducer';
 import './index.scss';
 import { AppProps, default as NextApp } from 'next/app';
