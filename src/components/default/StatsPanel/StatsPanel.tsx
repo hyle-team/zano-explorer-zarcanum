@@ -43,7 +43,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
     const percentage = visibilityInfo?.percentage || "...";
     const APY = visibilityInfo?.apy ? parseFloat((visibilityInfo?.apy || 0).toFixed(4)) : "...";
     const devFund = Utils.toShiftedNumber(visibilityInfo?.balance.toString(), 12) || "...";
-    const zanoBurned = visibilityInfo?.zano_burned ?? "...";
+    const zanoBurned = visibilityInfo?.zano_burned?.toFixed(2) ?? "...";
     const posValue = visibilityInfo?.pos_value
         ? Utils.formatNumber(visibilityInfo?.pos_value, 2) || "..."
         : "...";
