@@ -116,8 +116,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
                         <div className={styles["item__value__burn"]}>
                             <BurnImg />
                             <div>
-                                <p>{zanoBurned}</p>
-                                <p>ZANO</p>
+                                <p>{zanoBurned} ZANO</p>
                             </div>
                         </div>
                     }
