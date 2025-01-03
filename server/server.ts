@@ -1872,6 +1872,11 @@ const requestsLimiter = rateLimit({
 
 
 (async () => {
+
+    if (process.env.RESYNC_ASSETS === "true") {
+        await Asset.destroy({ where: {} });
+    }
+
     while (true) {
         try {
             // Fetch assets from external API
