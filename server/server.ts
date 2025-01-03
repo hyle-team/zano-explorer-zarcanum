@@ -1936,7 +1936,8 @@ const requestsLimiter = rateLimit({
             const amountPerIteration = 100;
 
             while (true) {
-                const newAssets = await fetchAssets(iterator, amountPerIteration);
+                const newAssets = (await fetchAssets(iterator, amountPerIteration))
+                    .filter(e => !e.ticker?.includes("#BADASSET#") && !e?.full_name?.includes("#bad asset name"));
                 if (!newAssets.length) break;
                 assets.push(...newAssets);
                 iterator += amountPerIteration;
