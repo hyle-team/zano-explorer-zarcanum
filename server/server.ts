@@ -1874,6 +1874,8 @@ const requestsLimiter = rateLimit({
 (async () => {
 
     if (process.env.RESYNC_ASSETS === "true") {
+        console.log('Resyncing assets');
+        
         await Asset.destroy({ where: {} });
     }
 
