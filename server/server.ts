@@ -660,7 +660,10 @@ const requestsLimiter = rateLimit({
                 if (tx_hash) {
                     // Fetching transaction details with associated block information using Sequelize
                     const transaction = await Transaction.findOne({
-                        where: { tx_id: tx_hash },
+                        where: { 
+                            tx_id: tx_hash,
+                            keeper_block: { [Op.ne]: null }
+                        },
                     });
 
 
@@ -668,9 +671,6 @@ const requestsLimiter = rateLimit({
                         where: { height: transaction?.keeper_block },
                     }).catch(() => null);
 
-                    console.log("txData", transaction, transactionBlock);
-                    
-                    
 
                     if (transaction && transactionBlock) {
                         const response = {
