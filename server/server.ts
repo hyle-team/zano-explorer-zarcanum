@@ -668,6 +668,8 @@ const requestsLimiter = rateLimit({
                         where: { height: transaction?.keeper_block },
                     }).catch(() => null);
 
+                    console.log("txData", transaction, transactionBlock);
+                    
                     
 
                     if (transaction && transactionBlock) {
