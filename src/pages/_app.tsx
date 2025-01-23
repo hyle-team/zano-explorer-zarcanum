@@ -14,7 +14,7 @@ function App(data: AppCustomProps) {
   return (
     <>
       <Head>
-        <title>Zano Block explorer</title>
+        <title>Zano Block Explorer</title>
         <meta
           name="description"
           content="Zano is an open-source cryptocurrency and ecosystem with enterprise-grade privacy, security, and scalability"
@@ -27,7 +27,7 @@ function App(data: AppCustomProps) {
 
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://explorer.zano.org/" />
-        <meta property="og:title" content="Zano Block explorer" />
+        <meta property="og:title" content="Zano Block Explorer" />
         <meta
           property="og:description"
           content="Zano is an open-source cryptocurrency and ecosystem with enterprise-grade privacy, security, and scalability"
@@ -43,7 +43,7 @@ function App(data: AppCustomProps) {
 
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content="https://explorer.zano.org/" />
-        <meta property="twitter:title" content="Zano Block explorer" />
+        <meta property="twitter:title" content="Zano Block Explorer" />
         <meta
           property="twitter:description"
           content="Zano is an open-source cryptocurrency and ecosystem with enterprise-grade privacy, security, and scalability"
