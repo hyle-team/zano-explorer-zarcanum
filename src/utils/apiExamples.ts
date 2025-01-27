@@ -718,6 +718,14 @@ const examples = {
             }],
             "status": "OK"
         }
+    },
+    price: {
+        success: true,
+        data: {
+            name: "Zano",
+            usd: 9.95,
+            usd_24h_change: -14.163639601697547
+        }
     }
 }
 

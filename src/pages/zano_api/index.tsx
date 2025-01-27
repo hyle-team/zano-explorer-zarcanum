@@ -31,6 +31,12 @@ function API() {
             json: examples.get_info
         },
         { 
+            title: "Request current price for asset", 
+            method: { text: "price" }, 
+            example: "https://explorer.zano.org/api/price?asset_id={:asset_id}", 
+            json: examples.price
+        },
+        { 
             title: "Request current total coins", 
             method: { text: "get_total_coins"}, 
             example: "https://explorer.zano.org/api/get_total_coins",
