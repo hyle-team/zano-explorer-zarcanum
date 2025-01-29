@@ -238,7 +238,7 @@ export async function getAssets() {
 
     assets.forEach((element: any) => {
         if (element.asset_id === ZANO_ID) {
-            element.price = zanoPrice;
+            element.price = zanoPrice || null;
         }
     });
 

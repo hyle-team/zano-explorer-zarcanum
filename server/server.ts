@@ -47,11 +47,25 @@ const requestsLimiter = rateLimit({
     legacyHeaders: false,
 });
 
-(async () => {
+let dbInited = false;
 
+(async () => {    
     await initDB();
     await sequelize.authenticate();
     await sequelize.sync();
+
+    dbInited = true;
+})();
+
+async function waitForDb() {
+    while (!dbInited) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+}
+
+(async () => {
+
+    await waitForDb();
 
     io.engine.on('initial_headers', (headers, req) => {
         headers['Access-Control-Allow-Origin'] = config.frontend_api
@@ -1100,6 +1114,26 @@ const requestsLimiter = rateLimit({
                 return res.json({ success: false, data: "Asset not found" });
             }
 
+
+            const assetsPricesResponse = await axios({
+                method: 'post',
+                url: config.trade_api_url + '/dex/get-assets-price-rates',
+                data: { assetsIds: [assetData.asset_id] },
+            });
+
+            console.log(assetsPricesResponse?.data?.priceRates?.[0]);
+            
+
+            return res.json({
+                success: true,
+                data: {
+                    name: assetData.full_name,
+                    usd: assetsPricesResponse?.data?.priceRates?.[0]?.rate || 0,
+                    usd_24h_change: null
+                }
+            });
+    
+
             // Assuming that you handle further processing of the `assetData` here...
         }
 
@@ -1875,6 +1909,8 @@ const requestsLimiter = rateLimit({
 
 (async () => {
 
+    await waitForDb();
+
     if (process.env.RESYNC_ASSETS === "true") {
         console.log('Resyncing assets');
         
@@ -1952,7 +1988,7 @@ const requestsLimiter = rateLimit({
                 iterator += amountPerIteration;
             }
 
-            console.log('Got assets list');
+            console.log('Got assets list', assets.length);
 
             // Fetch existing assets from the database
             const assetsRows = await Asset.findAll();
