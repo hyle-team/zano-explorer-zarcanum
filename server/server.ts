@@ -1128,7 +1128,7 @@ async function waitForDb() {
                 success: true,
                 data: {
                     name: assetData.full_name,
-                    usd: assetsPricesResponse?.data?.priceRates?.[0]?.rate || 0,
+                    usd: ((assetsPricesResponse?.data?.priceRates?.[0]?.rate || 0) * (state.priceData?.zano?.zano?.usd || 0)),
                     usd_24h_change: null
                 }
             });
