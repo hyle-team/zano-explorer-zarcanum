@@ -35,12 +35,13 @@ const links: {
         title: "Auction",
         type: "auction",
         link: "https://wrapped.zano.org/",
+        disabled: true
     },
     {
         title: "Messenger",
         type: "messenger",
-        link: "https://zano.org/",
-        disabled: true
+        link: "https://messenger.zano.org/",
+        disabled: false
     },
     {
         title: "Wrapped Zano",
