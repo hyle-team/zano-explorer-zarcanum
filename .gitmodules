@@ -1,3 +1,6 @@
 [submodule "submodules/zano_database"]
 	path = submodules/zano_database
 	url = git@github.com:jejolare-dev/zano_database.git
+[submodule "submodules/zano_ui"]
+    path = submodules/zano_ui
+    url = git@github.com:jejolare-dev/zano_ui.git
