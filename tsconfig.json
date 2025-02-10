@@ -24,7 +24,8 @@
     "paths": {
       "@/*": [
         "src/*"
-      ]
+      ],
+      "zano_ui": ["submodules/zano_ui/src"]
     }
   },
   "include": [

@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+import withTM from 'next-transpile-modules';
+
+const nextConfig = withTM(['zano_ui'])({ // Ensure Next.js transpiles `zano_ui`
   reactStrictMode: true,
   webpack: (config) => {
     const fileLoaderRule = config.module.rules.find((rule) =>
@@ -11,7 +13,7 @@ const nextConfig = {
       {
         ...fileLoaderRule,
         test: /\.svg$/i,
-        resourceQuery: /url/ // *.svg?url
+        resourceQuery: /url/, // *.svg?url
       },
       // Convert all other *.svg imports to React components
       {
@@ -33,11 +35,10 @@ const nextConfig = {
       }
     );
 
-
     fileLoaderRule.exclude = /\.svg$/i;
 
     return config;
   },
-}
+});
 
 export default nextConfig;
