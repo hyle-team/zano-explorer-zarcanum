@@ -41,7 +41,7 @@ export const io = new Server(server, { transports: ['websocket', 'polling'] });
 
 
 const requestsLimiter = rateLimit({
-    windowMs: 10 * 1000,
+    windowMs: 5 * 1000,
     limit: 1,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
