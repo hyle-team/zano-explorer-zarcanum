@@ -49,7 +49,7 @@ const requestsLimiter = rateLimit({
 
 let dbInited = false;
 
-(async () => {    
+(async () => {
     await initDB();
     await sequelize.authenticate();
     await sequelize.sync();
@@ -140,7 +140,7 @@ async function waitForDb() {
         })
     );
 
-    app.get('/api/get_asset_supply', exceptionHandler(async (req, res) => { 
+    app.get('/api/get_asset_supply', exceptionHandler(async (req, res) => {
         const response = await axios({
             method: 'get',
             url: config.api,
@@ -373,7 +373,7 @@ async function waitForDb() {
                         transformResponse: [(data) => JSON.parse(data)],
                     });
                     const addresses = addressesHasMatrixConnectionResp.data.addresses;
-                    registeredAddresses = addresses.filter((address) => address.registered === true).map(({address})=> address);  
+                    registeredAddresses = addresses.filter((address) => address.registered === true).map(({ address }) => address);
                 } catch (e) {
                     console.error(e)
                 }
@@ -382,7 +382,7 @@ async function waitForDb() {
                     aliasRow.dataValues.hasMatrixConnection = hasMatrixConnection;
                     return aliasRow
                 })
-                
+
                 res.json(aliases.length > 0 ? aliases : []);
             } catch (error) {
                 next(error);
@@ -458,14 +458,14 @@ async function waitForDb() {
     app.get('/api/get_chart/:chart/:offset', async (req, res) => {
         const { chart, offset } = req.params;
         const offsetDate = parseInt(offset, 10) / 1000;
-    
+
         if (!chart) {
             return res.status(400).json({ error: 'Invalid parameters' });
         }
-    
+
         if (chart === 'AvgBlockSize') {
             console.log('loading AvgBlockSize');
-    
+
             const result = await Chart.findAll({
                 attributes: [
                     [
@@ -483,9 +483,9 @@ async function waitForDb() {
                 },
                 raw: true,
             });
-    
+
             res.send(result);
-    
+
         } else if (chart === 'AvgTransPerBlock') {
             const result = await Chart.findAll({
                 attributes: [
@@ -505,7 +505,7 @@ async function waitForDb() {
                 raw: true,
             });
             res.send(result);
-    
+
         } else if (chart === 'hashRate') {
             console.time('hashRate');
             const result = await Chart.findAll({
@@ -530,7 +530,7 @@ async function waitForDb() {
             });
             console.timeEnd('hashRate');
             res.send(result);
-    
+
         } else if (chart === 'pos-difficulty') {
             // Aggregated data at 3600-second intervals
             const result = await Chart.findAll({
@@ -556,7 +556,7 @@ async function waitForDb() {
                 },
                 raw: true,
             });
-    
+
             // Detailed data at 3600-second intervals using AVG
             const result1 = await Chart.findAll({
                 attributes: [
@@ -576,13 +576,13 @@ async function waitForDb() {
                 },
                 raw: true,
             });
-    
+
             console.log('pos-difficulty', result1.length, result.length);
             res.send({
                 aggregated: result,
                 detailed: result1,
             });
-    
+
         } else if (chart === 'pow-difficulty') {
             // Aggregated data at 3600-second intervals
             const result = await Chart.findAll({
@@ -608,7 +608,7 @@ async function waitForDb() {
                 },
                 raw: true,
             });
-    
+
             // Detailed data at 3600-second intervals using AVG
             const result1 = await Chart.findAll({
                 attributes: [
@@ -628,12 +628,12 @@ async function waitForDb() {
                 },
                 raw: true,
             });
-    
+
             res.send({
                 aggregated: result,
                 detailed: result1,
             });
-    
+
         } else if (chart === 'ConfirmTransactPerDay') {
 
             const offsetDateStartOfDay = new Date(offsetDate);
@@ -658,12 +658,12 @@ async function waitForDb() {
                 raw: true,
             });
             res.send(result);
-    
+
         } else {
             res.status(400).json({ error: 'Invalid chart type' });
         }
     });
-    
+
 
     app.get(
         '/api/get_tx_details/:tx_hash',
@@ -674,7 +674,7 @@ async function waitForDb() {
                 if (tx_hash) {
                     // Fetching transaction details with associated block information using Sequelize
                     const transaction = await Transaction.findOne({
-                        where: { 
+                        where: {
                             tx_id: tx_hash,
                             keeper_block: { [Op.ne]: null }
                         },
@@ -697,7 +697,7 @@ async function waitForDb() {
                         res.json(response);
                     } else {
                         const response = await get_tx_details(tx_hash);
-                        
+
                         const data = response.data;
 
                         if (data?.result?.tx_info) {
@@ -714,7 +714,7 @@ async function waitForDb() {
                             });
 
                             res.json({
-                                ...data.result.tx_info, 
+                                ...data.result.tx_info,
                                 ...(blockInfo?.toJSON() || {}),
                                 last_block: lastBlock.height,
                             });
@@ -1122,7 +1122,7 @@ async function waitForDb() {
             });
 
             console.log(assetsPricesResponse?.data?.priceRates?.[0]);
-            
+
 
             return res.json({
                 success: true,
@@ -1132,7 +1132,7 @@ async function waitForDb() {
                     usd_24h_change: null
                 }
             });
-    
+
 
             // Assuming that you handle further processing of the `assetData` here...
         }
@@ -1206,7 +1206,7 @@ async function waitForDb() {
             return res.json({ success: true, asset: dbAsset });
         }
     })
-);
+    );
 
 
     app.post('/api/get_assets_price_rates', exceptionHandler(async (req, res) => {
@@ -1231,7 +1231,7 @@ async function waitForDb() {
     }))
 
     app.get('/api/get_matrix_addresses', exceptionHandler(async (req, res) => {
-        const {page, items} = req.query;
+        const { page, items } = req.query;
 
         if (!page || !items) {
             return res.status(200).send({
@@ -1241,9 +1241,9 @@ async function waitForDb() {
         }
 
         const matrixAddressesResponse = await fetch(`${config.matrix_api_url}/get-registered-addresses/?page=${page}&items=${items}`)
-        .then(res => res.json())
-        
-        const {addresses} = matrixAddressesResponse;
+            .then(res => res.json())
+
+        const { addresses } = matrixAddressesResponse;
 
         if (matrixAddressesResponse?.success && addresses) {
             return res.status(200).send({
@@ -1271,8 +1271,8 @@ async function waitForDb() {
     app.all('*', (req, res) => {
         return handle(req, res);
     });
-
-    server.listen(config.server_port, () => {
+    // config.server_port
+    server.listen(3000, () => {
         // @ts-ignore
         log(`Server listening on port ${server?.address()?.port}`)
     })
@@ -1550,7 +1550,7 @@ async function waitForDb() {
 
         async function syncTnxKeepers(blocks: any[]) {
             for (const block of blocks) {
-                
+
                 const txs = block.transactions_details;
 
                 for (const tx of txs) {
@@ -1913,7 +1913,7 @@ async function waitForDb() {
 
     if (process.env.RESYNC_ASSETS === "true") {
         console.log('Resyncing assets');
-        
+
         await Asset.destroy({ where: {} });
     }
 
