@@ -1272,7 +1272,7 @@ async function waitForDb() {
         return handle(req, res);
     });
     // config.server_port
-    server.listen(3000, () => {
+    server.listen(config.server_port, () => {
         // @ts-ignore
         log(`Server listening on port ${server?.address()?.port}`)
     })
