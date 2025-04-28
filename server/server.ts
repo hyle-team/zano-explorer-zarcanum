@@ -2097,7 +2097,7 @@ const heapChecker = setInterval(() => {
     const memoryUsage = process.memoryUsage();
     console.log(`[Memory Log] heapUsed: ${(memoryUsage.heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
-    if (memoryUsage.heapUsed > 0.3 * 1024 * 1024 * 1024) {
+    if (memoryUsage.heapUsed > 1 * 1024 * 1024 * 1024) {
         clearInterval(heapChecker);
         console.log('[HeapDump] Starting snapshot...');
 
