@@ -2091,7 +2091,7 @@ const heapChecker = setInterval(() => {
   if (memoryUsage.heapUsed > 0.5 * 1024 * 1024 * 1024) {
     clearInterval(heapChecker);
 
-    const filename = join('/tmp/explorer', `heap-${Date.now()}.heapsnapshot`);
+    const filename = join('./', `heap-${Date.now()}.heapsnapshot`);
     const snapshotStream = getHeapSnapshot();
     const fileStream = createWriteStream(filename);
   
