@@ -2100,35 +2100,35 @@ const heapChecker = setInterval(() => {
     const memoryUsage = process.memoryUsage();
     console.log(`[Memory Log] heapUsed: ${(memoryUsage.heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
-    if (memoryUsage.heapUsed > 1 * 1024 * 1024 * 1024) {
-        clearInterval(heapChecker);
-        console.log('[HeapDump] Starting snapshot...');
+    // if (memoryUsage.heapUsed > 1 * 1024 * 1024 * 1024) {
+    //     clearInterval(heapChecker);
+    //     console.log('[HeapDump] Starting snapshot...');
 
-        const filename = join('/tmp', `heap-${Date.now()}.heapsnapshot`);
-        const snapshotStream = getHeapSnapshot();
-        const fileStream = createWriteStream(filename);
+    //     const filename = join('/tmp', `heap-${Date.now()}.heapsnapshot`);
+    //     const snapshotStream = getHeapSnapshot();
+    //     const fileStream = createWriteStream(filename);
 
-        snapshotStream.on('data', (chunk) => {
-            console.log(`[HeapDump] Snapshot chunk: ${chunk.length} bytes`);
-        });
+    //     snapshotStream.on('data', (chunk) => {
+    //         console.log(`[HeapDump] Snapshot chunk: ${chunk.length} bytes`);
+    //     });
 
-        snapshotStream.on('end', () => {
-            console.log('[HeapDump] Snapshot stream ended.');
-        });
+    //     snapshotStream.on('end', () => {
+    //         console.log('[HeapDump] Snapshot stream ended.');
+    //     });
 
-        snapshotStream.on('error', (err) => {
-            console.error('[HeapDump] Snapshot stream error:', err);
-        });
+    //     snapshotStream.on('error', (err) => {
+    //         console.error('[HeapDump] Snapshot stream error:', err);
+    //     });
 
-        fileStream.on('finish', () => {
-            console.log(`[HeapDump] Successfully written to ${filename}`);
-        });
+    //     fileStream.on('finish', () => {
+    //         console.log(`[HeapDump] Successfully written to ${filename}`);
+    //     });
 
-        fileStream.on('error', (err) => {
-            console.error('[HeapDump] File write error:', err);
-        });
+    //     fileStream.on('error', (err) => {
+    //         console.error('[HeapDump] File write error:', err);
+    //     });
 
-        snapshotStream.pipe(fileStream);
+    //     snapshotStream.pipe(fileStream);
 
-    }
+    // }
 }, 30000);
