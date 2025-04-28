@@ -1264,10 +1264,16 @@ async function waitForDb() {
 
 
     io.on('connection', async (socket) => {
+        console.log('new socket connected');
+        
         socket.on('get-socket-info', () => {
+            console.log('get-socket-ingo');
+            
             emitSocketInfo(socket);
         })
         socket.on('get-socket-pool', async () => {
+            console.log('get-socket-pool');
+            
             io.emit('get_transaction_pool_info', JSON.stringify(await getTxPoolDetails(0)))
         });
     })
