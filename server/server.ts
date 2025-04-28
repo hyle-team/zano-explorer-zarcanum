@@ -27,6 +27,11 @@ import next from "next";
 import { rateLimit } from 'express-rate-limit';
 import bodyParser from 'body-parser';
 
+import { createWriteStream } from 'fs';
+import { getHeapSnapshot } from 'v8';
+import { join } from 'path';
+
+
 import fs from "fs";
 // @ts-ignore
 const __dirname = import.meta.dirname;
@@ -2079,15 +2084,28 @@ async function waitForDb() {
     }
 })();
 
-setInterval(() => {
+const heapChecker = setInterval(() => {
   const memoryUsage = process.memoryUsage();
   console.log(`[Memory Log] heapUsed: ${(memoryUsage.heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
-//   if (memoryUsage.heapUsed > 0.5 * 1024 * 1024 * 1024) {
-//     const file = `/tmp/explorer/heapdump-${Date.now()}.heapsnapshot`;
-//     heapdump.writeSnapshot(file, (err, filename) => {
-//       if (err) console.error('Heapdump failed:', err);
-//       else console.log('Heapdump written to', filename);
-//     });
-//   }
+  if (memoryUsage.heapUsed > 0.05 * 1024 * 1024 * 1024) {
+    clearInterval(heapChecker);
+
+    const filename = join('/tmp/explorer', `heap-${Date.now()}.heapsnapshot`);
+    const snapshotStream = getHeapSnapshot();
+    const fileStream = createWriteStream(filename);
+  
+    console.log(`[Heap Snapshot] Start writing snapshot to ${filename}...`);
+  
+    snapshotStream.pipe(fileStream);
+  
+    fileStream.on('finish', () => {
+      console.log(`[Heap Snapshot] Successfully written to ${filename}`);
+    });
+  
+    fileStream.on('error', (err) => {
+      console.error(`[Heap Snapshot] Failed to write snapshot:`, err);
+    });
+    
+  }
 }, 30000);
