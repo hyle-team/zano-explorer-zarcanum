@@ -2088,24 +2088,24 @@ const heapChecker = setInterval(() => {
   const memoryUsage = process.memoryUsage();
   console.log(`[Memory Log] heapUsed: ${(memoryUsage.heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
-  if (memoryUsage.heapUsed > 0.5 * 1024 * 1024 * 1024) {
-    clearInterval(heapChecker);
+//   if (memoryUsage.heapUsed > 0.5 * 1024 * 1024 * 1024) {
+//     clearInterval(heapChecker);
 
-    const filename = join('./', `heap-${Date.now()}.heapsnapshot`);
-    const snapshotStream = getHeapSnapshot();
-    const fileStream = createWriteStream(filename);
+//     const filename = join('./', `heap-${Date.now()}.heapsnapshot`);
+//     const snapshotStream = getHeapSnapshot();
+//     const fileStream = createWriteStream(filename);
   
-    console.log(`[Heap Snapshot] Start writing snapshot to ${filename}...`);
+//     console.log(`[Heap Snapshot] Start writing snapshot to ${filename}...`);
   
-    snapshotStream.pipe(fileStream);
+//     snapshotStream.pipe(fileStream);
   
-    fileStream.on('finish', () => {
-      console.log(`[Heap Snapshot] Successfully written to ${filename}`);
-    });
+//     fileStream.on('finish', () => {
+//       console.log(`[Heap Snapshot] Successfully written to ${filename}`);
+//     });
   
-    fileStream.on('error', (err) => {
-      console.error(`[Heap Snapshot] Failed to write snapshot:`, err);
-    });
+//     fileStream.on('error', (err) => {
+//       console.error(`[Heap Snapshot] Failed to write snapshot:`, err);
+//     });
     
-  }
+//   }
 }, 30000);
