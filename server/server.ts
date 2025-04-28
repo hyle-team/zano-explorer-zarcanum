@@ -2083,11 +2083,11 @@ setInterval(() => {
   const memoryUsage = process.memoryUsage();
   console.log(`[Memory Log] heapUsed: ${(memoryUsage.heapUsed / 1024 / 1024).toFixed(2)} MB`);
 
-  if (memoryUsage.heapUsed > 0.5 * 1024 * 1024 * 1024) {
-    const file = `/tmp/explorer/heapdump-${Date.now()}.heapsnapshot`;
-    heapdump.writeSnapshot(file, (err, filename) => {
-      if (err) console.error('Heapdump failed:', err);
-      else console.log('Heapdump written to', filename);
-    });
-  }
+//   if (memoryUsage.heapUsed > 0.5 * 1024 * 1024 * 1024) {
+//     const file = `/tmp/explorer/heapdump-${Date.now()}.heapsnapshot`;
+//     heapdump.writeSnapshot(file, (err, filename) => {
+//       if (err) console.error('Heapdump failed:', err);
+//       else console.log('Heapdump written to', filename);
+//     });
+//   }
 }, 30000);
