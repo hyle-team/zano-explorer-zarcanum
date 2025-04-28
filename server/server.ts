@@ -1268,18 +1268,21 @@ async function waitForDb() {
 
 
 
-    io.on('connection', async (socket) => {
+    io.on('connection', (socket) => {
         console.log('new socket connected');
 
-        socket.on('get-socket-info', () => {
-            console.log('get-socket-ingo');
+        const onSocketInfo = () => emitSocketInfo(socket);
+        const onSocketPool = async () => {
+            io.emit('get_transaction_pool_info', JSON.stringify(await getTxPoolDetails(0)));
+        };
 
-            emitSocketInfo(socket);
-        })
-        socket.on('get-socket-pool', async () => {
-            console.log('get-socket-pool');
+        socket.on('get-socket-info', onSocketInfo);
+        socket.on('get-socket-pool', onSocketPool);
 
-            io.emit('get_transaction_pool_info', JSON.stringify(await getTxPoolDetails(0)))
+        socket.on('disconnect', () => {
+            console.log('Socket disconnected');
+            socket.off('get-socket-info', onSocketInfo);
+            socket.off('get-socket-pool', onSocketPool);
         });
     })
 
