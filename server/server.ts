@@ -1863,12 +1863,12 @@ async function waitForDb() {
                 blockInfo.daemon_network_state = 0;
                 // Pause for 5 minutes on error
                 await pause(300000);
-                await getInfoTimer();
+                return getInfoTimer();
             }
         } else {
             // If now_delete_offers is true, pause for 10 seconds before retrying
             await pause(10000);
-            await getInfoTimer();
+            return getInfoTimer();
         }
     };
 
