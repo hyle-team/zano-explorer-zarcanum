@@ -1911,176 +1911,176 @@ async function waitForDb() {
 })();
 
 
-(async () => {
+// (async () => {
 
-    await waitForDb();
+//     await waitForDb();
 
-    if (process.env.RESYNC_ASSETS === "true") {
-        console.log('Resyncing assets');
+//     if (process.env.RESYNC_ASSETS === "true") {
+//         console.log('Resyncing assets');
 
-        await Asset.destroy({ where: {} });
-    }
+//         await Asset.destroy({ where: {} });
+//     }
 
-    while (true) {
-        try {
-            // Fetch assets from external API
-            async function fetchAssets(offset, count) {
-                try {
-                    const response = await axios({
-                        method: 'get',
-                        url: config.api,
-                        data: {
-                            method: 'get_assets_list',
-                            params: {
-                                count: count,
-                                offset: offset,
-                            }
-                        }
-                    });
+//     while (true) {
+//         try {
+//             // Fetch assets from external API
+//             async function fetchAssets(offset, count) {
+//                 try {
+//                     const response = await axios({
+//                         method: 'get',
+//                         url: config.api,
+//                         data: {
+//                             method: 'get_assets_list',
+//                             params: {
+//                                 count: count,
+//                                 offset: offset,
+//                             }
+//                         }
+//                     });
 
-                    return response?.data?.result?.assets || [];
-                } catch {
-                    return [];
-                }
-            }
+//                     return response?.data?.result?.assets || [];
+//                 } catch {
+//                     return [];
+//                 }
+//             }
 
-            // Fetch Zano price info
-            const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
+//             // Fetch Zano price info
+//             const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
 
-            await new Promise(res => setTimeout(res, 5 * 1e3));
+//             await new Promise(res => setTimeout(res, 5 * 1e3));
 
-            // Fetch Ethereum price info
-            try {
-                const ethInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
-                console.log('ETH INFO: ', ethInfo);
-                if (ethInfo?.ethereum?.usd !== undefined) {
-                    setState({
-                        ...state,
-                        priceData: {
-                            ...state.priceData,
-                            ethereum: ethInfo
-                        }
-                    });
-                }
-            } catch (error) {
-                console.log('ETH PARSING ERROR');
-                console.log('Error: ', error);
-            }
+//             // Fetch Ethereum price info
+//             try {
+//                 const ethInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
+//                 console.log('ETH INFO: ', ethInfo);
+//                 if (ethInfo?.ethereum?.usd !== undefined) {
+//                     setState({
+//                         ...state,
+//                         priceData: {
+//                             ...state.priceData,
+//                             ethereum: ethInfo
+//                         }
+//                     });
+//                 }
+//             } catch (error) {
+//                 console.log('ETH PARSING ERROR');
+//                 console.log('Error: ', error);
+//             }
 
-            console.log('ZANO INFO: ', zanoInfo);
+//             console.log('ZANO INFO: ', zanoInfo);
 
-            if (zanoInfo?.zano?.usd !== undefined) {
-                setState({
-                    ...state,
-                    priceData: {
-                        ...state.priceData,
-                        zano: zanoInfo
-                    }
-                });
-            }
+//             if (zanoInfo?.zano?.usd !== undefined) {
+//                 setState({
+//                     ...state,
+//                     priceData: {
+//                         ...state.priceData,
+//                         zano: zanoInfo
+//                     }
+//                 });
+//             }
 
-            // Fetch all assets
-            const assets: IAsset[] = [];
-            let iterator = 0;
-            const amountPerIteration = 100;
+//             // Fetch all assets
+//             const assets: IAsset[] = [];
+//             let iterator = 0;
+//             const amountPerIteration = 100;
 
-            while (true) {
-                const newAssets = (await fetchAssets(iterator, amountPerIteration))
-                    .filter(e => /^[A-Za-z0-9]{1,14}$/.test(e.ticker) && /^[A-Za-z0-9.,:!?\-() ]{0,400}$/.test(e?.full_name));
-                if (!newAssets.length) break;
-                assets.push(...newAssets);
-                iterator += amountPerIteration;
-            }
+//             while (true) {
+//                 const newAssets = (await fetchAssets(iterator, amountPerIteration))
+//                     .filter(e => /^[A-Za-z0-9]{1,14}$/.test(e.ticker) && /^[A-Za-z0-9.,:!?\-() ]{0,400}$/.test(e?.full_name));
+//                 if (!newAssets.length) break;
+//                 assets.push(...newAssets);
+//                 iterator += amountPerIteration;
+//             }
 
-            console.log('Got assets list', assets.length);
+//             console.log('Got assets list', assets.length);
 
-            // Fetch existing assets from the database
-            const assetsRows = await Asset.findAll();
+//             // Fetch existing assets from the database
+//             const assetsRows = await Asset.findAll();
 
-            // Update or delete existing assets
-            for (const assetRow of assetsRows) {
-                const foundAsset = assets.find(e => e.asset_id === assetRow.asset_id);
-                if (!foundAsset) {
-                    // Delete asset if not found in the external data
-                    await Asset.destroy({
-                        where: { asset_id: assetRow.asset_id }
-                    });
-                } else {
-                    // Update existing asset
-                    const {
-                        asset_id,
-                        logo,
-                        price_url,
-                        ticker,
-                        full_name,
-                        total_max_supply,
-                        current_supply,
-                        decimal_point,
-                        meta_info,
-                        price
-                    } = foundAsset;
+//             // Update or delete existing assets
+//             for (const assetRow of assetsRows) {
+//                 const foundAsset = assets.find(e => e.asset_id === assetRow.asset_id);
+//                 if (!foundAsset) {
+//                     // Delete asset if not found in the external data
+//                     await Asset.destroy({
+//                         where: { asset_id: assetRow.asset_id }
+//                     });
+//                 } else {
+//                     // Update existing asset
+//                     const {
+//                         asset_id,
+//                         logo,
+//                         price_url,
+//                         ticker,
+//                         full_name,
+//                         total_max_supply,
+//                         current_supply,
+//                         decimal_point,
+//                         meta_info,
+//                         price
+//                     } = foundAsset;
 
-                    await Asset.update({
-                        logo: logo || "",
-                        price_url: price_url || "",
-                        ticker: ticker || "",
-                        full_name: full_name || "",
-                        total_max_supply: total_max_supply?.toString() || "0",
-                        current_supply: current_supply?.toString() || "0",
-                        decimal_point: decimal_point || 0,
-                        meta_info: meta_info || "",
-                        price: price
-                    }, {
-                        where: { asset_id }
-                    });
-                }
-            }
+//                     await Asset.update({
+//                         logo: logo || "",
+//                         price_url: price_url || "",
+//                         ticker: ticker || "",
+//                         full_name: full_name || "",
+//                         total_max_supply: total_max_supply?.toString() || "0",
+//                         current_supply: current_supply?.toString() || "0",
+//                         decimal_point: decimal_point || 0,
+//                         meta_info: meta_info || "",
+//                         price: price
+//                     }, {
+//                         where: { asset_id }
+//                     });
+//                 }
+//             }
 
-            const addedAssetsIds = new Set<string>();
+//             const addedAssetsIds = new Set<string>();
 
-            // Insert new assets
-            for (const asset of assets) {
-                const foundAsset = assetsRows.find(e => e.asset_id === asset.asset_id);
+//             // Insert new assets
+//             for (const asset of assets) {
+//                 const foundAsset = assetsRows.find(e => e.asset_id === asset.asset_id);
 
-                if (!foundAsset && !addedAssetsIds.has(asset.asset_id) && asset.asset_id) {
-                    const {
-                        asset_id,
-                        logo,
-                        price_url,
-                        ticker,
-                        full_name,
-                        total_max_supply,
-                        current_supply,
-                        decimal_point,
-                        meta_info,
-                        price = 0
-                    } = asset;
+//                 if (!foundAsset && !addedAssetsIds.has(asset.asset_id) && asset.asset_id) {
+//                     const {
+//                         asset_id,
+//                         logo,
+//                         price_url,
+//                         ticker,
+//                         full_name,
+//                         total_max_supply,
+//                         current_supply,
+//                         decimal_point,
+//                         meta_info,
+//                         price = 0
+//                     } = asset;
 
-                    await Asset.create({
-                        asset_id,
-                        logo: logo || "",
-                        price_url: price_url || "",
-                        ticker,
-                        full_name,
-                        total_max_supply: total_max_supply?.toString(),
-                        current_supply: current_supply?.toString(),
-                        decimal_point,
-                        meta_info: meta_info || "",
-                        price
-                    });
+//                     await Asset.create({
+//                         asset_id,
+//                         logo: logo || "",
+//                         price_url: price_url || "",
+//                         ticker,
+//                         full_name,
+//                         total_max_supply: total_max_supply?.toString(),
+//                         current_supply: current_supply?.toString(),
+//                         decimal_point,
+//                         meta_info: meta_info || "",
+//                         price
+//                     });
 
-                    addedAssetsIds.add(asset_id);
-                }
-            }
-        } catch (error) {
-            console.log('ASSETS PARSING ERROR');
-            console.log('Error: ', error);
-        }
+//                     addedAssetsIds.add(asset_id);
+//                 }
+//             }
+//         } catch (error) {
+//             console.log('ASSETS PARSING ERROR');
+//             console.log('Error: ', error);
+//         }
 
-        // Wait for 60 seconds before the next iteration
-        await new Promise(res => setTimeout(res, 60 * 1e3));
-    }
-})();
+//         // Wait for 60 seconds before the next iteration
+//         await new Promise(res => setTimeout(res, 60 * 1e3));
+//     }
+// })();
 
 const heapChecker = setInterval(() => {
   const memoryUsage = process.memoryUsage();
