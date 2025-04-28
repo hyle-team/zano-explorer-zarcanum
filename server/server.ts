@@ -101,6 +101,12 @@ async function waitForDb() {
         "/api/find_outs_in_recent_blocks"
     ], requestsLimiter);
 
+    app.use("*", (req, res, next) => {
+        console.log(`Request path: ${req.path}`);
+        next();
+
+    });
+    
     app.get('/api/find_outs_in_recent_blocks', exceptionHandler(async (req, res) => {
         const address = req.query.address;
         const viewkey = req.query.viewkey;
