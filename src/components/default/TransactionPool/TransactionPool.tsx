@@ -30,7 +30,6 @@ function TransactionPool({
         socket.on("get_transaction_pool_info", (data: string) => {
             try {
                 const parsedData = JSON.parse(data);
-                console.log(parsedData);
                 
                 setPoolElements(parsedData);
             } catch (error) {

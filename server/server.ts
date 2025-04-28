@@ -1127,8 +1127,6 @@ async function waitForDb() {
                 data: { assetsIds: [assetData.asset_id] },
             });
 
-            console.log(assetsPricesResponse?.data?.priceRates?.[0]);
-
 
             return res.json({
                 success: true,

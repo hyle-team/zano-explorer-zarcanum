@@ -55,8 +55,6 @@ function Aliases(props: AliasesPageProps) {
         );
         setLoading(false)
 
-        console.log(result)
-
         if (newFetchId !== fetchIdRef.current) return;
 
         if (result.sucess === false) return;
