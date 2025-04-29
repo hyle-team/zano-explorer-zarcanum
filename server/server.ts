@@ -1864,7 +1864,7 @@ async function waitForDb() {
 
                 // Pause for 10 seconds
                 await pause(10000);
-                return getInfoTimer();
+                await getInfoTimer();
 
             } catch (error) {
                 log(`getInfoTimer() ERROR: ${error.message}`);
