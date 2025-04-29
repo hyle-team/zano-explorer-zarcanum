@@ -1914,8 +1914,8 @@ async function waitForDb() {
                 countAltBlocksDB: altBlockCountResult
             })
 
-            // Call the getInfoTimer function
-            getInfoTimer();
+            // // Call the getInfoTimer function
+            // getInfoTimer();
         } catch (error) {
             log(`Start ERROR: ${error.message}`);
         }
