@@ -1501,6 +1501,9 @@ async function waitForDb() {
 
 
     const syncBlocks = async () => {
+
+        console.log('Sync block called');
+        
         try {
 
             // await syncPrevBlocksTnxKeepers(lastBlock.height);
@@ -1776,6 +1779,8 @@ async function waitForDb() {
 
 
     const getInfoTimer = async () => {
+        console.log('Called git info timer');
+        
         if (!state.now_delete_offers) {
             try {
                 const response = await get_info();
