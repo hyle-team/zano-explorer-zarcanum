@@ -1859,7 +1859,7 @@ async function waitForDb() {
 
                 // Pause for 10 seconds
                 await pause(10000);
-                await getInfoTimer();
+                return getInfoTimer();
 
             } catch (error) {
                 log(`getInfoTimer() ERROR: ${error.message}`);
@@ -1914,8 +1914,8 @@ async function waitForDb() {
                 countAltBlocksDB: altBlockCountResult
             })
 
-            // // Call the getInfoTimer function
-            // getInfoTimer();
+            // Call the getInfoTimer function
+            getInfoTimer();
         } catch (error) {
             log(`Start ERROR: ${error.message}`);
         }
