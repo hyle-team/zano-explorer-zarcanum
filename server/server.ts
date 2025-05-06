@@ -1117,8 +1117,25 @@ async function waitForDb() {
 
             }
 
-            delete fiatPrices.lastUpdated;
+            const entitiesToExclude = [
+                "lastUpdated",
+                "btc", 
+                "eth", 
+                "ltc",
+                "bch", 
+                "bnb",
+                "eos", 
+                "xrp",
+                "xlm", 
+                "link",
+                "dot", 
+                "yfi", 
+            ]
 
+            for (const entity of entitiesToExclude) {
+                delete fiatPrices[entity];
+            }
+            
             return fiatPrices;
         }
 
