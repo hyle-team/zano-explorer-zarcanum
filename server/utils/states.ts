@@ -42,7 +42,12 @@ export interface State {
     serverTimeout: number;
     block_array: any[];
     pools_array: any[];
-    priceData: any;
+    priceData: {
+        [key: string]: PriceData
+    };
+    fiat_rates: {
+        [key: string]: number
+    }
     zanoBurned?: number;
 }
 
@@ -54,7 +59,8 @@ export let state: State = {
     serverTimeout: 30,
     block_array: [],
     pools_array: [],
-    priceData: {}
+    priceData: {},
+    fiat_rates: {},
 }
 
 export function setState(newState: State) { 

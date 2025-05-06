@@ -8,7 +8,7 @@ import path from "path";
 import initDB from "./database/initdb";
 import sequelize from "./database/sequelize";
 import { log, config, ZANO_ASSET_ID, parseComment, parseTrackingKey, decodeString } from "./utils/utils";
-import { blockInfo, lastBlock, setLastBlock, state, setState, setBlockInfo } from "./utils/states";
+import { blockInfo, lastBlock, setLastBlock, state, setState, setBlockInfo, PriceData } from "./utils/states";
 import { emitSocketInfo, getBlocksDetails, getMainBlockDetails, getTxPoolDetails, getVisibilityInfo } from "./utils/methods";
 import AltBlock from "./schemes/AltBlock";
 import Transaction from "./schemes/Transaction";
@@ -1101,18 +1101,56 @@ async function waitForDb() {
     )
 
     app.get('/api/price', exceptionHandler(async (req, res) => {
+
+
+        function calcFiatPrice(pricePerAssetUSD: number | undefined, ratesPerUSD: {
+            [key: string]: number | undefined;
+        }) {
+            const fiatPrices: { [key: string]: number } = {};
+
+            const entries = Object.entries(ratesPerUSD);
+
+            for (const entry of entries) {
+                const [fiatName, pricePerUsd] = entry;
+
+                fiatPrices[fiatName] = ((pricePerAssetUSD || 0) * (pricePerUsd || 0));
+
+            }
+
+            delete fiatPrices.lastUpdated;
+
+            return fiatPrices;
+        }
+
+        interface ResponsePriceData {
+            name: string;
+            usd: number | undefined;
+            usd_24h_change: number | undefined;
+            fiat_prices: {
+                [key: string]: number;
+            };
+        }
+
+        interface ResponseData {
+            success: boolean;
+            data: {
+                [key: string]: ResponsePriceData;
+            };
+        }
+
         if (req.query.asset_id) {
             if (req.query.asset_id === ZANO_ASSET_ID) {
-                if (!state.priceData?.zano?.zano?.usd) {
-                    return res.send({ success: false, data: "Price not found" });
+                if (!state.priceData?.zano?.price) {
+                    return res.send({ success: false, data: 'Price not found' });
                 }
 
                 return res.send({
                     success: true,
                     data: {
-                        name: "Zano",
-                        usd: state.priceData?.zano?.zano?.usd,
-                        usd_24h_change: state.priceData?.zano?.zano?.usd_24h_change
+                        name: 'Zano',
+                        price: state.priceData?.zano?.price,
+                        usd_24h_change: state.priceData?.zano?.usd_24h_change,
+                        fiat_prices: calcFiatPrice(state.priceData?.zano?.price, state?.fiat_rates),
                     }
                 });
             }
@@ -1133,12 +1171,15 @@ async function waitForDb() {
             });
 
 
+            const usdPrice = ((assetsPricesResponse?.data?.priceRates?.[0]?.rate || 0) * (state.priceData?.zano?.price || 0))
+
             return res.json({
                 success: true,
                 data: {
                     name: assetData.full_name,
-                    usd: ((assetsPricesResponse?.data?.priceRates?.[0]?.rate || 0) * (state.priceData?.zano?.zano?.usd || 0)),
-                    usd_24h_change: null
+                    usd: usdPrice,
+                    usd_24h_change: null,
+                    fiat_prices: calcFiatPrice(usdPrice, state?.fiat_rates),
                 }
             });
 
@@ -1146,22 +1187,37 @@ async function waitForDb() {
             // Assuming that you handle further processing of the `assetData` here...
         }
 
-        const responseData = {
+
+        const responseData: ResponseData = {
             success: true,
-            data: state.priceData.zano
+            data: {
+                zano: {
+                    name: "Zano",
+                    usd: state.priceData?.zano?.price,
+                    usd_24h_change: state.priceData?.zano?.usd_24h_change,
+                    fiat_prices: calcFiatPrice(state.priceData?.zano?.price, state?.fiat_rates),
+                }
+            }
         };
 
         switch (req.query.asset) {
             case "ethereum":
-                if (state.priceData?.ethereum?.ethereum?.usd === undefined) {
+                if (state.priceData?.ethereum?.price === undefined) {
                     responseData.data = {};
                     responseData.success = false;
                 } else {
-                    responseData.data = state.priceData.ethereum;
+                    responseData.data = {
+                        ethereum: {
+                            usd: state.priceData?.ethereum?.price,
+                            usd_24h_change: state.priceData?.ethereum?.usd_24h_change,
+                            name: "Ethereum",
+                            fiat_prices: calcFiatPrice(state.priceData?.ethereum?.price, state?.fiat_rates),
+                        }
+                    };
                 }
                 break;
             default:
-                if (state.priceData?.zano?.zano?.usd === undefined) {
+                if (state.priceData?.zano?.price === undefined) {
                     responseData.data = {};
                     responseData.success = false;
                 }
@@ -1503,7 +1559,7 @@ async function waitForDb() {
     const syncBlocks = async () => {
 
         console.log('Sync block called');
-        
+
         try {
 
             // await syncPrevBlocksTnxKeepers(lastBlock.height);
@@ -1780,7 +1836,7 @@ async function waitForDb() {
 
     const getInfoTimer = async () => {
         console.log('Called git info timer');
-        
+
         if (!state.now_delete_offers) {
             try {
                 const response = await get_info();
@@ -1940,6 +1996,82 @@ async function waitForDb() {
         await Asset.destroy({ where: {} });
     }
 
+    async function fetchPriceFromMexc(symbol: string): Promise<PriceData | null> {
+        try {
+            const [avgPriceResponse, tickerResponse] = await Promise.all([
+                axios({
+                    method: 'get',
+                    url: `${config.mexc_api_url}/api/v3/avgPrice?symbol=${symbol}USDT`,
+                }),
+                axios({
+                    method: 'get',
+                    url: `${config.mexc_api_url}/api/v3/ticker/24hr?symbol=${symbol}USDT`,
+                }),
+            ]);
+            const result: PriceData = {
+                lastUpdated: new Date().toISOString(),
+            };
+            if (avgPriceResponse.data?.price) {
+                result.price = parseFloat(avgPriceResponse.data.price);
+            }
+            if (tickerResponse.data?.priceChange) {
+                result.usd_24h_change = parseFloat(tickerResponse.data.priceChange);
+            }
+            return result;
+        } catch (error) {
+            console.error(`Error fetching ${symbol} price from MEXC:`, error);
+            return null;
+        }
+    }
+
+    // Fetch Zano price from MEXC
+    async function fetchZanoPrice() {
+        return fetchPriceFromMexc('ZANO');
+    }
+
+    // Fetch Ethereum price from MEXC
+    async function fetchEthereumPrice() {
+        return fetchPriceFromMexc('ETH');
+    }
+
+    // Fetch fiat rates from CoinGecko
+    async function fetchFiatRates() {
+        try {
+            const { data: supportedCurrencies } = await axios({
+                method: 'get',
+                url: `https://api.coingecko.com/api/v3/simple/supported_vs_currencies`,
+            });
+
+            // Validate the response is an array
+            if (!Array.isArray(supportedCurrencies)) {
+                console.error(
+                    'CoinGecko supported currencies response is not an array:',
+                    supportedCurrencies,
+                );
+                return null;
+            }
+
+            const { data: ratesData } = await axios({
+                method: 'get',
+                url: `https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=${supportedCurrencies.join(
+                    ',',
+                )}`,
+            });
+
+            if (ratesData?.usd) {
+                return {
+                    ...ratesData.usd,
+                    usd: 1, // USD to USD is always 1
+                    lastUpdated: new Date().toISOString(),
+                };
+            }
+            return null;
+        } catch (error) {
+            console.error('Error fetching fiat rates from CoinGecko:', error);
+            return null;
+        }
+    }
+
     while (true) {
         try {
             // Fetch assets from external API
@@ -1963,40 +2095,53 @@ async function waitForDb() {
                 }
             }
 
-            // Fetch Zano price info
-            const zanoInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=zano&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
 
-            await new Promise(res => setTimeout(res, 5 * 1e3));
+            const zanoPrice = await fetchZanoPrice();
 
-            // Fetch Ethereum price info
-            try {
-                const ethInfo = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd&include_24hr_change=true").then(res => res.json());
-                console.log('ETH INFO: ', ethInfo);
-                if (ethInfo?.ethereum?.usd !== undefined) {
-                    setState({
-                        ...state,
-                        priceData: {
-                            ...state.priceData,
-                            ethereum: ethInfo
-                        }
-                    });
-                }
-            } catch (error) {
-                console.log('ETH PARSING ERROR');
-                console.log('Error: ', error);
-            }
-
-            console.log('ZANO INFO: ', zanoInfo);
-
-            if (zanoInfo?.zano?.usd !== undefined) {
+            if (zanoPrice) {
                 setState({
                     ...state,
                     priceData: {
                         ...state.priceData,
-                        zano: zanoInfo
-                    }
+                        zano: zanoPrice,
+                    },
                 });
             }
+
+            // Fetch Ethereum price every 10 seconds
+            const ethPrice = await fetchEthereumPrice();
+
+            if (ethPrice) {
+                setState({
+                    ...state,
+                    priceData: {
+                        ...state.priceData,
+                        ethereum: ethPrice,
+                    },
+                });
+            }
+
+            console.log(state.priceData);
+
+
+            // Fetch fiat rates every 1h (3600 seconds)
+            if (
+                Date.now() -
+                (state?.fiat_rates?.lastUpdated
+                    ? new Date(state.fiat_rates.lastUpdated).getTime()
+                    : 0) >
+                3600 * 1000
+            ) {
+                const fiatRates = await fetchFiatRates();
+
+                if (fiatRates) {
+                    setState({
+                        ...state,
+                        fiat_rates: fiatRates,
+                    });
+                }
+            }
+
 
             // Fetch all assets
             const assets: IAsset[] = [];
