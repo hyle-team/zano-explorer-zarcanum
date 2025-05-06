@@ -1165,7 +1165,7 @@ async function waitForDb() {
                     success: true,
                     data: {
                         name: 'Zano',
-                        price: state.priceData?.zano?.price,
+                        usd: state.priceData?.zano?.price,
                         usd_24h_change: state.priceData?.zano?.usd_24h_change,
                         fiat_prices: calcFiatPrice(state.priceData?.zano?.price, state?.fiat_rates),
                     }
