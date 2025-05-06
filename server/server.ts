@@ -2242,7 +2242,7 @@ async function waitForDb() {
         }
 
         // Wait for 60 seconds before the next iteration
-        await new Promise(res => setTimeout(res, 60 * 1e3));
+        await new Promise(res => setTimeout(res, 10 * 1e3));
     }
 })();
 
