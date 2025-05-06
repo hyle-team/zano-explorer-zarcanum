@@ -22,6 +22,13 @@ export let lastBlock: ILastBlock = {
     tx_id: '0000000000000000000000000000000000000000000000000000000000000000'
 }
 
+export interface PriceData {
+    price?: number;
+    usd_24h_change?: number;
+    lastUpdated?: string;
+}
+
+
 export interface State {
     countAliasesDB?: number;
     countAltBlocksDB?: number;
