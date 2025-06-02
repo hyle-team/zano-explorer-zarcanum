@@ -1857,7 +1857,16 @@ async function waitForDb() {
         if (!state.now_delete_offers) {
             try {
                 const response = await get_info();
-                setBlockInfo(response.data.result);
+
+                const databaseHeight = await Block.max('height') || 0;
+
+                console.log('databaseHeight',  databaseHeight)
+                
+
+                setBlockInfo({
+                    ...response.data.result,
+                    height: databaseHeight
+                });
 
                 const txs = await Transaction.findAll({
                     where: {
