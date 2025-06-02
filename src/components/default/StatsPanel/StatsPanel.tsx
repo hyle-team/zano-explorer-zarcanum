@@ -32,7 +32,7 @@ function StatsPanel(props: { visibilityInfo?: VisibilityInfo | null, fetchedInfo
 
     const transactions = info ? info.height + info.tx_count : undefined;
 
-    const infoHeight = Utils.formatNumber(info?.height, 0) || "...";
+    const infoHeight = Utils.formatNumber(Math.min(info?.height || 0, info?.database_height || 0), 0) || "...";
     const posDiff = Utils.toShiftedNumber(info?.pos_difficulty, 0, 0) || "...";
     const powDiff = Utils.formatNumber(info?.pow_difficulty, 0) || "...";
     const coinsEmitted = Utils.toShiftedNumber(info?.total_coins, 12) || "...";

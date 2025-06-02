@@ -5,6 +5,7 @@ interface Info {
     total_coins: string;
     tx_count: number;
     current_network_hashrate_350: number;
+    database_height: number;
 }
 
 export default Info;

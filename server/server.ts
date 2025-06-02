@@ -1865,7 +1865,7 @@ async function waitForDb() {
 
                 setBlockInfo({
                     ...response.data.result,
-                    height: databaseHeight
+                    database_height: databaseHeight
                 });
 
                 const txs = await Transaction.findAll({

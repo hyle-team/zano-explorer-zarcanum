@@ -71,8 +71,10 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
             const pageNumber = parseInt(page, 10) || 0;
             if (pageNumber === 0) return;
             if (!info) return;
-            const { height } = info;
-            const result = await Fetch.getBlockDetails(height - items * pageNumber, items);
+            const { height, database_height } = info;
+
+            const heightToRequest = Math.min(height, database_height);
+            const result = await Fetch.getBlockDetails(heightToRequest - items * pageNumber, items);
             if (result.success === false) return;
             if (!(result instanceof Array)) return;
             setBlocks(
