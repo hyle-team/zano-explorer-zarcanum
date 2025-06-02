@@ -48,9 +48,12 @@ export async function getMainPageProps() {
 
     try {
         if (info) {
-            const { height } = info;
+            const { height, database_height } = info;
             const { itemsInPage, page } = latestBlocksInitState;
-            const response = await Fetch.getBlockDetails(height - itemsInPage * page, itemsInPage);
+
+            const heightToRequest = Math.min(height, database_height);
+
+            const response = await Fetch.getBlockDetails(heightToRequest - itemsInPage * page, itemsInPage);
 
             if (response.success !== false && response instanceof Array) {
                 latestBlocks = Utils.transformToBlocks(response, true);              
