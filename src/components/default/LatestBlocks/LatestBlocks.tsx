@@ -3,11 +3,12 @@ import Table from "@/components/default/Table/Table";
 import Block from "@/interfaces/state/Block";
 import Info from "@/interfaces/state/Info";
 import Fetch from "@/utils/methods";
-import Utils from "@/utils/utils";
+import Utils, { classes } from "@/utils/utils";
 import styles from "./LatestBlocks.module.scss";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import BigNumber from "bignumber.js";
+import InfoIcon from "@/assets/images/UI/info.svg";
 
 export const latestBlocksInitState = {
     itemsInPage: 10,
@@ -15,8 +16,9 @@ export const latestBlocksInitState = {
 }
 
 function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info | null, fetchedLatestBlocks: Block[] }) {
-
     const [info, setInfo] = useState<Info | null>(fetchedInfo);
+    const prevTxCount = useRef<number>(0);
+    const [headerStatus, setHeaderStatus] = useState<JSX.Element | null>(null);
 
     useEffect(() => {
         async function fetchInfo() {
@@ -63,31 +65,53 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
 
         onGoToBlockEnter();
     }, [goToBlock, info, itemsOnPage]);
-    
+
 
     useEffect(() => {
         async function fetchBlocks() {
-            const items = parseInt(itemsOnPage, 10) || 0;
-            const pageNumber = parseInt(page, 10) || 0;
-            if (pageNumber === 0) return;
-            if (!info) return;
-            const { height, database_height } = info;
+            try {
+                setHeaderStatus(<>Scanning new transactions...</>);
 
-            const heightToRequest = Math.min(height, database_height);
-            const result = await Fetch.getBlockDetails(heightToRequest - items * pageNumber, items);
-            if (result.success === false) return;
-            if (!(result instanceof Array)) return;
-            setBlocks(
-                Utils.transformToBlocks(result, true)
-            );
+                const items = parseInt(itemsOnPage, 10) || 0;
+                const pageNumber = parseInt(page, 10) || 0;
+                if (pageNumber === 0 || !info) return;
+                const { height, database_height } = info;
+
+                const heightToRequest = Math.min(height, database_height);
+                const result = await Fetch.getBlockDetails(heightToRequest - items * pageNumber, items);
+                if (result.success === false || !(result instanceof Array)) return;
+
+                const transformed = Utils.transformToBlocks(result, true);
+
+                const currentTxCount = transformed.reduce((acc, block) => acc + (block.transactions || 0), 0);
+                const prevCount = prevTxCount.current;
+                prevTxCount.current = currentTxCount;
+
+                setBlocks(transformed);
+
+
+                if (currentTxCount > prevCount) {
+                    const diff = currentTxCount - prevCount;
+                    setHeaderStatus(
+                        <>
+                            <span>{diff} more transaction{diff > 1 ? "s" : ""}</span> has come in
+                        </>
+                    );
+                } else {
+                    setHeaderStatus(null);
+                }
+            } catch (error) {
+                console.error(error);
+                setHeaderStatus(null);
+            }
         }
-        
+
         fetchBlocks();
-        const id = setInterval(fetchBlocks, 20 * 1e3);
+        const id = setInterval(fetchBlocks, 20 * 1000);
         return () => clearInterval(id);
     }, [info, itemsOnPage, page]);
 
-    const tableHeaders = [ "HEIGHT", "TIMESTAMP (UTC)", "AGE", "SIZE", "TRANSACTIONS", "HASH" ];
+    const tableHeaders = ["HEIGHT", "TIMESTAMP (UTC)", "AGE", "SIZE", "TRANSACTIONS", "HASH"];
 
     const tableElements = blocks.map(e => {
         const hash = e.hash;
@@ -106,12 +130,16 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
     });
 
     return (
-        <div className={styles["blockchain__latest_blocks"] + " " + styles["custom-scroll"]}>
-            <h3>Latest Blocks</h3>
-            <Table 
+        <div className={classes(styles["blockchain__latest_blocks"], styles["custom-scroll"])}>
+            <h3 className={styles["blockchain__latest_blocks__title"]}>
+                Latest Blocks <span className={styles["status__badge"]}><InfoIcon /> Last updated 26 mins ago</span>
+            </h3>
+
+            <Table
+                headerStatus={headerStatus}
                 pagination
-                headers={tableHeaders} 
-                elements={tableElements} 
+                headers={tableHeaders}
+                elements={tableElements}
                 itemsOnPage={itemsOnPage}
                 setItemsOnPage={setItemsOnPage}
                 page={page}
@@ -119,7 +147,7 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
                 goToBlock={goToBlock}
                 setGoToBlock={setGoToBlock}
                 pagesTotal={pagesAmount}
-                // goToBlockEnter={onGoToBlockEnter}
+            // goToBlockEnter={onGoToBlockEnter}
             />
         </div>
     )

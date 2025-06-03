@@ -7,4 +7,6 @@ interface Block {
     hash: string;
 }
 
+export type ExplorerStatusType = "online" | "offline" | "syncing";
+
 export default Block;

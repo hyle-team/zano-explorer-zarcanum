@@ -8,9 +8,10 @@ import { useEffect, useState } from "react";
 import Fetch from "@/utils/methods";
 import VisibilityInfo from "@/interfaces/state/VisibilityInfo";
 import Info from "@/interfaces/state/Info";
-import Block from "@/interfaces/state/Block";
+import Block, { ExplorerStatusType } from "@/interfaces/state/Block";
 import { GetServerSideProps } from "next";
 import { getMainPageProps } from "@/utils/ssr";
+import { classes } from "@/utils/utils";
 export interface MainPageProps {
     visibilityInfo: VisibilityInfo | null;
     isOnline: boolean;
@@ -23,7 +24,7 @@ function MainPage({ visibilityInfo: fetchedVisibilityInfo, isOnline: fetchedIsOn
     const [burgerOpened, setBurgerOpened] = useState(false);
 
     const [visibilityInfo, setVisibilityInfo] = useState<VisibilityInfo | null>(fetchedVisibilityInfo);
-    const [isOnline, setIsOnline] = useState(fetchedIsOnline);
+    const [explorerStatus, setExplorerStatus] = useState<ExplorerStatusType>(fetchedIsOnline ? "online" : "offline");
 
     useEffect(() => {
         async function fetchVisibilityInfo() {
@@ -33,16 +34,18 @@ function MainPage({ visibilityInfo: fetchedVisibilityInfo, isOnline: fetchedIsOn
         }
 
         async function checkOnline() {
+
             try {
+                setExplorerStatus("syncing");
                 const result = await Fetch.getInfo();
                 if (result.status === "OK") {
-                    setIsOnline(true);
+                    setExplorerStatus("online");
                 } else {
-                    setIsOnline(false);
+                    setExplorerStatus("offline");
                 }
             } catch (error) {
                 console.log(error);
-                setIsOnline(false);
+                setExplorerStatus("offline");
             }
         }
 
@@ -53,19 +56,23 @@ function MainPage({ visibilityInfo: fetchedVisibilityInfo, isOnline: fetchedIsOn
 
     return (
         <div className={styles["blockchain"]}>
-            <Header 
-                page="Blockchain" 
-                burgerOpened={burgerOpened} 
-                setBurgerOpened={setBurgerOpened} 
+            <Header
+                page="Blockchain"
+                burgerOpened={burgerOpened}
+                setBurgerOpened={setBurgerOpened}
             />
-            <InfoTopPanel 
-                burgerOpened={burgerOpened} 
-                title="Blockchain" 
+            <InfoTopPanel
+                burgerOpened={burgerOpened}
+                title="Blockchain"
                 content={
                     <div className={styles["info__top__daemon"]}>
-                        <p>Daemon state: {isOnline ? 'Online' : 'Offline'}</p>
-                        <p>Default network fee: 0,01</p>
-                        <p>Minimum network fee: 0,01</p>
+                        <p className={styles["info__top__daemon_item"]}>Explorer state:
+                            <span className={classes(styles["explorer__status"], styles[explorerStatus])}>
+                                <span className={styles["status__item"]} /> {explorerStatus}
+                            </span>
+                        </p>
+                        <p className={styles["info__top__daemon_item"]}>Default network fee: 0,01</p>
+                        <p className={styles["info__top__daemon_item"]}>Minimum network fee: 0,01</p>
                     </div>
                 }
             />
