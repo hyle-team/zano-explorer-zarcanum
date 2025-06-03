@@ -1,7 +1,8 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction } from "react";
 
 interface TableProps {
     headers: string[];
+    headerStatus?: ReactNode | null;
     elements: React.ReactNode[][];
     pagination?: boolean;
     hidePaginationBlock?: boolean;
