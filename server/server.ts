@@ -1119,23 +1119,23 @@ async function waitForDb() {
 
             const entitiesToExclude = [
                 "lastUpdated",
-                "btc", 
-                "eth", 
+                "btc",
+                "eth",
                 "ltc",
-                "bch", 
+                "bch",
                 "bnb",
-                "eos", 
+                "eos",
                 "xrp",
-                "xlm", 
+                "xlm",
                 "link",
-                "dot", 
-                "yfi", 
+                "dot",
+                "yfi",
             ]
 
             for (const entity of entitiesToExclude) {
                 delete fiatPrices[entity];
             }
-            
+
             return fiatPrices;
         }
 
@@ -1311,6 +1311,16 @@ async function waitForDb() {
         }
 
     }))
+
+    app.get('/api/explorer_status', exceptionHandler(async (req, res) => {
+
+        res.json({
+            success: true,
+            data: {
+                explorer_status: state.explorer_status,
+            }
+        });
+    }));
 
     app.get('/api/get_matrix_addresses', exceptionHandler(async (req, res) => {
         const { page, items } = req.query;
@@ -1583,6 +1593,10 @@ async function waitForDb() {
 
             let count = (blockInfo?.height || 0) - lastBlock.height + 1;
             if (count > 100) {
+                setState({
+                    ...state,
+                    explorer_status: 'syncing'
+                });
                 count = 100;
             }
             if (count < 0) {
@@ -1854,14 +1868,32 @@ async function waitForDb() {
     const getInfoTimer = async () => {
         console.log('Called git info timer');
 
+        // chech explorer status
+
+        const infoResponse = await get_info().then(r => r.data).catch(_ => null);
+
+        if (!infoResponse || !infoResponse?.result?.height) {
+            setState({
+                ...state,
+                explorer_status: "offline"
+            })
+        } else {   
+            setState({
+                ...state,
+                explorer_status: "online"
+            });
+        }
+
         if (!state.now_delete_offers) {
             try {
                 const response = await get_info();
 
                 const databaseHeight = await Block.max('height') || 0;
 
-                console.log('databaseHeight',  databaseHeight)
+                console.log('databaseHeight', databaseHeight);
+                console.log('blockchain height', response.data?.result?.height);
                 
+
 
                 setBlockInfo({
                     ...response.data.result,

@@ -15,7 +15,7 @@ export async function getMainPageProps() {
     let visibilityInfo: VisibilityInfo | null = null;
     let info: Info | null = null;
     let latestBlocks: Block[] = [];
-    let isOnline: boolean = false;
+    let explorerStatus: "online" | "offline" | "syncing" = "offline";
     let txPoolElements: PoolElement[] = [];
     
     try {
@@ -36,14 +36,23 @@ export async function getMainPageProps() {
 
         if (response.success === false) {
             info = null;
-            isOnline = false;
         } else {
             info = response;
-            isOnline = response.status === "OK";
         }
     } catch {
-        isOnline = false;
         info = null;
+    }
+
+
+    try {
+        const status = await Fetch.getExplorerStatus();
+
+
+        explorerStatus = status?.data?.explorer_status || "offline";
+
+    } catch (error) {
+        console.error("Error fetching explorer status:", error);
+        explorerStatus = "offline";
     }
 
     try {
@@ -78,7 +87,7 @@ export async function getMainPageProps() {
     return {
         props: {
             visibilityInfo,
-            isOnline,
+            explorerStatus,
             info,
             latestBlocks,
             txPoolElements,

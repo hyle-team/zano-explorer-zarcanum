@@ -19,6 +19,10 @@ class Fetch {
         return await fetch(this.proxyPath + "/get_info").then(res => res.json());
     }
 
+    static async getExplorerStatus() {
+        return await fetch(this.proxyPath + "/explorer_status").then(res => res.json());
+    }
+
     static async getBlockDetails(page: number, blocksAmount: number) {
         return await fetch(this.proxyPath + `/get_blocks_details/${page}/${blocksAmount}`).then(res => res.json());
     }

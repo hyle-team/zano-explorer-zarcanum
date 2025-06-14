@@ -18,13 +18,19 @@ export interface MainPageProps {
     info: Info | null;
     latestBlocks: Block[];
     txPoolElements: PoolElement[]
+    explorerStatus: ExplorerStatusType;
 }
 
-function MainPage({ visibilityInfo: fetchedVisibilityInfo, isOnline: fetchedIsOnline, info, latestBlocks, txPoolElements }: MainPageProps) {
+function MainPage({ visibilityInfo: fetchedVisibilityInfo, explorerStatus: ssrExplorerStatus, info, latestBlocks, txPoolElements }: MainPageProps) {
+
+
+    console.log('ssrExplorerStatus', ssrExplorerStatus);
+    
+
     const [burgerOpened, setBurgerOpened] = useState(false);
 
     const [visibilityInfo, setVisibilityInfo] = useState<VisibilityInfo | null>(fetchedVisibilityInfo);
-    const [explorerStatus, setExplorerStatus] = useState<ExplorerStatusType>(fetchedIsOnline ? "online" : "offline");
+    const [explorerStatus, setExplorerStatus] = useState<ExplorerStatusType>(ssrExplorerStatus);
 
     useEffect(() => {
         async function fetchVisibilityInfo() {
@@ -34,18 +40,17 @@ function MainPage({ visibilityInfo: fetchedVisibilityInfo, isOnline: fetchedIsOn
         }
 
         async function checkOnline() {
-
             try {
-                setExplorerStatus("syncing");
-                const result = await Fetch.getInfo();
-                if (result.status === "OK") {
-                    setExplorerStatus("online");
-                } else {
+                const explorerStatus = await Fetch.getExplorerStatus();
+
+                if (explorerStatus.success === false) {
                     setExplorerStatus("offline");
+                } else {
+                    setExplorerStatus(explorerStatus.data.explorer_status);
                 }
+
             } catch (error) {
-                console.log(error);
-                setExplorerStatus("offline");
+                console.error("Error checking online status:", error);
             }
         }
 

@@ -19,6 +19,7 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
     const [info, setInfo] = useState<Info | null>(fetchedInfo);
     const prevTxCount = useRef<number>(0);
     const [headerStatus, setHeaderStatus] = useState<JSX.Element | null>(null);
+    const [lastUpdated, setLastUpdated] = useState<number | null>(null);
 
     useEffect(() => {
         async function fetchInfo() {
@@ -71,6 +72,7 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
         async function fetchBlocks() {
             try {
                 setHeaderStatus(<>Scanning new transactions...</>);
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
                 const items = parseInt(itemsOnPage, 10) || 0;
                 const pageNumber = parseInt(page, 10) || 0;
@@ -100,6 +102,8 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
                 } else {
                     setHeaderStatus(null);
                 }
+
+                setLastUpdated(+Date.now());
             } catch (error) {
                 console.error(error);
                 setHeaderStatus(null);
@@ -129,10 +133,15 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
         ]
     });
 
+    const lastUpdatedText = lastUpdated ? Utils.timeElapsedString(lastUpdated) : undefined;
+
     return (
         <div className={classes(styles["blockchain__latest_blocks"], styles["custom-scroll"])}>
             <h3 className={styles["blockchain__latest_blocks__title"]}>
-                Latest Blocks <span className={styles["status__badge"]}><InfoIcon /> Last updated 26 mins ago</span>
+                Latest Blocks 
+                {lastUpdated && (
+                    <span className={styles["status__badge"]}><InfoIcon /> Last updated {lastUpdatedText}</span>
+                )}
             </h3>
 
             <Table

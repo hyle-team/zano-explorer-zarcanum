@@ -49,6 +49,7 @@ export interface State {
         [key: string]: number
     }
     zanoBurned?: number;
+    explorer_status: "online" | "offline" | "syncing";
 }
 
 export let state: State = {
@@ -61,6 +62,7 @@ export let state: State = {
     pools_array: [],
     priceData: {},
     fiat_rates: {},
+    explorer_status: "offline",
 }
 
 export function setState(newState: State) { 
