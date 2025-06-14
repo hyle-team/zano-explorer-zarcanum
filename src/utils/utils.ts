@@ -98,7 +98,7 @@ class Utils {
 
         if (elapsedSeconds < 60) {
 
-            if (includeSeconds && elapsedSeconds > 0) {
+            if (includeSeconds && elapsedSeconds > 1) {
                 const seconds: number = Math.floor(elapsedSeconds);
                 return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
             } else {
