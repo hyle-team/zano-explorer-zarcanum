@@ -133,7 +133,19 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
         ]
     });
 
-    const lastUpdatedText = lastUpdated ? Utils.timeElapsedString(lastUpdated) : undefined;
+    const [lastUpdatedText, setLastUpdatedText] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        function formatLastUpdated() {
+            setLastUpdatedText(lastUpdated ? Utils.timeElapsedString(lastUpdated / 1000, true) : undefined);
+        }
+
+        formatLastUpdated();
+        const interval = setInterval(formatLastUpdated, 1000);
+        return () => clearInterval(interval);
+
+    }, [lastUpdated]);
+
 
     return (
         <div className={classes(styles["blockchain__latest_blocks"], styles["custom-scroll"])}>

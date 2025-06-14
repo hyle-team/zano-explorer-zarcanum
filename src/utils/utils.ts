@@ -92,12 +92,18 @@ class Utils {
         } as Block));
     }
 
-    static timeElapsedString(timestamp: number): string {
+    static timeElapsedString(timestamp: number, includeSeconds: boolean = false): string {
         const currentTimestamp: number = Date.now() / 1000;
         const elapsedSeconds: number = currentTimestamp - timestamp;
 
         if (elapsedSeconds < 60) {
-            return "just now";
+
+            if (includeSeconds && elapsedSeconds > 0) {
+                const seconds: number = Math.floor(elapsedSeconds);
+                return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
+            } else {
+                return "just now";
+            }
         } else if (elapsedSeconds < 3600) {
             const minutes: number = Math.floor(elapsedSeconds / 60);
             return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
