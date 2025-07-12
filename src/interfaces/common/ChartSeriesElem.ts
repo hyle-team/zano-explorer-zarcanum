@@ -1,7 +1,7 @@
 interface ChartSeriesElem {
-    x: number;
-    y: number;
-    label: string;
+	x: number;
+	y: number;
+	label: string;
 }
 
 export default ChartSeriesElem;

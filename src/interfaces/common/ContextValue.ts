@@ -1,17 +1,17 @@
-import { Dispatch } from "react";
-import NetMode from "./NetMode";
+import { Dispatch } from 'react';
+import NetMode from './NetMode';
 
 interface ContextState {
-    netMode: NetMode;
+	netMode: NetMode;
 }
 
 type ContextAction = {
-    type: string;
+	type: string;
 };
 
 interface ContextValue {
-    state: ContextState;
-    dispatch: Dispatch<ContextAction>;
+	state: ContextState;
+	dispatch: Dispatch<ContextAction>;
 }
 
 export default ContextValue;
