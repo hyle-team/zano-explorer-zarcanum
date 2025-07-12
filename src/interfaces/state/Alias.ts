@@ -1,7 +1,7 @@
 interface Alias {
-    alias: string;
-    address: string;
-    hasMatrixConnection: boolean;
+	alias: string;
+	address: string;
+	hasMatrixConnection: boolean;
 }
 
 export default Alias;

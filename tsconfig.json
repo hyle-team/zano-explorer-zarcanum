@@ -1,40 +1,30 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "noEmit": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "isolatedModules": true,
-    "baseUrl": "./",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "zano_ui": ["submodules/zano_ui/src"]
-    }
-  },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "src/setupProxy.js"
-  ],
-  "ts-node": {
-    "esm": true
-  }
+	"compilerOptions": {
+		"target": "es5",
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"noFallthroughCasesInSwitch": true,
+		"module": "esnext",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"noEmit": true,
+		"jsx": "preserve",
+		"incremental": true,
+		"isolatedModules": true,
+		"baseUrl": "./",
+		"paths": {
+			"@/*": ["src/*"],
+			"zano_ui": ["submodules/zano_ui/src"]
+		}
+	},
+	"include": ["src", "server", "next-env.d.ts", "next.config.js"],
+	"exclude": ["src/setupProxy.js"],
+	"ts-node": {
+		"esm": true
+	}
 }

@@ -1,3 +1,3 @@
-type NetMode = "TEST" | "MAIN";
+type NetMode = 'TEST' | 'MAIN';
 
 export default NetMode;
