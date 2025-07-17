@@ -87,7 +87,7 @@ class Utils {
             type: e.type === '0' ? "PoS" : "PoW",
             timestamp: +new Date(parseInt(e.timestamp, 10)),
             size: e.total_txs_size,
-            transactions: e.tr_count,
+            transactions: typeof e.tr_count === 'number' ? e.tr_count : parseInt(e.tr_count || "0", 10),
             hash: !hashField ? e.tx_id : e.hash
         } as Block));
     }

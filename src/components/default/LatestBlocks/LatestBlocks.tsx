@@ -85,12 +85,15 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
 
                 const transformed = Utils.transformToBlocks(result, true);
 
-                const currentTxCount = transformed.reduce((acc, block) => acc + (block.transactions || 0), 0);
+                const currentTxCount = transformed.reduce((acc, block) => {
+                    const txs = typeof block.transactions === 'number' ? block.transactions : 0;
+                    return acc + txs;
+                }, 0);
+
                 const prevCount = prevTxCount.current;
                 prevTxCount.current = currentTxCount;
 
                 setBlocks(transformed);
-
 
                 if (currentTxCount > prevCount) {
                     const diff = currentTxCount - prevCount;
@@ -150,7 +153,7 @@ function LatestBlocks({ fetchedInfo, fetchedLatestBlocks }: { fetchedInfo: Info 
     return (
         <div className={classes(styles["blockchain__latest_blocks"], styles["custom-scroll"])}>
             <h3 className={styles["blockchain__latest_blocks__title"]}>
-                Latest Blocks 
+                Latest Blocks
                 {lastUpdated && (
                     <span className={styles["status__badge"]}><InfoIcon /> Last updated {lastUpdatedText}</span>
                 )}
