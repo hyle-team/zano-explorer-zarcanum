@@ -1141,6 +1141,7 @@ async function waitForDb() {
 
         interface ResponsePriceData {
             name: string;
+            zano_price?: number;
             usd: number | undefined;
             usd_24h_change: number | undefined;
             fiat_prices: {
@@ -1166,6 +1167,7 @@ async function waitForDb() {
                     data: {
                         name: 'Zano',
                         usd: state.priceData?.zano?.price,
+                        zano_price: state.priceData?.zano?.price,
                         usd_24h_change: state.priceData?.zano?.usd_24h_change,
                         fiat_prices: calcFiatPrice(state.priceData?.zano?.price, state?.fiat_rates),
                     }
@@ -1195,6 +1197,7 @@ async function waitForDb() {
                 data: {
                     name: assetData.full_name,
                     usd: usdPrice,
+                    zano_price: (usdPrice / (state.priceData?.zano?.price || 1)),
                     usd_24h_change: null,
                     fiat_prices: calcFiatPrice(usdPrice, state?.fiat_rates),
                 }
@@ -1211,6 +1214,7 @@ async function waitForDb() {
                 zano: {
                     name: "Zano",
                     usd: state.priceData?.zano?.price,
+                    zano_price: state.priceData?.zano?.price,
                     usd_24h_change: state.priceData?.zano?.usd_24h_change,
                     fiat_prices: calcFiatPrice(state.priceData?.zano?.price, state?.fiat_rates),
                 }
@@ -1226,6 +1230,7 @@ async function waitForDb() {
                     responseData.data = {
                         ethereum: {
                             usd: state.priceData?.ethereum?.price,
+                            zano_price: state.priceData?.ethereum?.price / (state.priceData?.zano?.price || 1),
                             usd_24h_change: state.priceData?.ethereum?.usd_24h_change,
                             name: "Ethereum",
                             fiat_prices: calcFiatPrice(state.priceData?.ethereum?.price, state?.fiat_rates),
