@@ -25,7 +25,7 @@ import BigNumber from "bignumber.js";
 import next from "next";
 import { rateLimit } from 'express-rate-limit';
 import bodyParser from 'body-parser';
-import { backfill, syncLatest } from "./services/zanoPrice.service";
+import { syncLatest } from "./services/zanoPrice.service";
 import ZanoPrice from "./schemes/ZanoPrice";
 import cron from "node-cron";
 
@@ -264,32 +264,39 @@ async function waitForDb() {
         })
     );
 
-    app.get("/api/get_historical_zano_price", exceptionHandler(async (req, res) => {
-        let whereClause = {};
+    app.get(
+        "/api/get_historical_zano_price",
+        exceptionHandler(async (req, res) => {
+            let whereClause: any = {};
 
-        if (req.query.from || req.query.to) {
-            const from = req.query.from
-                ? (isNaN(Number(req.query.from)) ? Date.parse(String(req.query.from)) : Number(req.query.from))
-                : 0;
+            if (req.query.from || req.query.to) {
+                const from = req.query.from
+                    ? isNaN(Number(req.query.from))
+                        ? Date.parse(String(req.query.from))
+                        : Number(req.query.from)
+                    : 0;
 
-            const to = req.query.to
-                ? (isNaN(Number(req.query.to)) ? Date.parse(String(req.query.to)) : Number(req.query.to))
-                : Date.now();
+                const to = req.query.to
+                    ? isNaN(Number(req.query.to))
+                        ? Date.parse(String(req.query.to))
+                        : Number(req.query.to)
+                    : Date.now();
 
-            whereClause = {
-                ts_utc: {
-                    [Op.between]: [new Date(from), new Date(to)]
-                }
-            };
-        }
+                whereClause = {
+                    ts_utc: {
+                        [Op.between]: [Number(from), Number(to)],
+                    },
+                };
+            }
 
-        const prices = await ZanoPrice.findAll({
-            where: whereClause,
-            order: [["ts_utc", "ASC"]]
-        });
+            const prices = await ZanoPrice.findAll({
+                where: whereClause,
+                order: [["ts_utc", "ASC"]],
+            });
 
-        res.json(prices);
-    }));
+            res.json(prices);
+        })
+    );
 
     const getWhitelistedAssets = async (offset, count, searchText) => {
         // Step 1: Fetch assets from external API

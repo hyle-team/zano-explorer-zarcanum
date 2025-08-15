@@ -1,50 +1,55 @@
-import { DataTypes, Model, Optional } from "sequelize";
+import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/sequelize";
 
-interface ZanoPriceAttributes {
-  ts_utc: Date;
-  price_close: string;
-  src?: string;
-  raw: object;
-  createdAt?: Date;
-  updatedAt?: Date;
+class ZanoPrice extends Model {
+  declare readonly id: number;
+  declare ts_utc: number;
+  declare price_close: string;
+  declare src: string;
+  declare raw: object;
+
+  declare readonly createdAt: Date;
+  declare readonly updatedAt: Date;
 }
 
-type ZanoPriceCreation = Optional<ZanoPriceAttributes, "src" | "createdAt" | "updatedAt">;
-
-class ZanoPrice extends Model<ZanoPriceAttributes, ZanoPriceCreation>
-  implements ZanoPriceAttributes {
-  public ts_utc!: Date;
-  public price_close!: string;
-  public src!: string;
-  public raw!: object;
-}
+export type IZanoPrice = Omit<
+  ZanoPrice,
+  keyof Model | "createdAt" | "updatedAt" | "id"
+>;
 
 ZanoPrice.init(
   {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+
     ts_utc: {
-      type: DataTypes.DATE,
-      primaryKey: true,
-      allowNull: false
-    },
-    price_close: {
-      type: DataTypes.DECIMAL(20, 10),
-      allowNull: false
-    },
-    src: {
-      type: DataTypes.STRING,
+      type: DataTypes.BIGINT,
       allowNull: false,
-      defaultValue: "mexc"
+      unique: true,
+      get() {
+        const v = this.getDataValue("ts_utc") as unknown;
+        return v == null ? null : Number(v);
+      },
+      set(v: number | string | Date) {
+        if (v instanceof Date) {
+          this.setDataValue("ts_utc", v.getTime());
+        } else {
+          this.setDataValue("ts_utc", Number(v));
+        }
+      },
     },
-    raw: {
-      type: DataTypes.JSONB,
-      allowNull: false
-    }
+
+    price_close: { type: DataTypes.DECIMAL(20, 10), allowNull: false },
+    src: { type: DataTypes.STRING, allowNull: false, defaultValue: "mexc" },
+    raw: { type: DataTypes.JSONB, allowNull: false },
   },
   {
     sequelize,
-    tableName: "zano_price_4h",
-    timestamps: true
+    modelName: "zano_price_4h",
+    timestamps: true,
+    indexes: [
+      { fields: ["ts_utc"], unique: true },
+      { fields: ["src"] },
+    ],
   }
 );
 
