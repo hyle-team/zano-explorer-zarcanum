@@ -25,13 +25,10 @@ import BigNumber from "bignumber.js";
 import next from "next";
 import { rateLimit } from 'express-rate-limit';
 import bodyParser from 'body-parser';
+import { syncLatest } from "./services/zanoPrice.service";
+import ZanoPrice from "./schemes/ZanoPrice";
+import cron from "node-cron";
 
-import { createWriteStream } from 'fs';
-import { getHeapSnapshot } from 'v8';
-import { join } from 'path';
-
-
-import fs from "fs";
 // @ts-ignore
 const __dirname = import.meta.dirname;
 const dev = process.env.NODE_ENV !== 'production';
@@ -71,6 +68,7 @@ async function waitForDb() {
 (async () => {
 
     await waitForDb();
+    await syncLatest();
 
     io.engine.on('initial_headers', (headers, req) => {
         headers['Access-Control-Allow-Origin'] = config.frontend_api
@@ -263,6 +261,40 @@ async function waitForDb() {
 
                 return res.send(assets);
             }
+        })
+    );
+
+    app.get(
+        "/api/get_historical_zano_price",
+        exceptionHandler(async (req, res) => {
+            let whereClause: any = {};
+
+            if (req.query.from || req.query.to) {
+                const from = req.query.from
+                    ? isNaN(Number(req.query.from))
+                        ? Date.parse(String(req.query.from))
+                        : Number(req.query.from)
+                    : 0;
+
+                const to = req.query.to
+                    ? isNaN(Number(req.query.to))
+                        ? Date.parse(String(req.query.to))
+                        : Number(req.query.to)
+                    : Date.now();
+
+                whereClause = {
+                    ts_utc: {
+                        [Op.between]: [Number(from), Number(to)],
+                    },
+                };
+            }
+
+            const prices = await ZanoPrice.findAll({
+                where: whereClause,
+                order: [["ts_utc", "ASC"]],
+            });
+
+            res.json(prices);
         })
     );
 
@@ -1882,7 +1914,7 @@ async function waitForDb() {
                 ...state,
                 explorer_status: "offline"
             })
-        } else {   
+        } else {
             setState({
                 ...state,
                 explorer_status: "online"
@@ -1897,7 +1929,7 @@ async function waitForDb() {
 
                 console.log('databaseHeight', databaseHeight);
                 console.log('blockchain height', response.data?.result?.height);
-                
+
 
 
                 setBlockInfo({
@@ -2047,6 +2079,11 @@ async function waitForDb() {
 
     start();
 })();
+
+cron.schedule("0 */4 * * *", async () => {
+    console.log("[CRON] Syncing latest Zano price...");
+    await syncLatest();
+}, { timezone: "UTC" });
 
 
 (async () => {
@@ -2308,40 +2345,3 @@ async function waitForDb() {
         await new Promise(res => setTimeout(res, 10 * 1e3));
     }
 })();
-
-const heapChecker = setInterval(() => {
-    const memoryUsage = process.memoryUsage();
-    console.log(`[Memory Log] heapUsed: ${(memoryUsage.heapUsed / 1024 / 1024).toFixed(2)} MB`);
-
-    // if (memoryUsage.heapUsed > 1 * 1024 * 1024 * 1024) {
-    //     clearInterval(heapChecker);
-    //     console.log('[HeapDump] Starting snapshot...');
-
-    //     const filename = join('/tmp', `heap-${Date.now()}.heapsnapshot`);
-    //     const snapshotStream = getHeapSnapshot();
-    //     const fileStream = createWriteStream(filename);
-
-    //     snapshotStream.on('data', (chunk) => {
-    //         console.log(`[HeapDump] Snapshot chunk: ${chunk.length} bytes`);
-    //     });
-
-    //     snapshotStream.on('end', () => {
-    //         console.log('[HeapDump] Snapshot stream ended.');
-    //     });
-
-    //     snapshotStream.on('error', (err) => {
-    //         console.error('[HeapDump] Snapshot stream error:', err);
-    //     });
-
-    //     fileStream.on('finish', () => {
-    //         console.log(`[HeapDump] Successfully written to ${filename}`);
-    //     });
-
-    //     fileStream.on('error', (err) => {
-    //         console.error('[HeapDump] File write error:', err);
-    //     });
-
-    //     snapshotStream.pipe(fileStream);
-
-    // }
-}, 30000);

@@ -14,7 +14,7 @@ import CrossImg from "@/assets/images/UI/cross.svg";
 import Button from "@/components/UI/Button/Button";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
-import { getStats, getTransaction, StatsPageProps, TransactionPageProps } from "@/utils/ssr";
+import { getTransaction, TransactionPageProps } from "@/utils/ssr";
 
 interface Block {
     hash: string;
@@ -26,7 +26,7 @@ function Transaction({
     visibilityInfo,
     info,
     transactionsData
-} : TransactionPageProps) {
+}: TransactionPageProps) {
 
     const [burgerOpened, setBurgerOpened] = useState(false);
 
@@ -43,7 +43,7 @@ function Transaction({
     const hash = Array.isArray(hashQuery) ? hashQuery[0] : hashQuery;
 
 
-    
+
     const fetchTransaction = Utils.fetchTransaction;
 
     useEffect(() => {
@@ -76,7 +76,7 @@ function Transaction({
         if (result.tx_id && typeof result.tx_id === "string") {
             router.push("/transaction/" + result.tx_id);
             setPopupState(false);
-        } 
+        }
     }
 
     const insRows = transactionInfo ? (
@@ -85,18 +85,18 @@ function Transaction({
             e.keyimage,
             e.globalIndexes.length,
             e.globalIndexes.length > 1 ?
-            (
-                <Link href="/" onClick={event => showIndexesClick(event, e)}>Show all...</Link>
-            )
-            : 
-            (
-                <Link
-                    href="/" 
-                    onClick={event => onIndexClick(event, e.amount, e.globalIndexes[0])}
-                >
-                    {e.globalIndexes[0] ?? ""}
-                </Link>
-            )
+                (
+                    <Link href="/" onClick={event => showIndexesClick(event, e)}>Show all...</Link>
+                )
+                :
+                (
+                    <Link
+                        href="/"
+                        onClick={event => onIndexClick(event, e.amount, e.globalIndexes[0])}
+                    >
+                        {e.globalIndexes[0] ?? ""}
+                    </Link>
+                )
         ])
     ) : [];
 
@@ -120,20 +120,20 @@ function Transaction({
                     Input ring set ({popupIndexes.length})
                 </h3>
                 <div>
-                    {popupIndexes.map(e => 
-                        (
-                            <Link
-                                href="/" 
-                                key={e}
-                                onClick={event => onIndexClick(event, amount, e)}
-                            >
-                                {e}
-                            </Link>
-                        )
+                    {popupIndexes.map(e =>
+                    (
+                        <Link
+                            href="/"
+                            key={e}
+                            onClick={event => onIndexClick(event, amount, e)}
+                        >
+                            {e}
+                        </Link>
+                    )
                     )}
                 </div>
-                <Button 
-                    wrapper 
+                <Button
+                    wrapper
                     className={styles["popup__cross"]}
                     onClick={close}
                 >
@@ -145,108 +145,120 @@ function Transaction({
 
     return (
         <div className={styles["transaction"]}>
-            <Header 
+            <Header
                 burgerOpened={burgerOpened}
                 setBurgerOpened={setBurgerOpened}
                 page="Blockchain"
             />
-            <InfoTopPanel 
-                burgerOpened={burgerOpened} 
+            <InfoTopPanel
+                burgerOpened={burgerOpened}
                 title=""
                 back
                 className={styles["block__info__top"]}
             />
             <StatsPanel noStats={true} visibilityInfo={visibilityInfo} fetchedInfo={info} />
-            <div className={styles["transaction__info"]}>
-                <h2>Transaction</h2>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td>Hash</td>
-                            <td>{transactionInfo?.hash || "-"}</td>
-                        </tr>
-                        <tr>
-                            <td>Amount</td>
-                            <td>{transactionInfo?.amount || "-"}</td>
-                        </tr>
-                        <tr>
-                            <td>Fee</td>
-                            <td>{transactionInfo?.fee || "-"}</td>
-                        </tr>
-                        <tr>
-                            <td>Size</td>
-                            <td>{(transactionInfo?.size || "0") + " bytes"}</td>
-                        </tr>
-                        <tr className={styles["transaction__confirmation"] + (!transactionInfo?.confirmations ? ` ${styles["transaction__unconfirmed"]}` : '')}>    
-                            <td>Confirmations</td>
-                            <td>{transactionInfo?.confirmations || "Unconfirmed"}</td>
-                        </tr>
-                        <tr>
-                            <td>One-time public key</td>
-                            <td>{transactionInfo?.publicKey || "-"}</td>
-                        </tr>
-                        <tr>
-                            <td>Mixin</td>
-                            <td>{transactionInfo?.mixin || "-"}</td>
-                        </tr>
-                        <tr className={styles["transaction__extra_items"]}>
-                            <td>Extra items</td>
-                            <td>
-                                {
-                                    transactionInfo?.extraItems.map((e, i) => 
-                                        <p key={nanoid(16)}>
-                                            {`[${i + 1}] ` + e}
-                                        </p>
-                                    )
-                                }
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Attachments</td>
-                            <td>{transactionInfo?.attachments || "-"}</td>
-                        </tr>
-                    </tbody>
-                </table>
+
+            {transactionInfo?.confirmations ? <>
+                <div className={styles["transaction__info"]}>
+                    <h2>Transaction</h2>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>Hash</td>
+                                <td>{transactionInfo?.hash || "-"}</td>
+                            </tr>
+                            <tr>
+                                <td>Amount</td>
+                                <td>{transactionInfo?.amount || "-"}</td>
+                            </tr>
+                            <tr>
+                                <td>Fee</td>
+                                <td>{transactionInfo?.fee || "-"}</td>
+                            </tr>
+                            <tr>
+                                <td>Size</td>
+                                <td>{(transactionInfo?.size || "0") + " bytes"}</td>
+                            </tr>
+                            <tr className={styles["transaction__confirmation"] + (!transactionInfo?.confirmations ? ` ${styles["transaction__unconfirmed"]}` : '')}>
+                                <td>Confirmations</td>
+                                <td>{transactionInfo?.confirmations || "Unconfirmed"}</td>
+                            </tr>
+                            <tr>
+                                <td>One-time public key</td>
+                                <td>{transactionInfo?.publicKey || "-"}</td>
+                            </tr>
+                            <tr>
+                                <td>Mixin</td>
+                                <td>{transactionInfo?.mixin || "-"}</td>
+                            </tr>
+                            <tr className={styles["transaction__extra_items"]}>
+                                <td>Extra items</td>
+                                <td>
+                                    {
+                                        transactionInfo?.extraItems.map((e, i) =>
+                                            <p key={nanoid(16)}>
+                                                {`[${i + 1}] ` + e}
+                                            </p>
+                                        )
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Attachments</td>
+                                <td>{transactionInfo?.attachments || "-"}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className={styles["transaction__table__wrapper"]}>
+                    <h3>From Block</h3>
+                    <Table
+                        className={styles["custom-scroll"]}
+                        headers={["HASH", "HEIGHT", "TIMESTAMP (UTC)"]}
+                        elements={[[
+                            <Link
+                                className={styles["table__hash"]}
+                                href={blockOrigin?.hash ? "/block/" + blockOrigin.hash : "/"}
+                            >
+                                {blockOrigin?.hash}
+                            </Link>,
+                            blockOrigin?.height || "",
+                            blockOrigin?.timestamp ? Utils.formatTimestampUTC(parseInt(blockOrigin.timestamp, 10)) : ""
+                        ]]}
+                        columnsWidth={[65, 15, 20]}
+                    />
+                </div>
+
+                <div className={styles["transaction__table__wrapper"]}>
+                    <h3>{`Inputs ( ${insRows.length} )`}</h3>
+                    <Table
+                        className={`${styles["transaction__table__inputs"]} ${styles["custom-scroll"]}`}
+                        headers={["AMOUNT", "IMAGE / MULTISIG ID", "DECOY COUNT", "GLOBAL INDEX"]}
+                        elements={insRows}
+                        columnsWidth={[15, 50, 15, 20]}
+                    />
+                </div>
+
+                <div className={styles["transaction__table__wrapper"]}>
+                    <h3>{`Outputs ( ${outsRows.length} )`}</h3>
+                    <Table
+                        className={styles["custom-scroll"]}
+                        headers={["AMOUNT", "KEY", "GLOBAL INDEX / MULTISIG ID"]}
+                        elements={outsRows}
+                        columnsWidth={[15, 65, 20]}
+                        textWrap
+                    />
+                </div>
+            </> 
+            : 
+            <div className={styles.notFound}>
+               [Not found]
             </div>
-            <div className={styles["transaction__table__wrapper"]}>
-                <h3>From Block</h3>
-                <Table 
-                    className={styles["custom-scroll"]}
-                    headers={[ "HASH", "HEIGHT", "TIMESTAMP (UTC)" ]}
-                    elements={[[ 
-                        <Link
-                            className={styles["table__hash"]} 
-                            href={blockOrigin?.hash ? "/block/" + blockOrigin.hash : "/"}
-                        >
-                            {blockOrigin?.hash}
-                        </Link>,
-                        blockOrigin?.height || "",
-                        blockOrigin?.timestamp ? Utils.formatTimestampUTC(parseInt(blockOrigin.timestamp, 10)) : "" 
-                    ]]}
-                    columnsWidth={[ 65, 15, 20 ]}
-                />
-            </div>
-            <div className={styles["transaction__table__wrapper"]}>
-                <h3>{`Inputs ( ${insRows.length} )`}</h3>
-                <Table 
-                    className={`${styles["transaction__table__inputs"]} ${styles["custom-scroll"]}`}
-                    headers={[ "AMOUNT", "IMAGE / MULTISIG ID", "DECOY COUNT", "GLOBAL INDEX" ]}
-                    elements={insRows}
-                    columnsWidth={[ 15, 50, 15, 20 ]}
-                />
-            </div>
-            <div className={styles["transaction__table__wrapper"]}>
-                <h3>{`Outputs ( ${outsRows.length} )`}</h3>
-                <Table 
-                    className={styles["custom-scroll"]}
-                    headers={[ "AMOUNT", "KEY", "GLOBAL INDEX / MULTISIG ID" ]}
-                    elements={outsRows}
-                    columnsWidth={[ 15, 65, 20 ]}
-                    textWrap
-                />
-            </div>
+            }
+
             {popupState &&
-                <Popup 
+                <Popup
                     Content={GlobalIndexesPopup}
                     settings={{}}
                     close={() => setPopupState(false)}
