@@ -3,8 +3,8 @@ import sequelize from "../database/sequelize";
 
 class ZanoPrice extends Model {
   declare readonly id: number;
-  declare ts_utc: string;
-  declare price_close: string;
+  declare timestamp: string;
+  declare price: string;
   declare src: string;
   declare raw: object;
 
@@ -20,18 +20,18 @@ export type IZanoPrice = Omit<
 ZanoPrice.init(
   {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    ts_utc: {
-      type: DataTypes.STRING,
+    timestamp: {
+      type: DataTypes.BIGINT,
       allowNull: false,
       unique: true
     },
-    price_close: { type: DataTypes.DECIMAL(20, 10), allowNull: false },
+    price: { type: DataTypes.DECIMAL(20, 10), allowNull: false },
     src: { type: DataTypes.STRING, allowNull: false, defaultValue: "mexc" },
     raw: { type: DataTypes.JSONB, allowNull: false },
   },
   {
     sequelize,
-    modelName: "zano_price",
+    modelName: "zano_price_data",
     timestamps: true,
   }
 );

@@ -68,7 +68,8 @@ async function waitForDb() {
 (async () => {
 
     await waitForDb();
-    await syncLatestPrice().then(() => syncHistoricalPrice());
+    await syncLatestPrice();
+    syncHistoricalPrice(); // async
 
     io.engine.on('initial_headers', (headers, req) => {
         headers['Access-Control-Allow-Origin'] = config.frontend_api
@@ -267,34 +268,38 @@ async function waitForDb() {
     app.get(
         "/api/get_historical_zano_price",
         exceptionHandler(async (req, res) => {
-            let whereClause: any = {};
 
-            if (req.query.from || req.query.to) {
-                const from = req.query.from
-                    ? isNaN(Number(req.query.from))
-                        ? Date.parse(String(req.query.from))
-                        : Number(req.query.from)
-                    : 0;
+            const target_timestamp = req.query.timestamp ? parseInt(req?.query?.timestamp as string) : null;
 
-                const to = req.query.to
-                    ? isNaN(Number(req.query.to))
-                        ? Date.parse(String(req.query.to))
-                        : Number(req.query.to)
-                    : Date.now();
-
-                whereClause = {
-                    ts_utc: {
-                        [Op.between]: [Number(from), Number(to)],
-                    },
-                };
+            if (!target_timestamp) {
+                return res.json({
+                    success: false,
+                    data: 'invalid timestamp'
+                })
             }
 
-            const prices = await ZanoPrice.findAll({
-                where: whereClause,
-                order: [["ts_utc", "ASC"]],
+            const closestPrice = await ZanoPrice.findOne({
+                order: [[Sequelize.literal('ABS(timestamp - $targetTs)'), 'ASC']],
+                bind: { targetTs: target_timestamp },
+                raw: true,
             });
 
-            res.json(prices);
+            if (!closestPrice) {
+                return res.json({
+                    success: false,
+                    data: 'price not found (unexpected error)'
+                });
+            }
+
+            res.json({
+                success: true,
+                data: {
+                    timestamp: closestPrice.timestamp,
+                    price: closestPrice.price,
+                    src: closestPrice.src,
+                    raw: closestPrice.raw
+                }
+            });
         })
     );
 

@@ -6,38 +6,36 @@ const BASE_URL = `https://api.mexc.com/api/v3/klines?symbol=ZANOUSDT&interval=1m
 const HISTORY_LIMIT_MS = 365 * 24 * 60 * 60 * 1000; // 1 year
 
 async function fetchPriceForTimestamp(timestamp: number) {
-	console.log(`Fetching price for timestamp: ${timestamp}`);
 
 	const url = `${BASE_URL}&startTime=${timestamp}`;
 	const res = await axios.get(url);
 	if (!Array.isArray(res.data) || res.data.length === 0) return null;
 
 	return {
-		ts_utc: timestamp,
-		price_close: String(res.data[0][4]),
+		timestamp: timestamp,
+		price: String(res.data[0][4]),
 		raw: res.data[0],
 	};
 }
 
 export async function syncHistoricalPrice() {
 	const oldestPrice = await ZanoPrice.findOne({
-		order: [["ts_utc", "ASC"]],
+		order: [["timestamp", "ASC"]],
 		raw: true,
 	});
-	console.log(oldestPrice);
 
 
 	if (!oldestPrice) {
 		throw new Error("Sync latest price before historical");
 	}
 
-	if (parseInt(oldestPrice.ts_utc, 10) < (+new Date() - HISTORY_LIMIT_MS)) {
+	if (parseInt(oldestPrice.timestamp, 10) < (+new Date() - HISTORY_LIMIT_MS)) {
 		return console.log(`[zano price] Historical Price already synced`);
 	}
 
 	const timestampsToSync: number[] = [];
 
-	let oldestTimestamp = parseInt(oldestPrice.ts_utc, 10);
+	let oldestTimestamp = parseInt(oldestPrice.timestamp, 10);
 
 	while (oldestTimestamp > (+new Date() - HISTORY_LIMIT_MS)) {
 		oldestTimestamp -= FOUR_HOURS_MS;
@@ -63,14 +61,14 @@ export async function syncHistoricalPrice() {
 
 export async function syncLatestPrice() {
 	const lastRow = await ZanoPrice.findOne({
-		attributes: ["ts_utc"],
-		order: [["ts_utc", "DESC"]],
+		attributes: ["timestamp"],
+		order: [["timestamp", "DESC"]],
 		raw: true,
 	});
 
-	if (lastRow?.ts_utc && parseInt(lastRow.ts_utc, 10) > (+new Date() - FOUR_HOURS_MS)) {
+	if (lastRow?.timestamp && parseInt(lastRow.timestamp, 10) > (+new Date() - FOUR_HOURS_MS)) {
 		return console.log(
-			`[zano price] Nothing to sync since ${new Date(parseInt(lastRow.ts_utc, 10)).toUTCString()} (UTC)`
+			`[zano price] Nothing to sync since ${new Date(parseInt(lastRow.timestamp, 10)).toUTCString()} (UTC)`
 		);
 	}
 	const latestPrice = await fetchPriceForTimestamp(+new Date());
