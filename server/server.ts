@@ -25,7 +25,7 @@ import BigNumber from "bignumber.js";
 import next from "next";
 import { rateLimit } from 'express-rate-limit';
 import bodyParser from 'body-parser';
-import { syncLatest } from "./services/zanoPrice.service";
+import { syncHistoricalPrice, syncLatestPrice } from "./services/zanoPrice.service";
 import ZanoPrice from "./schemes/ZanoPrice";
 import cron from "node-cron";
 
@@ -68,7 +68,7 @@ async function waitForDb() {
 (async () => {
 
     await waitForDb();
-    await syncLatest();
+    await syncLatestPrice().then(() => syncHistoricalPrice());
 
     io.engine.on('initial_headers', (headers, req) => {
         headers['Access-Control-Allow-Origin'] = config.frontend_api
@@ -2082,7 +2082,7 @@ async function waitForDb() {
 
 cron.schedule("0 */4 * * *", async () => {
     console.log("[CRON] Syncing latest Zano price...");
-    await syncLatest();
+    await syncLatestPrice();
 }, { timezone: "UTC" });
 
 
