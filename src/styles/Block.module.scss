@@ -16,7 +16,7 @@
         color: #9eaacc;
         font-size: 20px;
     }
-    
+
     @media screen and (max-width: 700px) {
         width: 90vw;
         height: 90vh;
@@ -43,7 +43,7 @@
             align-items: center;
         }
 
-        > div {
+        >div {
             border-radius: 10px;
             overflow: hidden;
         }
@@ -92,12 +92,12 @@
             align-items: center;
             flex-wrap: wrap;
 
-            > div {
+            >div {
                 display: flex;
                 align-items: center;
                 gap: 5px;
-                
-                > a:first-child svg {
+
+                >a:first-child svg {
                     transform: rotateY(180deg)
                 }
             }
@@ -139,12 +139,12 @@
                     flex-basis: 50%;
                 }
             }
-            
+
             table tbody {
                 tr {
                     height: 38px;
                     width: 100%;
-                    
+
                     td {
                         padding: 12px 20px;
                         font-size: 13px;
@@ -156,7 +156,7 @@
                         background-color: #263163;
                     }
 
-                    
+
                 }
             }
 
@@ -167,7 +167,7 @@
                     white-space: initial;
 
                     &:last-child {
-                        width: 50%;    
+                        width: 50%;
                     }
                 }
             }
@@ -179,4 +179,11 @@
             // }
         }
     }
+}
+
+.notFound {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 24px;
+    opacity: .7;
 }

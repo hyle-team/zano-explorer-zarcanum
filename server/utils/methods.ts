@@ -105,18 +105,18 @@ export async function getVisibilityInfo() {
             result.apy = 720 * 365 / stakedNumber * 100;
 
             let stakedCoinsLast7Days = new BigNumber(0);
-    
+
             const mined_entries = res2?.data?.result?.mined_entries || [];
-        
+
             for (const item of mined_entries) {
                 stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
             }
 
 
             const coinsPerDay = stakedCoinsLast7Days.div(7);
-   
+
             const neededToStakeCoinPerDay = new BigNumber(res1.data.result.balance).div(coinsPerDay);
-            
+
             result.pos_value = neededToStakeCoinPerDay.toNumber();
         }
     } catch (error) {
@@ -191,4 +191,65 @@ export const emitSocketInfo = async (socket?: Socket) => {
         emitter.emit('get_info', JSON.stringify(blockInfo));
         emitter.emit('get_visibility_info', getVisibilityInfo());
     }
+}
+
+export type TxDTO = {
+    tx_id: string;
+    amount?: string;
+    fee?: string;
+    blob_size?: string | number;
+    keeper_block: number | null;
+    block_hash?: string | null;
+    block_timestamp?: number | null | undefined;
+    timestamp: number;
+    status: 'confirmed' | 'pending';
+};
+
+export function toNumberOrNull(v: unknown): number | null {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'number') return v;
+    if (typeof v === 'bigint') return Number(v);
+    if (typeof v === 'string') {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+    }
+    return null;
+}
+
+export async function findTxWithFallback(tx_hash: string): Promise<TxDTO | null> {
+    const trx = await Transaction.findOne({
+        where: { tx_id: tx_hash, keeper_block: { [Op.ne]: null } },
+    });
+
+    if (trx) {
+        const block = await Block.findOne({ where: { height: trx.keeper_block } }).catch(() => null);
+        return {
+            tx_id: trx.tx_id,
+            amount: trx.amount ?? undefined,
+            fee: trx.fee ?? undefined,
+            blob_size: trx.blob_size ?? undefined,
+            keeper_block: trx.keeper_block ?? null,
+            block_hash: block?.tx_id ?? null,
+            block_timestamp: toNumberOrNull(block?.timestamp),
+            timestamp: toNumberOrNull(trx.timestamp) ?? 0,
+            status: 'confirmed',
+        };
+    }
+
+    const p = await Pool.findOne({ where: { tx_id: tx_hash } });
+    if (p) {
+        return {
+            tx_id: p.tx_id,
+            amount: undefined,
+            fee: (p.fee != null) ? String(p.fee) : undefined,
+            blob_size: p.blob_size,
+            keeper_block: null,
+            block_hash: null,
+            block_timestamp: null,
+            timestamp: p.timestamp ? Math.floor(Number(p.timestamp) / 1000) : 0,
+            status: 'pending',
+        };
+    }
+
+    return null;
 }

@@ -9,7 +9,7 @@ import initDB from "./database/initdb";
 import sequelize from "./database/sequelize";
 import { log, config, ZANO_ASSET_ID, parseComment, parseTrackingKey, decodeString } from "./utils/utils";
 import { blockInfo, lastBlock, setLastBlock, state, setState, setBlockInfo, PriceData } from "./utils/states";
-import { emitSocketInfo, getBlocksDetails, getMainBlockDetails, getTxPoolDetails, getVisibilityInfo } from "./utils/methods";
+import { emitSocketInfo, findTxWithFallback, getBlocksDetails, getMainBlockDetails, getTxPoolDetails, getVisibilityInfo, toNumberOrNull, TxDTO } from "./utils/methods";
 import AltBlock from "./schemes/AltBlock";
 import Transaction from "./schemes/Transaction";
 import OutInfo, { IOutInfo } from "./schemes/OutInfo";
@@ -718,69 +718,47 @@ async function waitForDb() {
         exceptionHandler(async (req, res) => {
             try {
                 const tx_hash = req.params.tx_hash.toLowerCase();
-
-                if (tx_hash) {
-                    // Fetching transaction details with associated block information using Sequelize
-                    const transaction = await Transaction.findOne({
-                        where: {
-                            tx_id: tx_hash,
-                            keeper_block: { [Op.ne]: null }
-                        },
-                    });
-
-
-                    const transactionBlock = await Block.findOne({
-                        where: { height: transaction?.keeper_block },
-                    }).catch(() => null);
-
-
-                    if (transaction && transactionBlock) {
-                        const response = {
-                            ...transaction.toJSON(),
-                            block_hash: transactionBlock?.tx_id,
-                            block_timestamp: transactionBlock?.timestamp,
-                            last_block: lastBlock.height,
-                        };
-
-                        res.json(response);
-                    } else {
-                        const response = await get_tx_details(tx_hash);
-
-                        const data = response.data;
-
-                        if (data?.result?.tx_info) {
-                            if (data.result.tx_info.ins && typeof data.result.tx_info.ins === 'object') {
-                                data.result.tx_info.ins = JSON.stringify(data.result.tx_info.ins);
-                            }
-
-                            if (data.result.tx_info.outs && typeof data.result.tx_info.outs === 'object') {
-                                data.result.tx_info.outs = JSON.stringify(data.result.tx_info.outs);
-                            }
-
-                            const blockInfo = await Block.findOne({
-                                where: { height: data.result?.tx_info?.keeper_block?.toString() },
-                            });
-
-                            res.json({
-                                ...data.result.tx_info,
-                                ...(blockInfo?.toJSON() || {}),
-                                last_block: lastBlock.height,
-                            });
-                        } else {
-                            res.status(500).json({
-                                message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
-                            });
-                        }
-                    }
-                } else {
-                    res.status(500).json({
-                        message: `/get_tx_details/:tx_hash ${JSON.stringify(req.params)}`,
-                    });
+                if (!tx_hash) {
+                    return res.status(400).json({ error: 'Invalid tx hash' });
                 }
-            } catch (error) {
-                console.log(error);
 
-                res.status(500).json({ error: error.message });
+                const local = await findTxWithFallback(tx_hash);
+                if (local) {
+                    return res.json({ ...local, last_block: lastBlock.height });
+                }
+
+                const response = await get_tx_details(tx_hash).catch(() => null);
+                const data = response?.data;
+
+                if (data?.result?.tx_info) {
+                    const info = data.result.tx_info;
+
+                    if (info.ins && typeof info.ins === 'object') info.ins = JSON.stringify(info.ins);
+                    if (info.outs && typeof info.outs === 'object') info.outs = JSON.stringify(info.outs);
+
+                    const blockInfo = info?.keeper_block
+                        ? await Block.findOne({ where: { height: info.keeper_block.toString() } })
+                        : null;
+
+                    const dto: TxDTO = {
+                        tx_id: info.id,
+                        amount: String(info.amount ?? ''),
+                        fee: String(info.fee ?? ''),
+                        blob_size: info.blob_size,
+                        keeper_block: info.keeper_block ?? null,
+                        block_hash: blockInfo?.tx_id ?? null,
+                        block_timestamp: toNumberOrNull(blockInfo?.timestamp),
+                        timestamp: toNumberOrNull(info.timestamp) ?? 0,
+                        status: info.keeper_block ? 'confirmed' : 'pending',
+                    };
+
+                    return res.json({ ...dto, last_block: lastBlock.height });
+                }
+
+                return res.status(404).json({ error: 'Transaction not found' });
+            } catch (error: any) {
+                console.log(error);
+                return res.status(500).json({ error: error.message });
             }
         })
     );
@@ -845,6 +823,11 @@ async function waitForDb() {
                 // Search in the 'transactions' table
                 let transactionResult = await Transaction.findOne({ where: { tx_id: id } });
                 if (transactionResult) {
+                    return res.json({ result: 'tx' });
+                }
+
+                const poolResult = await Pool.findOne({ where: { tx_id: id } });
+                if (poolResult) {
                     return res.json({ result: 'tx' });
                 }
 
@@ -1843,13 +1826,9 @@ async function waitForDb() {
 
                     try {
                         // Fetch all transaction ids currently in the pool
-                        const existingTransactions = await Pool.findAll({
-                            attributes: ['id']
-                        });
-
-                        // Find new transactions that are not already in the pool
-                        const existingIds = existingTransactions.map(tx => tx.tx_id);
-                        const new_ids = state.pools_array.filter(id => !existingIds.includes(id));
+                        const existingPoolTxs = await Pool.findAll({ attributes: ['tx_id'], raw: true });
+                        const existingIds = existingPoolTxs.map((tx: any) => tx.tx_id);
+                        const new_ids = state.pools_array.filter((id) => !existingIds.includes(id));
 
                         if (new_ids.length) {
                             try {
