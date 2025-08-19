@@ -7,7 +7,7 @@ const HISTORY_LIMIT_MS = 365 * 24 * 60 * 60 * 1000; // 1 year
 
 async function fetchPriceForTimestamp(timestamp: number) {
 
-	const url = `${BASE_URL}&startTime=${timestamp}`;
+	const url = `${BASE_URL}&startTime=${timestamp - 60 *1000}&endTime=${timestamp}`;
 	const res = await axios.get(url);
 	if (!Array.isArray(res.data) || res.data.length === 0) return null;
 

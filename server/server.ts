@@ -282,7 +282,7 @@ async function waitForDb() {
                 order: [[Sequelize.literal('ABS(timestamp - $targetTs)'), 'ASC']],
                 bind: { targetTs: target_timestamp },
                 raw: true,
-            });
+            });            
 
             if (!closestPrice) {
                 return res.json({
