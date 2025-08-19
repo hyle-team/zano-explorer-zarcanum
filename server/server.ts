@@ -9,7 +9,7 @@ import initDB from "./database/initdb";
 import sequelize from "./database/sequelize";
 import { log, config, ZANO_ASSET_ID, parseComment, parseTrackingKey, decodeString } from "./utils/utils";
 import { blockInfo, lastBlock, setLastBlock, state, setState, setBlockInfo, PriceData } from "./utils/states";
-import { emitSocketInfo, findTxWithFallback, getBlocksDetails, getMainBlockDetails, getTxPoolDetails, getVisibilityInfo, toNumberOrNull, TxDTO } from "./utils/methods";
+import { emitSocketInfo, findTxWithFallback, getBlocksDetails, getMainBlockDetails, getTxPoolDetails, getVisibilityInfo, toNumberOrNull, TxDTO, TxResponse } from "./utils/methods";
 import AltBlock from "./schemes/AltBlock";
 import Transaction from "./schemes/Transaction";
 import OutInfo, { IOutInfo } from "./schemes/OutInfo";
@@ -732,28 +732,28 @@ async function waitForDb() {
 
                 if (data?.result?.tx_info) {
                     const info = data.result.tx_info;
-
                     if (info.ins && typeof info.ins === 'object') info.ins = JSON.stringify(info.ins);
                     if (info.outs && typeof info.outs === 'object') info.outs = JSON.stringify(info.outs);
+                    if (info.extra && typeof info.extra === 'object') info.extra = JSON.stringify(info.extra);
+                    if (info.attachments && typeof info.attachments === 'object') info.attachments = JSON.stringify(info.attachments);
 
                     const blockInfo = info?.keeper_block
-                        ? await Block.findOne({ where: { height: info.keeper_block.toString() } })
+                        ? await Block.findOne({ where: { height: String(info.keeper_block) } })
                         : null;
 
-                    const dto: TxDTO = {
-                        tx_id: info.id,
-                        amount: String(info.amount ?? ''),
-                        fee: String(info.fee ?? ''),
-                        blob_size: info.blob_size,
-                        keeper_block: info.keeper_block ?? null,
+                    const merged: TxResponse = {
+                        ...(blockInfo?.toJSON?.() ?? {}),
+                        ...info,
                         block_hash: blockInfo?.tx_id ?? null,
                         block_timestamp: toNumberOrNull(blockInfo?.timestamp),
                         timestamp: toNumberOrNull(info.timestamp) ?? 0,
                         status: info.keeper_block ? 'confirmed' : 'pending',
+                        last_block: lastBlock.height,
                     };
 
-                    return res.json({ ...dto, last_block: lastBlock.height });
+                    return res.json(merged);
                 }
+
 
                 return res.status(404).json({ error: 'Transaction not found' });
             } catch (error: any) {
