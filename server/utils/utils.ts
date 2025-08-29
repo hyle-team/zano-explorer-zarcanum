@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 export const ZANO_ASSET_ID = 'd6329b5b1f7c0805b5c345f4957554002a2f557845f64d7645dae0e051a6498a';
+export const FUSD_ASSET_ID = '86143388bd056a8f0bab669f78f14873fac8e2dd8d57898cdb725a2d5e2e4f8f';
 
 export const config = {
     "api": process.env.API + '/json_rpc',

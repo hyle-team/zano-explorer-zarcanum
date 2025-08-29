@@ -7,7 +7,7 @@ import exceptionHandler from "./exceptionHandler";
 import path from "path";
 import initDB from "./database/initdb";
 import sequelize from "./database/sequelize";
-import { log, config, ZANO_ASSET_ID, parseComment, parseTrackingKey, decodeString } from "./utils/utils";
+import { log, config, ZANO_ASSET_ID, parseComment, parseTrackingKey, decodeString, FUSD_ASSET_ID } from "./utils/utils";
 import { blockInfo, lastBlock, setLastBlock, state, setState, setBlockInfo, PriceData } from "./utils/states";
 import { emitSocketInfo, getBlocksDetails, getMainBlockDetails, getTxPoolDetails, getVisibilityInfo } from "./utils/methods";
 import AltBlock from "./schemes/AltBlock";
@@ -282,7 +282,7 @@ async function waitForDb() {
                 order: [[Sequelize.literal('ABS(timestamp - $targetTs)'), 'ASC']],
                 bind: { targetTs: target_timestamp },
                 raw: true,
-            });            
+            });
 
             if (!closestPrice) {
                 return res.json({
@@ -1207,6 +1207,23 @@ async function waitForDb() {
                         zano_price: state.priceData?.zano?.price,
                         usd_24h_change: state.priceData?.zano?.usd_24h_change,
                         fiat_prices: calcFiatPrice(state.priceData?.zano?.price, state?.fiat_rates),
+                    }
+                });
+            }
+
+            if (req.query.asset_id === FUSD_ASSET_ID) {
+                if (!state.priceData?.fusd?.price) {
+                    return res.send({ success: false, data: 'Price not found' });
+                }
+
+                return res.send({
+                    success: true,
+                    data: {
+                        name: 'FUSD',
+                        usd: state.priceData?.fusd?.price,
+                        zano_price: (state.priceData?.fusd?.price / (state.priceData?.zano?.price || 1)),
+                        usd_24h_change: state.priceData?.fusd?.usd_24h_change,
+                        fiat_prices: calcFiatPrice(state.priceData?.fusd?.price, state?.fiat_rates),
                     }
                 });
             }
@@ -2139,6 +2156,10 @@ cron.schedule("0 */4 * * *", async () => {
         return fetchPriceFromMexc('ETH');
     }
 
+    async function fetchFUSDPrice() {
+        return fetchPriceFromMexc('FUSD');
+    }
+
     // Fetch fiat rates from CoinGecko
     async function fetchFiatRates() {
         try {
@@ -2202,31 +2223,36 @@ cron.schedule("0 */4 * * *", async () => {
 
 
             const zanoPrice = await fetchZanoPrice();
-
-            if (zanoPrice) {
-                setState({
-                    ...state,
-                    priceData: {
-                        ...state.priceData,
-                        zano: zanoPrice,
-                    },
-                });
-            }
-
-            // Fetch Ethereum price every 10 seconds
             const ethPrice = await fetchEthereumPrice();
+            const fusdPrice = await fetchFUSDPrice();
 
-            if (ethPrice) {
-                setState({
-                    ...state,
-                    priceData: {
-                        ...state.priceData,
-                        ethereum: ethPrice,
-                    },
-                });
-            }
+            const pricesToIncert = {
+                zano: zanoPrice || null,
+                ethereum: ethPrice || null,
+                fusd: fusdPrice || null,
+            };
 
-            console.log(state.priceData);
+            const validPrices = Object.entries(pricesToIncert)
+                .map(e => {
+                    if (!e[1]) {
+                        return null;
+                    }
+                    return {
+                        [e[0]]: e[1]
+                    };
+                })
+                .filter(e => e !== null);
+
+            const validPricesObject = Object.assign({}, ...validPrices);
+            
+            setState({
+                ...state,
+                priceData: {
+                    ...state.priceData,
+                    ...validPricesObject
+                },
+            });
+
 
 
             // Fetch fiat rates every 1h (3600 seconds)
