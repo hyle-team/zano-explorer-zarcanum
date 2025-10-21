@@ -18,12 +18,12 @@ class Alias extends Model {
 Alias.init(
     {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        alias: { type: DataTypes.STRING, allowNull: true },
-        address: { type: DataTypes.STRING, allowNull: true },
+        alias: { type: DataTypes.STRING, allowNull: false, unique: true },
+        address: { type: DataTypes.STRING, allowNull: false },
         comment: { type: DataTypes.STRING, allowNull: true },
         tracking_key: { type: DataTypes.STRING, allowNull: true },
-        block: { type: DataTypes.STRING, allowNull: true },
-        transaction: { type: DataTypes.STRING, allowNull: true },
+        block: { type: DataTypes.STRING, allowNull: false },
+        transaction: { type: DataTypes.STRING, allowNull: false },
         enabled: { type: DataTypes.BOOLEAN, allowNull: true }
     },
     {
