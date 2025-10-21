@@ -468,17 +468,24 @@ async function waitForDb() {
     app.get(
         '/api/get_aliases_count',
         exceptionHandler(async (req, res) => {
-            const aliasesAmount = await Alias.count();
+            const aliasesAmount = await Alias.count({
+                where: { enabled: true }
+            });
             const premiumAliasesAmount = await Alias.count({
-                where: sequelize.where(
-                    sequelize.fn(
-                        'LENGTH',
-                        sequelize.col('alias')
-                    ),
-                    {
-                        [Op.lte]: 5
-                    }
-                )
+                where: {
+                    [Op.and]: [
+                        sequelize.where(
+                            sequelize.fn(
+                                'LENGTH',
+                                sequelize.col('alias')
+                            ),
+                            {
+                                [Op.lte]: 5
+                            },
+                        ),
+                        { enabled: true }
+                    ]
+                }
             });
             return res.json({ aliasesAmount, premiumAliasesAmount });
         }),
@@ -2019,7 +2026,9 @@ async function waitForDb() {
                     );
 
                     // Fetch the count of aliases using Sequelize
-                    const aliasCountDB = await Alias.count();
+                    const aliasCountDB = await Alias.count({
+                        where: { enabled: true }
+                    });
 
                     if (aliasCountDB !== state.countAliasesServer) {
                         log(
@@ -2079,7 +2088,9 @@ async function waitForDb() {
             }
 
             // Get the count of aliases
-            const aliasCountResult = await Alias.count();
+            const aliasCountResult = await Alias.count({
+                where: { enabled: true }
+            });
             setState({
                 ...state,
                 countAliasesDB: aliasCountResult
@@ -2244,7 +2255,7 @@ cron.schedule("0 */4 * * *", async () => {
                 .filter(e => e !== null);
 
             const validPricesObject = Object.assign({}, ...validPrices);
-            
+
             setState({
                 ...state,
                 priceData: {
