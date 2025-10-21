@@ -22,8 +22,8 @@ Alias.init(
         address: { type: DataTypes.STRING, allowNull: false },
         comment: { type: DataTypes.STRING, allowNull: true },
         tracking_key: { type: DataTypes.STRING, allowNull: true },
-        block: { type: DataTypes.STRING, allowNull: false },
-        transaction: { type: DataTypes.STRING, allowNull: false },
+        block: { type: DataTypes.STRING, allowNull: true },
+        transaction: { type: DataTypes.STRING, allowNull: true },
         enabled: { type: DataTypes.BOOLEAN, allowNull: true }
     },
     {
