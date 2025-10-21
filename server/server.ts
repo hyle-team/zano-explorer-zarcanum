@@ -2114,9 +2114,7 @@ cron.schedule("0 */4 * * *", async () => {
     await waitForDb();
 
 
-    await syncService.syncAliases();
-
-    await new Promise(resolve => setTimeout(resolve, 5000000));
+    await syncService.startSyncDaemon();
 
     if (process.env.RESYNC_ASSETS === "true") {
         console.log('Resyncing assets');

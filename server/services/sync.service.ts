@@ -1,3 +1,4 @@
+import sequelize from "../database/sequelize";
 import Alias from "../schemes/Alias";
 import rpcService from "./rpc.service";
 
@@ -17,9 +18,22 @@ class SyncService {
             enabled: 1
         }));
 
-        Alias.bulkCreate(preparedData, {
-            ignoreDuplicates: true,
-        })
+        await sequelize.transaction(async (t) => {
+            await Alias.destroy({ where: {}, transaction: t });
+            await Alias.bulkCreate(preparedData, { transaction: t });
+        });
+    }
+
+    async startSyncDaemon() {
+        while (true) {
+            try {
+                await this.syncAliases();
+            } catch (error) {
+                console.log(error);
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 20000));
+        }
     }
 }
 
