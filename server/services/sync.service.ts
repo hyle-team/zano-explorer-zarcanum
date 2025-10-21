@@ -7,7 +7,7 @@ class SyncService {
         console.log('fetching all alias details from daemon...');
         const allAliases = await rpcService.getAllAliasesDetails();
         console.log(`Fetched ${allAliases.length} aliases from daemon.`);
-        
+
         const preparedData = allAliases.map(e => ({
             alias: e.alias,
             address: e.address,
@@ -25,15 +25,17 @@ class SyncService {
     }
 
     async startSyncDaemon() {
-        while (true) {
-            try {
-                await this.syncAliases();
-            } catch (error) {
-                console.log(error);
+        (async () => {
+            while (true) {
+                try {
+                    await this.syncAliases();
+                } catch (error) {
+                    console.log(error);
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 20000));
             }
-            
-            await new Promise(resolve => setTimeout(resolve, 20000));
-        }
+        })();
     }
 }
 
