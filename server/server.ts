@@ -28,6 +28,7 @@ import bodyParser from 'body-parser';
 import { syncHistoricalPrice, syncLatestPrice } from "./services/zanoPrice.service";
 import ZanoPrice from "./schemes/ZanoPrice";
 import cron from "node-cron";
+import syncService from "./services/sync.service.ts";
 
 // @ts-ignore
 const __dirname = import.meta.dirname;
@@ -1471,36 +1472,36 @@ async function waitForDb() {
 
                         let tx_info = response.data.result.tx_info;
 
-                        for (let item of tx_info.extra) {
-                            if (item.type === 'alias_info') {
-                                let arr = item.short_view.split('-->');
-                                let aliasName = arr[0];
-                                let aliasAddress = arr[1];
-                                let aliasComment = parseComment(item.datails_view || item.details_view);
-                                let aliasTrackingKey = parseTrackingKey(item.datails_view || item.details_view);
-                                let aliasBlock = bl.height;
-                                let aliasTransaction = localTr.id;
+                        // for (let item of tx_info.extra) {
+                        //     if (item.type === 'alias_info') {
+                        //         let arr = item.short_view.split('-->');
+                        //         let aliasName = arr[0];
+                        //         let aliasAddress = arr[1];
+                        //         let aliasComment = parseComment(item.datails_view || item.details_view);
+                        //         let aliasTrackingKey = parseTrackingKey(item.datails_view || item.details_view);
+                        //         let aliasBlock = bl.height;
+                        //         let aliasTransaction = localTr.id;
 
-                                await Alias.update(
-                                    { enabled: 0 },
-                                    { where: { alias: aliasName } }
-                                );
+                        //         await Alias.update(
+                        //             { enabled: 0 },
+                        //             { where: { alias: aliasName } }
+                        //         );
 
-                                try {
-                                    await Alias.upsert({
-                                        alias: decodeString(aliasName),
-                                        address: aliasAddress,
-                                        comment: decodeString(aliasComment),
-                                        tracking_key: decodeString(aliasTrackingKey),
-                                        block: aliasBlock,
-                                        transact: aliasTransaction,
-                                        enabled: 1,
-                                    });
-                                } catch (error) {
-                                    log(`SyncTransactions() Insert into aliases ERROR: ${error}`);
-                                }
-                            }
-                        }
+                        //         try {
+                        //             await Alias.upsert({
+                        //                 alias: decodeString(aliasName),
+                        //                 address: aliasAddress,
+                        //                 comment: decodeString(aliasComment),
+                        //                 tracking_key: decodeString(aliasTrackingKey),
+                        //                 block: aliasBlock,
+                        //                 transact: aliasTransaction,
+                        //                 enabled: 1,
+                        //             });
+                        //         } catch (error) {
+                        //             log(`SyncTransactions() Insert into aliases ERROR: ${error}`);
+                        //         }
+                        //     }
+                        // }
 
                         for (let item of tx_info.ins) {
                             if (item.global_indexes) {
@@ -2122,6 +2123,9 @@ cron.schedule("0 */4 * * *", async () => {
 (async () => {
 
     await waitForDb();
+
+
+    await syncService.startSyncDaemon();
 
     if (process.env.RESYNC_ASSETS === "true") {
         console.log('Resyncing assets');
