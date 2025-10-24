@@ -65,9 +65,13 @@ function Header(props: HeaderProps) {
                     API
                 </Link>
                 {netMode === "MAIN" &&
-                    <p>
-                        Governance
-                    </p>
+                    <Link
+                        href="https://vote.zano.org/"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
+                        Vote
+                    </Link>
                 }
             </nav>
         )
