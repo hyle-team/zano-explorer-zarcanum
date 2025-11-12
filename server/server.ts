@@ -1212,7 +1212,7 @@ async function waitForDb() {
                     data: {
                         name: 'Zano',
                         usd: state.priceData?.zano?.price,
-                        zano_price: state.priceData?.zano?.price,
+                        zano_price: 1,
                         usd_24h_change: state.priceData?.zano?.usd_24h_change,
                         fiat_prices: calcFiatPrice(state.priceData?.zano?.price, state?.fiat_rates),
                     }
@@ -1276,7 +1276,7 @@ async function waitForDb() {
                 zano: {
                     name: "Zano",
                     usd: state.priceData?.zano?.price,
-                    zano_price: state.priceData?.zano?.price,
+                    zano_price: 1,
                     usd_24h_change: state.priceData?.zano?.usd_24h_change,
                     fiat_prices: calcFiatPrice(state.priceData?.zano?.price, state?.fiat_rates),
                 }
