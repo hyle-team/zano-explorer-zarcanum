@@ -105,18 +105,18 @@ export async function getVisibilityInfo() {
             result.apy = 720 * 365 / stakedNumber * 100;
 
             let stakedCoinsLast7Days = new BigNumber(0);
-    
+
             const mined_entries = res2?.data?.result?.mined_entries || [];
-        
+
             for (const item of mined_entries) {
                 stakedCoinsLast7Days = stakedCoinsLast7Days.plus(item.a);
             }
 
 
             const coinsPerDay = stakedCoinsLast7Days.div(7);
-   
+
             const neededToStakeCoinPerDay = new BigNumber(res1.data.result.balance).div(coinsPerDay);
-            
+
             result.pos_value = neededToStakeCoinPerDay.toNumber();
         }
     } catch (error) {
@@ -191,4 +191,87 @@ export const emitSocketInfo = async (socket?: Socket) => {
         emitter.emit('get_info', JSON.stringify(blockInfo));
         emitter.emit('get_visibility_info', getVisibilityInfo());
     }
+}
+
+export type TxDTO = {
+    tx_id: string;
+    amount?: string;
+    fee?: string;
+    blob_size?: string | number;
+    keeper_block: number | null;
+    block_hash?: string | null;
+    block_timestamp?: number | null | undefined;
+    timestamp: number;
+    status: 'confirmed' | 'pending';
+    extra?: string;
+    ins?: string;
+    outs?: string;
+    pub_key?: string;
+    attachments?: string;
+    createdAt?: string;
+    updatedAt?: string;
+};
+
+export type TxResponse = TxDTO & Record<string, any>;
+
+export function toNumberOrNull(v: unknown): number | null {
+    if (v === null || v === undefined) return null;
+    if (typeof v === 'number') return v;
+    if (typeof v === 'bigint') return Number(v);
+    if (typeof v === 'string') {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+    }
+    return null;
+}
+
+export async function findTxWithFallback(tx_hash: string): Promise<TxResponse | null> {
+    const trx = await Transaction.findOne({
+        where: { tx_id: tx_hash, keeper_block: { [Op.ne]: null } },
+        include: [{ model: Block, as: 'block', required: false }], 
+    });
+
+    if (trx) {
+        const block: any = (trx as any).block ?? null;
+        const trxJson = (trx as any).toJSON?.() ?? trx;
+        const blkJson = block?.toJSON?.() ?? {};
+
+        const merged: TxResponse = {
+            ...blkJson,
+            ...trxJson,
+            block_hash: block?.tx_id ?? null,
+            block_timestamp: toNumberOrNull(block?.timestamp),
+            timestamp: toNumberOrNull(trx.timestamp) ?? 0,
+            status: 'confirmed',
+        };
+
+        return merged;
+    }
+
+    const p = await Pool.findOne({ where: { tx_id: tx_hash } });
+    if (p) {
+        const poolJson = (p as any).toJSON?.() ?? p;
+
+        const merged: TxResponse = {
+            ...poolJson,
+            keeper_block: null,
+            block_hash: null,
+            block_timestamp: null,
+            amount: null,
+            extra: null,
+            ins: null,
+            outs: null,
+            pub_key: null,
+            attachments: null,
+            fee: (p.fee != null) ? String(p.fee) : null,
+            timestamp: p.timestamp ? Math.floor(Number(p.timestamp) / 1000) : 0,
+            status: 'pending',
+            createdAt: p.createdAt?.toISOString?.() ?? null,
+            updatedAt: p.updatedAt?.toISOString?.() ?? null,
+        };
+
+        return merged;
+    }
+
+    return null;
 }

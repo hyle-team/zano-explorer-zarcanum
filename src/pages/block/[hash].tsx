@@ -11,7 +11,7 @@ import Link from "next/link";
 import Fetch from "@/utils/methods";
 import Popup from "@/components/default/Popup/Popup";
 import { useRouter } from "next/router";
-import { getStats, BlockPageProps, getBlock } from "@/utils/ssr";
+import { BlockPageProps, getBlock } from "@/utils/ssr";
 import { GetServerSideProps } from "next";
 
 interface Transaction {
@@ -121,6 +121,7 @@ function Block(props: BlockProps) {
                         classList={[styles["block__json_popup"]]}
                     />
                 }
+
                 <div className={styles["block__info__title"]}>
                     <h2>Zano Block</h2>
                     <div>
@@ -278,15 +279,24 @@ function Block(props: BlockProps) {
                 back
                 className={styles["block__info__top"]}
             />
+
             <StatsPanel noStats={true} visibilityInfo={props.visibilityInfo} fetchedInfo={props.info} />
-            <BlockInfo />
-            <div className={styles["block__transactions"]}>
-                <h2>Transactions</h2>
-                <Table
-                    headers={tableHeaders}
-                    elements={tableElements}
-                />
-            </div>
+
+            {height ? <>
+                <BlockInfo />
+                <div className={styles["block__transactions"]}>
+                    <h2>Transactions</h2>
+                    <Table
+                        headers={tableHeaders}
+                        elements={tableElements}
+                    />
+                </div>
+            </>
+                :
+                <div className={styles.notFound}>
+                    [Not found]
+                </div>
+            }
         </div>
     )
 }
